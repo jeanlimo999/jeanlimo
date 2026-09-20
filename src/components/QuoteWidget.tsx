@@ -12,6 +12,15 @@ const VEHICLES: { id: Vehicle; name: string; seats: string }[] = [
   { id: "sprinter", name: "Sprinter Van", seats: "7–14 passengers" },
 ];
 
+const TIME_OPTIONS = Array.from({ length: 48 }, (_, i) => {
+  const h24 = Math.floor(i / 2);
+  const m = i % 2 === 0 ? "00" : "30";
+  const value = `${String(h24).padStart(2, "0")}:${m}`;
+  const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
+  const ampm = h24 < 12 ? "AM" : "PM";
+  return { value, label: `${h12}:${m} ${ampm}` };
+});
+
 export default function QuoteWidget() {
   const [tripType, setTripType] = useState<TripType>("oneway");
   const [vehicle, setVehicle] = useState<Vehicle>("sedan");
@@ -212,13 +221,19 @@ export default function QuoteWidget() {
           </div>
           <div>
             <label className="block text-xs text-zinc-400 mb-1.5 uppercase tracking-wider">Pickup Time</label>
-            <input
-              type="time"
+            <select
               value={time}
               onChange={(e) => setTime(e.target.value)}
               required
               className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-yellow-500"
-            />
+            >
+              <option value="">Select time</option>
+              {TIME_OPTIONS.map((t) => (
+                <option key={t.value} value={t.value}>
+                  {t.label}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 

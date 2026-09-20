@@ -21,11 +21,12 @@ export default function Home() {
               <a href="#fleet" className="hover:text-yellow-400 transition">Fleet & Pricing</a>
               <a href="#quote" className="hover:text-yellow-400 transition">Get Quote</a>
               <a href="#contact" className="hover:text-yellow-400 transition">Contact</a>
+              <a href="https://maps.app.goo.gl/aDG8UD4nBddGKKmk6" target="_blank" rel="noopener noreferrer" className="hover:text-yellow-400 transition">Reviews</a>
               <a href="/manage" className="hover:text-yellow-400 transition">Manage Booking</a>
             </div>
             <div className="flex items-center gap-2 sm:gap-3">
-              <a href="/manage" className="text-xs sm:text-sm text-zinc-300 hover:text-yellow-400 px-2">
-                Manage
+              <a href="/manage" className="text-xs sm:text-sm text-zinc-300 hover:text-yellow-400 px-2 whitespace-nowrap">
+                Manage booking
               </a>
               <a href="tel:+12819170929" className="hidden sm:inline-flex text-sm text-yellow-400 hover:text-yellow-300">
                 281-917-0929
@@ -242,6 +243,17 @@ export default function Home() {
               <div className="text-xl text-yellow-500 font-medium">Cash 281-917-0085</div>
             </a>
           </div>
+
+          <a
+            href="https://maps.app.goo.gl/aDG8UD4nBddGKKmk6"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block mb-10 bg-zinc-900 border border-yellow-600/30 rounded-xl px-8 py-5 hover:border-yellow-500 transition"
+          >
+            <div className="text-yellow-500 text-2xl font-serif">5.0 ★★★★★</div>
+            <div className="text-white mt-1">Google reviews</div>
+            <div className="text-sm text-zinc-400 mt-1">Read reviews or leave one on Google</div>
+          </a>
 
           <div className="flex flex-wrap justify-center gap-4 text-sm text-zinc-400">
             <span>All major credit cards accepted</span>
