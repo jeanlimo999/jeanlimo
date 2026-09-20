@@ -6,6 +6,12 @@ import AddressInput from "./AddressInput";
 
 type TripType = "oneway" | "hourly";
 
+const VEHICLES: { id: Vehicle; name: string; seats: string }[] = [
+  { id: "sedan", name: "Business Sedan", seats: "1–3 passengers" },
+  { id: "suv", name: "Business SUV", seats: "4–6 passengers" },
+  { id: "sprinter", name: "Sprinter Van", seats: "7–14 passengers" },
+];
+
 export default function QuoteWidget() {
   const [tripType, setTripType] = useState<TripType>("oneway");
   const [vehicle, setVehicle] = useState<Vehicle>("sedan");
@@ -15,7 +21,7 @@ export default function QuoteWidget() {
   const [pickup, setPickup] = useState("");
   const [dropoff, setDropoff] = useState("");
   const [miles, setMiles] = useState<number | null>(null);
-  const [result, setResult] = useState<{ price: number; breakdown: string } | null>(null);
+  const [quotes, setQuotes] = useState<Record<Vehicle, { price: number; breakdown: string }> | null>(null);
 
   const [showBooking, setShowBooking] = useState(false);
   const [name, setName] = useState("");
@@ -24,11 +30,14 @@ export default function QuoteWidget() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const selectedQuote = quotes?.[vehicle] || null;
+
   const handleQuote = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    setResult(null);
+    setQuotes(null);
     setMiles(null);
+    setShowBooking(false);
 
     try {
       if (tripType === "oneway") {
@@ -48,10 +57,18 @@ export default function QuoteWidget() {
 
         const calculatedMiles = Number(data.miles);
         setMiles(calculatedMiles);
-        setResult(calculateOneWay(vehicle, calculatedMiles));
+        setQuotes({
+          sedan: calculateOneWay("sedan", calculatedMiles),
+          suv: calculateOneWay("suv", calculatedMiles),
+          sprinter: calculateOneWay("sprinter", calculatedMiles),
+        });
       } else {
         const h = parseFloat(hours) || 2;
-        setResult(calculateHourly(vehicle, h));
+        setQuotes({
+          sedan: calculateHourly("sedan", h),
+          suv: calculateHourly("suv", h),
+          sprinter: calculateHourly("sprinter", h),
+        });
       }
     } catch (err: any) {
       setError(err.message);
@@ -61,7 +78,7 @@ export default function QuoteWidget() {
   };
 
   const handlePay = async () => {
-    if (!result) return;
+    if (!selectedQuote) return;
     if (!name.trim() || !phone.trim()) {
       setError("Name and phone are required.");
       return;
@@ -75,10 +92,10 @@ export default function QuoteWidget() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          price: result.price,
+          price: selectedQuote.price,
           vehicle,
           type: tripType,
-          breakdown: result.breakdown,
+          breakdown: selectedQuote.breakdown,
           passengerName: name,
           passengerPhone: phone,
           passengerEmail: email,
@@ -109,7 +126,7 @@ export default function QuoteWidget() {
       <div className="flex bg-zinc-800 rounded-lg p-1 mb-6">
         <button
           type="button"
-          onClick={() => { setTripType("oneway"); setResult(null); setShowBooking(false); }}
+          onClick={() => { setTripType("oneway"); setQuotes(null); setShowBooking(false); }}
           className={`flex-1 py-2.5 rounded-md text-sm font-medium transition ${
             tripType === "oneway" ? "bg-yellow-500 text-zinc-900" : "text-zinc-300 hover:text-white"
           }`}
@@ -118,7 +135,7 @@ export default function QuoteWidget() {
         </button>
         <button
           type="button"
-          onClick={() => { setTripType("hourly"); setResult(null); setShowBooking(false); }}
+          onClick={() => { setTripType("hourly"); setQuotes(null); setShowBooking(false); }}
           className={`flex-1 py-2.5 rounded-md text-sm font-medium transition ${
             tripType === "hourly" ? "bg-yellow-500 text-zinc-900" : "text-zinc-300 hover:text-white"
           }`}
@@ -128,19 +145,6 @@ export default function QuoteWidget() {
       </div>
 
       <form onSubmit={handleQuote} className="space-y-4">
-        <div>
-          <label className="block text-xs text-zinc-400 mb-1.5 uppercase tracking-wider">Vehicle</label>
-          <select
-            value={vehicle}
-            onChange={(e) => setVehicle(e.target.value as Vehicle)}
-            className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-yellow-500"
-          >
-            <option value="sedan">Business Sedan</option>
-            <option value="suv">Business SUV</option>
-            <option value="sprinter">Sprinter Van</option>
-          </select>
-        </div>
-
         {tripType === "oneway" ? (
           <>
             <div>
@@ -161,9 +165,6 @@ export default function QuoteWidget() {
                 placeholder="Start typing destination"
               />
             </div>
-            <p className="text-xs text-zinc-500">
-              Start typing and choose a Google suggestion. Miles are calculated automatically.
-            </p>
           </>
         ) : (
           <>
@@ -219,36 +220,65 @@ export default function QuoteWidget() {
           disabled={loading}
           className="w-full py-3.5 bg-yellow-500 hover:bg-yellow-400 disabled:opacity-60 text-zinc-900 font-semibold rounded-lg transition mt-2"
         >
-          {loading ? "Calculating…" : "See Price →"}
+          {loading ? "Calculating…" : "See prices & vehicles"}
         </button>
       </form>
 
       {error && <p className="mt-3 text-sm text-red-400">{error}</p>}
 
-      {result && !showBooking && (
-        <div className="mt-6 p-5 bg-zinc-800/80 border border-yellow-600/30 rounded-xl">
-          <div className="text-sm text-zinc-400 mb-1">Estimated Total (all-inclusive)</div>
-          <div className="text-3xl font-serif text-yellow-500 mb-2">${result.price.toFixed(2)}</div>
-          <div className="text-xs text-zinc-400 mb-1">{result.breakdown}</div>
+      {quotes && !showBooking && (
+        <div className="mt-6 space-y-3">
           {miles !== null && (
-            <div className="text-xs text-zinc-500 mb-4">Driving distance: {miles} miles</div>
+            <p className="text-xs text-zinc-400">Driving distance: {miles} miles. Choose a vehicle:</p>
           )}
+
+          {VEHICLES.map((v) => {
+            const q = quotes[v.id];
+            const selected = vehicle === v.id;
+            return (
+              <button
+                key={v.id}
+                type="button"
+                onClick={() => setVehicle(v.id)}
+                className={`w-full text-left p-4 rounded-xl border transition ${
+                  selected
+                    ? "border-yellow-500 bg-yellow-500/10"
+                    : "border-zinc-700 bg-zinc-800/80 hover:border-yellow-600/50"
+                }`}
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <div className="font-medium text-white">{v.name}</div>
+                    <div className="text-xs text-zinc-400">{v.seats}</div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-xl font-serif text-yellow-500">${q.price.toFixed(0)}</div>
+                    <div className="text-[10px] text-zinc-500">all-inclusive</div>
+                  </div>
+                </div>
+              </button>
+            );
+          })}
+
           <button
             onClick={() => setShowBooking(true)}
-            className="w-full py-3 bg-white hover:bg-zinc-100 text-zinc-900 font-semibold rounded-lg transition"
+            className="w-full py-3 bg-white hover:bg-zinc-100 text-zinc-900 font-semibold rounded-lg transition mt-2"
           >
-            Book & Pay with Stripe
+            Book {VEHICLES.find((v) => v.id === vehicle)?.name} · ${selectedQuote?.price.toFixed(0)}
           </button>
-          <p className="text-center text-xs text-zinc-500 mt-3">
+          <p className="text-center text-xs text-zinc-500">
             Or call Jeannie: <a href="tel:+12819170929" className="text-yellow-500">281-917-0929</a>
           </p>
         </div>
       )}
 
-      {result && showBooking && (
+      {quotes && showBooking && selectedQuote && (
         <div className="mt-6 p-5 bg-zinc-800/80 border border-yellow-600/30 rounded-xl space-y-4">
-          <div className="text-sm text-zinc-400">Total due</div>
-          <div className="text-2xl font-serif text-yellow-500">${result.price.toFixed(2)}</div>
+          <div className="text-sm text-zinc-400">
+            {VEHICLES.find((v) => v.id === vehicle)?.name} · Total due
+          </div>
+          <div className="text-2xl font-serif text-yellow-500">${selectedQuote.price.toFixed(2)}</div>
+          <div className="text-xs text-zinc-500">{selectedQuote.breakdown}</div>
 
           <div>
             <label className="block text-xs text-zinc-400 mb-1">Full Name *</label>
@@ -271,7 +301,7 @@ export default function QuoteWidget() {
             {loading ? "Redirecting to Stripe…" : "Pay Securely with Stripe"}
           </button>
           <button onClick={() => setShowBooking(false)} className="w-full py-2 text-sm text-zinc-400 hover:text-white">
-            ← Back
+            ← Back to vehicles
           </button>
         </div>
       )}

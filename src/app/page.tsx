@@ -21,6 +21,7 @@ export default function Home() {
               <a href="#fleet" className="hover:text-yellow-400 transition">Fleet & Pricing</a>
               <a href="#quote" className="hover:text-yellow-400 transition">Get Quote</a>
               <a href="#contact" className="hover:text-yellow-400 transition">Contact</a>
+              <a href="/manage" className="hover:text-yellow-400 transition">Manage Booking</a>
             </div>
             <div className="flex items-center gap-3">
               <a href="tel:+12819170929" className="hidden sm:inline-flex text-sm text-yellow-400 hover:text-yellow-300">

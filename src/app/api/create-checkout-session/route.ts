@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
+import { makeConfirmationNumber } from "@/lib/booking";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-06-20",
@@ -34,6 +35,7 @@ export async function POST(req: NextRequest) {
     }
 
     const origin = req.headers.get("origin") || process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+    const confirmation = makeConfirmationNumber();
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
@@ -52,7 +54,10 @@ export async function POST(req: NextRequest) {
         },
       ],
       customer_email: passengerEmail || undefined,
+      client_reference_id: confirmation,
       metadata: {
+        confirmation,
+        status: "confirmed",
         vehicle: vehicle || "",
         type: type || "",
         passengerName: passengerName || "",
