@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Vehicle, calculateOneWay, calculateHourly } from "@/lib/pricing";
 import AddressInput from "./AddressInput";
 
@@ -29,6 +29,13 @@ export default function QuoteWidget() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const resultsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (quotes && resultsRef.current) {
+      resultsRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [quotes]);
 
   const selectedQuote = quotes?.[vehicle] || null;
 
@@ -120,7 +127,7 @@ export default function QuoteWidget() {
     <div className="bg-zinc-900/90 backdrop-blur border border-yellow-600/20 rounded-2xl p-6 md:p-8 card-glow">
       <div className="flex items-center justify-between mb-6">
         <h2 className="font-serif text-2xl text-yellow-500">Get an Instant Quote</h2>
-        <span className="text-xs text-zinc-400 uppercase tracking-wider">All-Inclusive</span>
+        <span className="text-xs text-zinc-400 uppercase tracking-wider">Houston</span>
       </div>
 
       <div className="flex bg-zinc-800 rounded-lg p-1 mb-6">
@@ -227,10 +234,15 @@ export default function QuoteWidget() {
       {error && <p className="mt-3 text-sm text-red-400">{error}</p>}
 
       {quotes && !showBooking && (
-        <div className="mt-6 space-y-3">
-          {miles !== null && (
-            <p className="text-xs text-zinc-400">Driving distance: {miles} miles. Choose a vehicle:</p>
-          )}
+        <div ref={resultsRef} className="mt-6 space-y-3 scroll-mt-24">
+          <div className="pt-2">
+            <h3 className="font-serif text-xl text-yellow-500">Choose your vehicle</h3>
+            {miles !== null && (
+              <p className="text-sm text-zinc-300 mt-1">
+                {miles} miles · tap a car to select it
+              </p>
+            )}
+          </div>
 
           {VEHICLES.map((v) => {
             const q = quotes[v.id];
@@ -253,7 +265,6 @@ export default function QuoteWidget() {
                   </div>
                   <div className="text-right">
                     <div className="text-xl font-serif text-yellow-500">${q.price.toFixed(0)}</div>
-                    <div className="text-[10px] text-zinc-500">all-inclusive</div>
                   </div>
                 </div>
               </button>
@@ -267,7 +278,10 @@ export default function QuoteWidget() {
             Book {VEHICLES.find((v) => v.id === vehicle)?.name} · ${selectedQuote?.price.toFixed(0)}
           </button>
           <p className="text-center text-xs text-zinc-500">
-            Or call Jeannie: <a href="tel:+12819170929" className="text-yellow-500">281-917-0929</a>
+            Or call / text Jeannie{" "}
+            <a href="tel:+12819170929" className="text-yellow-500">281-917-0929</a>
+            {" "}or Cash{" "}
+            <a href="tel:+12819170085" className="text-yellow-500">281-917-0085</a>
           </p>
         </div>
       )}

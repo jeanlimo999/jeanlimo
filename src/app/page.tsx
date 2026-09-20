@@ -23,13 +23,16 @@ export default function Home() {
               <a href="#contact" className="hover:text-yellow-400 transition">Contact</a>
               <a href="/manage" className="hover:text-yellow-400 transition">Manage Booking</a>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <a href="/manage" className="text-xs sm:text-sm text-zinc-300 hover:text-yellow-400 px-2">
+                Manage
+              </a>
               <a href="tel:+12819170929" className="hidden sm:inline-flex text-sm text-yellow-400 hover:text-yellow-300">
                 281-917-0929
               </a>
               <a
                 href="#quote"
-                className="px-4 py-2 bg-yellow-500 hover:bg-yellow-400 text-zinc-900 font-semibold text-sm rounded transition"
+                className="px-3 sm:px-4 py-2 bg-yellow-500 hover:bg-yellow-400 text-zinc-900 font-semibold text-sm rounded transition"
               >
                 Book Now
               </a>
@@ -66,7 +69,7 @@ export default function Home() {
                   <span className="text-yellow-500">✓</span> 24/7 Dispatch
                 </div>
                 <div className="flex items-center gap-2 text-sm text-zinc-300">
-                  <span className="text-yellow-500">✓</span> Flat All-Inclusive Rates
+                  <span className="text-yellow-500">✓</span> Flat Rates
                 </div>
               </div>
               <div className="flex flex-wrap gap-4">
