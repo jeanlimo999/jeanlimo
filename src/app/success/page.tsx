@@ -16,6 +16,15 @@ function SuccessInner() {
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Could not load booking");
         setBooking(data.booking);
+        const sentKey = `emailed-${data.booking?.confirmation || sessionId}`;
+        if (data.booking && !sessionStorage.getItem(sentKey)) {
+          sessionStorage.setItem(sentKey, "1");
+          fetch("/api/notify-booking", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data.booking),
+          }).catch(() => {});
+        }
       })
       .catch((err) => setError(err.message));
   }, [sessionId]);
@@ -26,7 +35,7 @@ function SuccessInner() {
         <div className="text-5xl mb-4">✓</div>
         <h1 className="font-serif text-3xl text-yellow-500 mb-3">Booking Confirmed</h1>
         <p className="text-zinc-400 mb-6">
-          Payment received. Save your confirmation number. Stripe will also email a receipt if you entered an email.
+          Payment received. Save your confirmation number. A booking email is sent to you (if you entered an email) and to Jean Limo dispatch.
         </p>
 
         {booking?.confirmation && (
