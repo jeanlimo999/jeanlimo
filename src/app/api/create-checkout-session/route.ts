@@ -28,6 +28,11 @@ export async function POST(req: NextRequest) {
       time,
       pickup,
       dropoff,
+      flightNumber,
+      returnDate,
+      returnTime,
+      returnPickup,
+      returnDropoff,
     } = body;
 
     if (!price || price <= 0) {
@@ -68,6 +73,11 @@ export async function POST(req: NextRequest) {
         pickup: pickup || "",
         dropoff: dropoff || "",
         breakdown: breakdown || "",
+        flightNumber: String(flightNumber || "").slice(0, 20),
+        returnDate: String(returnDate || "").slice(0, 20),
+        returnTime: String(returnTime || "").slice(0, 10),
+        returnPickup: String(returnPickup || "").slice(0, 400),
+        returnDropoff: String(returnDropoff || "").slice(0, 400),
       },
       success_url: `${origin}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/cancel`,

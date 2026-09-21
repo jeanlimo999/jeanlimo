@@ -27,9 +27,16 @@ export default function QuoteWidget() {
   const [hours, setHours] = useState("3");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
+  const [wantReturn, setWantReturn] = useState(false);
+  const [returnDate, setReturnDate] = useState("");
+  const [returnTime, setReturnTime] = useState("");
+  const [flightNumber, setFlightNumber] = useState("");
   const [pickup, setPickup] = useState("");
   const [dropoff, setDropoff] = useState("");
+  const [returnPickup, setReturnPickup] = useState("");
+  const [returnDropoff, setReturnDropoff] = useState("");
   const [miles, setMiles] = useState<number | null>(null);
+  const [returnMiles, setReturnMiles] = useState<number | null>(null);
   const [quotes, setQuotes] = useState<Record<Vehicle, { price: number; breakdown: string }> | null>(null);
 
   const [showBooking, setShowBooking] = useState(false);
@@ -48,11 +55,23 @@ export default function QuoteWidget() {
 
   const selectedQuote = quotes?.[vehicle] || null;
 
+  const fetchMiles = async (from: string, to: string) => {
+    const res = await fetch("/api/distance", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pickup: from, dropoff: to }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Could not calculate distance");
+    return Number(data.miles);
+  };
+
   const handleQuote = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setQuotes(null);
     setMiles(null);
+    setReturnMiles(null);
     setShowBooking(false);
 
     try {
@@ -63,20 +82,31 @@ export default function QuoteWidget() {
         }
 
         setLoading(true);
-        const res = await fetch("/api/distance", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ pickup, dropoff }),
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Could not calculate distance");
-
-        const calculatedMiles = Number(data.miles);
+        const calculatedMiles = await fetchMiles(pickup, dropoff);
         setMiles(calculatedMiles);
+
+        let backMiles: number | null = null;
+        if (wantReturn) {
+          const rp = returnPickup.trim() || dropoff;
+          const rd = returnDropoff.trim() || pickup;
+          backMiles = await fetchMiles(rp, rd);
+          setReturnMiles(backMiles);
+        }
+
+        const build = (v: Vehicle) => {
+          const out = calculateOneWay(v, calculatedMiles);
+          if (!wantReturn || backMiles == null) return out;
+          const back = calculateOneWay(v, backMiles);
+          return {
+            price: out.price + back.price,
+            breakdown: `Outbound ${calculatedMiles.toFixed(1)} mi $${out.price} + return ${backMiles.toFixed(1)} mi $${back.price}`,
+          };
+        };
+
         setQuotes({
-          sedan: calculateOneWay("sedan", calculatedMiles),
-          suv: calculateOneWay("suv", calculatedMiles),
-          sprinter: calculateOneWay("sprinter", calculatedMiles),
+          sedan: build("sedan"),
+          suv: build("suv"),
+          sprinter: build("sprinter"),
         });
       } else {
         const h = parseFloat(hours) || 2;
@@ -119,6 +149,11 @@ export default function QuoteWidget() {
           time,
           pickup,
           dropoff,
+          flightNumber,
+          returnDate: wantReturn ? returnDate : "",
+          returnTime: wantReturn ? returnTime : "",
+          returnPickup: wantReturn ? returnPickup || dropoff : "",
+          returnDropoff: wantReturn ? returnDropoff || pickup : "",
         }),
       });
 
@@ -237,6 +272,81 @@ export default function QuoteWidget() {
           </div>
         </div>
 
+        <div>
+          <label className="block text-xs text-zinc-400 mb-1.5 uppercase tracking-wider">Flight number</label>
+          <input
+            type="text"
+            value={flightNumber}
+            onChange={(e) => setFlightNumber(e.target.value.toUpperCase())}
+            placeholder="e.g. UA887"
+            className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-yellow-500"
+          />
+        </div>
+
+        <button
+          type="button"
+          onClick={() => {
+            const next = !wantReturn;
+            setWantReturn(next);
+            if (next) {
+              if (!returnPickup.trim()) setReturnPickup(dropoff);
+              if (!returnDropoff.trim()) setReturnDropoff(pickup);
+            }
+          }}
+          className="w-full py-2.5 border border-yellow-500/40 text-yellow-400 font-semibold rounded-lg"
+        >
+          {wantReturn ? "− Remove return trip" : "+ Return trip"}
+        </button>
+
+        {wantReturn && (
+          <div className="p-3 bg-zinc-800/70 border border-yellow-600/20 rounded-xl space-y-3">
+            <div>
+              <label className="block text-xs text-zinc-400 mb-1.5 uppercase tracking-wider">Return pickup</label>
+              <AddressInput
+                id="return-pickup"
+                value={returnPickup}
+                onChange={setReturnPickup}
+                placeholder="Return pickup address"
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-zinc-400 mb-1.5 uppercase tracking-wider">Return drop-off</label>
+              <AddressInput
+                id="return-dropoff"
+                value={returnDropoff}
+                onChange={setReturnDropoff}
+                placeholder="Return drop-off address"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs text-zinc-400 mb-1.5 uppercase tracking-wider">Return date</label>
+              <input
+                type="date"
+                value={returnDate}
+                onChange={(e) => setReturnDate(e.target.value)}
+                className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-yellow-500"
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-zinc-400 mb-1.5 uppercase tracking-wider">Return time</label>
+              <select
+                value={returnTime}
+                onChange={(e) => setReturnTime(e.target.value)}
+                className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-yellow-500"
+              >
+                <option value="">Select time</option>
+                {TIME_OPTIONS.map((t) => (
+                  <option key={t.value} value={t.value}>
+                    {t.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            </div>
+          </div>
+        )}
+
         <button
           type="submit"
           disabled={loading}
@@ -244,6 +354,9 @@ export default function QuoteWidget() {
         >
           {loading ? "Calculating…" : "See prices & vehicles"}
         </button>
+        <p className="text-xs text-zinc-500 text-center mt-3 leading-relaxed">
+          Instant quote · No surge pricing · No charge when a standard ride is cancelled 2+ hours before pickup
+        </p>
       </form>
 
       {error && <p className="mt-3 text-sm text-red-400">{error}</p>}
@@ -254,7 +367,9 @@ export default function QuoteWidget() {
             <h3 className="font-serif text-xl text-yellow-500">Choose your vehicle</h3>
             {miles !== null && (
               <p className="text-sm text-zinc-300 mt-1">
-                {miles} miles · tap a car to select it
+                {miles} mi outbound
+                {wantReturn && returnMiles != null ? ` + ${returnMiles} mi return` : ""}
+                {" "}· tap a car to select it
               </p>
             )}
           </div>
@@ -332,6 +447,9 @@ export default function QuoteWidget() {
           <button onClick={() => setShowBooking(false)} className="w-full py-2 text-sm text-zinc-400 hover:text-white">
             ← Back to vehicles
           </button>
+          <p className="text-xs text-zinc-500 text-center leading-relaxed">
+            Full refund if canceled at least 12 hours before the scheduled pickup time.
+          </p>
         </div>
       )}
     </div>

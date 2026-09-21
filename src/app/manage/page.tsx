@@ -120,6 +120,10 @@ export default function ManagePage() {
             <div>Status: {booking.status}</div>
             <div>{booking.name} · {booking.vehicle}</div>
             <div>Current pickup: {booking.date} {booking.time}</div>
+            {booking.flightNumber && <div>Flight: {booking.flightNumber}</div>}
+            {(booking.returnDate || booking.returnTime) && (
+              <div>Return: {booking.returnDate} {booking.returnTime}</div>
+            )}
             {(booking.originalDate || booking.originalTime) &&
               (booking.originalDate !== booking.date || booking.originalTime !== booking.time) && (
               <div className="text-zinc-500 text-xs">
