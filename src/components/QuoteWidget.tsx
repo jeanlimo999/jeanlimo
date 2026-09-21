@@ -31,6 +31,7 @@ export default function QuoteWidget() {
   const [returnDate, setReturnDate] = useState("");
   const [returnTime, setReturnTime] = useState("");
   const [flightNumber, setFlightNumber] = useState("");
+  const [returnFlightNumber, setReturnFlightNumber] = useState("");
   const [pickup, setPickup] = useState("");
   const [dropoff, setDropoff] = useState("");
   const [returnPickup, setReturnPickup] = useState("");
@@ -150,6 +151,7 @@ export default function QuoteWidget() {
           pickup,
           dropoff,
           flightNumber,
+          returnFlightNumber: wantReturn ? returnFlightNumber : "",
           returnDate: wantReturn ? returnDate : "",
           returnTime: wantReturn ? returnTime : "",
           returnPickup: wantReturn ? returnPickup || dropoff : "",
@@ -343,6 +345,16 @@ export default function QuoteWidget() {
                 ))}
               </select>
             </div>
+            </div>
+            <div>
+              <label className="block text-xs text-zinc-400 mb-1.5 uppercase tracking-wider">Return flight number</label>
+              <input
+                type="text"
+                value={returnFlightNumber}
+                onChange={(e) => setReturnFlightNumber(e.target.value.toUpperCase())}
+                placeholder="e.g. UA888"
+                className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-yellow-500"
+              />
             </div>
           </div>
         )}

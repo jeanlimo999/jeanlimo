@@ -26,6 +26,7 @@ export function bookingFromSession(session: any) {
     pickup: meta.pickup || "",
     dropoff: meta.dropoff || "",
     flightNumber: meta.flightNumber || "",
+    returnFlightNumber: meta.returnFlightNumber || "",
     returnDate: meta.returnDate || "",
     returnTime: meta.returnTime || "",
     returnPickup: meta.returnPickup || "",

@@ -121,6 +121,7 @@ export default function ManagePage() {
             <div>{booking.name} · {booking.vehicle}</div>
             <div>Current pickup: {booking.date} {booking.time}</div>
             {booking.flightNumber && <div>Flight: {booking.flightNumber}</div>}
+            {booking.returnFlightNumber && <div>Return flight: {booking.returnFlightNumber}</div>}
             {(booking.returnDate || booking.returnTime) && (
               <div>Return: {booking.returnDate} {booking.returnTime}</div>
             )}
