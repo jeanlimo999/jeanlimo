@@ -12,12 +12,14 @@ export default function ManagePage() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [done, setDone] = useState<"change" | "cancel" | null>(null);
 
   const lookup = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setMessage("");
     setBooking(null);
+    setDone(null);
     setLoading(true);
     try {
       const res = await fetch(
@@ -26,6 +28,8 @@ export default function ManagePage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Booking not found");
       setBooking(data.booking);
+      setNewDate(data.booking.date || "");
+      setNewTime(data.booking.time || "");
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -45,7 +49,9 @@ export default function ManagePage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Request failed");
-      setMessage(data.message);
+      setDone(action);
+      setBooking(null);
+      setMessage("");
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -62,6 +68,7 @@ export default function ManagePage() {
           Enter your confirmation number and the last 4 digits of the phone used at checkout.
         </p>
 
+        {!done && (
         <form onSubmit={lookup} className="space-y-4">
           <div>
             <label className="block text-xs text-zinc-400 mb-1 uppercase tracking-wider">Confirmation number</label>
@@ -85,16 +92,40 @@ export default function ManagePage() {
             {loading ? "Looking up…" : "Find booking"}
           </button>
         </form>
+        )}
 
-        {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
-        {message && <p className="mt-4 text-sm text-green-400">{message}</p>}
+        {error && !done && <p className="mt-4 text-sm text-red-400">{error}</p>}
 
-        {booking && (
+        {done && (
+          <div className="mt-6 p-6 bg-zinc-800 border border-yellow-600/30 rounded-xl text-center space-y-4">
+            <div className="text-4xl text-yellow-500">✓</div>
+            <p className="text-lg text-white">
+              {done === "cancel"
+                ? "Your cancel request has been received."
+                : "Your changes have been updated."}
+            </p>
+            <p className="text-zinc-300">
+              We will follow up with an email confirmation shortly.
+            </p>
+            <p className="text-zinc-400">Thank you for choosing Jean Limo LLC.</p>
+            <a href="/" className="inline-block mt-2 px-6 py-3 bg-yellow-500 text-zinc-900 font-semibold rounded-lg">
+              Back to Home
+            </a>
+          </div>
+        )}
+
+        {booking && !done && (
           <div className="mt-6 p-4 bg-zinc-800 rounded-xl space-y-2 text-sm">
             <div className="font-mono text-yellow-400 text-lg">{booking.confirmation}</div>
             <div>Status: {booking.status}</div>
             <div>{booking.name} · {booking.vehicle}</div>
-            <div>Original pickup: {booking.date} {booking.time}</div>
+            <div>Current pickup: {booking.date} {booking.time}</div>
+            {(booking.originalDate || booking.originalTime) &&
+              (booking.originalDate !== booking.date || booking.originalTime !== booking.time) && (
+              <div className="text-zinc-500 text-xs">
+                Originally booked: {booking.originalDate} {booking.originalTime}
+              </div>
+            )}
             <div className="text-zinc-400">{booking.pickup}</div>
             {booking.dropoff && <div className="text-zinc-400">→ {booking.dropoff}</div>}
             {booking.amount != null && <div>${booking.amount.toFixed(2)} paid</div>}
