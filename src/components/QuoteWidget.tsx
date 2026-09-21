@@ -12,9 +12,9 @@ const VEHICLES: { id: Vehicle; name: string; seats: string }[] = [
   { id: "sprinter", name: "Sprinter Van", seats: "7–14 passengers" },
 ];
 
-const TIME_OPTIONS = Array.from({ length: 48 }, (_, i) => {
-  const h24 = Math.floor(i / 2);
-  const m = i % 2 === 0 ? "00" : "30";
+const TIME_OPTIONS = Array.from({ length: 96 }, (_, i) => {
+  const h24 = Math.floor(i / 4);
+  const m = String((i % 4) * 15).padStart(2, "0");
   const value = `${String(h24).padStart(2, "0")}:${m}`;
   const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
   const ampm = h24 < 12 ? "AM" : "PM";
@@ -95,8 +95,8 @@ export default function QuoteWidget() {
 
   const handlePay = async () => {
     if (!selectedQuote) return;
-    if (!name.trim() || !phone.trim()) {
-      setError("Name and phone are required.");
+    if (!name.trim() || !phone.trim() || !email.trim()) {
+      setError("Name, phone, and email are required.");
       return;
     }
 
@@ -318,7 +318,7 @@ export default function QuoteWidget() {
             <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full bg-zinc-700 border border-zinc-600 rounded-lg px-3 py-2 text-sm" />
           </div>
           <div>
-            <label className="block text-xs text-zinc-400 mb-1">Email</label>
+            <label className="block text-xs text-zinc-400 mb-1">Email *</label>
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-zinc-700 border border-zinc-600 rounded-lg px-3 py-2 text-sm" />
           </div>
 

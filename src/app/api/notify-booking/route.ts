@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import nodemailer from "nodemailer";
 
-const OWNER_EMAIL = "cashtienlam@gmail.com";
+const OWNER_EMAIL = process.env.BOOKING_NOTIFY_EMAIL || "cashtienlam@gmail.com";
 
 function bookingText(b: any) {
   return [
@@ -23,25 +24,6 @@ function bookingText(b: any) {
   ].join("\n");
 }
 
-async function sendFormSubmit(to: string, subject: string, text: string, replyTo?: string) {
-  const res = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(to)}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
-    body: JSON.stringify({
-      _subject: subject,
-      _template: "box",
-      _captcha: "false",
-      name: "Jean Limo Booking",
-      email: replyTo || OWNER_EMAIL,
-      message: text,
-    }),
-  });
-  return res.ok;
-}
-
 export async function POST(req: NextRequest) {
   try {
     const booking = await req.json();
@@ -49,23 +31,45 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing booking" }, { status: 400 });
     }
 
-    const text = bookingText(booking);
-    const subjectOwner = `New Jean Limo booking ${booking.confirmation}`;
-    const subjectCustomer = `Your Jean Limo confirmation ${booking.confirmation}`;
-
-    const ownerSent = await sendFormSubmit(OWNER_EMAIL, subjectOwner, text, booking.email);
-    let customerSent = false;
-    if (booking.email && String(booking.email).includes("@")) {
-      customerSent = await sendFormSubmit(
-        String(booking.email),
-        subjectCustomer,
-        `Thank you for booking Jean Limo.\n\n${text}`,
-        OWNER_EMAIL
+    const user = process.env.GMAIL_USER;
+    const pass = process.env.GMAIL_APP_PASSWORD;
+    if (!user || !pass) {
+      return NextResponse.json(
+        { error: "Email is not configured. Add GMAIL_USER and GMAIL_APP_PASSWORD in Netlify." },
+        { status: 500 }
       );
     }
 
-    return NextResponse.json({ ok: true, ownerSent, customerSent });
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: { user, pass },
+    });
+
+    const text = bookingText(booking);
+
+    await transporter.sendMail({
+      from: `"Jean Limo" <${user}>`,
+      to: OWNER_EMAIL,
+      replyTo: booking.email || user,
+      subject: `New Jean Limo booking ${booking.confirmation}`,
+      text,
+    });
+
+    let customerSent = false;
+    if (booking.email && String(booking.email).includes("@")) {
+      await transporter.sendMail({
+        from: `"Jean Limo" <${user}>`,
+        to: String(booking.email),
+        replyTo: OWNER_EMAIL,
+        subject: `Your Jean Limo confirmation ${booking.confirmation}`,
+        text: `Thank you for booking Jean Limo.\n\n${text}`,
+      });
+      customerSent = true;
+    }
+
+    return NextResponse.json({ ok: true, ownerSent: true, customerSent });
   } catch (err: any) {
+    console.error("Email error:", err);
     return NextResponse.json({ error: err.message || "Email failed" }, { status: 500 });
   }
 }
