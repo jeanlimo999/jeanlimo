@@ -6,6 +6,8 @@ export default function ManagePage() {
   const [confirmation, setConfirmation] = useState("");
   const [phone, setPhone] = useState("");
   const [notes, setNotes] = useState("");
+  const [newDate, setNewDate] = useState("");
+  const [newTime, setNewTime] = useState("");
   const [booking, setBooking] = useState<any>(null);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -39,7 +41,7 @@ export default function ManagePage() {
       const res = await fetch("/api/booking", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ confirmation, phone, action, notes }),
+        body: JSON.stringify({ confirmation, phone, action, notes, newDate, newTime }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Request failed");
@@ -92,16 +94,50 @@ export default function ManagePage() {
             <div className="font-mono text-yellow-400 text-lg">{booking.confirmation}</div>
             <div>Status: {booking.status}</div>
             <div>{booking.name} · {booking.vehicle}</div>
-            <div>{booking.date} {booking.time}</div>
+            <div>Original pickup: {booking.date} {booking.time}</div>
             <div className="text-zinc-400">{booking.pickup}</div>
             {booking.dropoff && <div className="text-zinc-400">→ {booking.dropoff}</div>}
             {booking.amount != null && <div>${booking.amount.toFixed(2)} paid</div>}
 
+            <div className="grid grid-cols-2 gap-3 mt-3">
+              <div>
+                <label className="block text-xs text-zinc-400 mb-1">New date</label>
+                <input
+                  type="date"
+                  value={newDate}
+                  onChange={(e) => setNewDate(e.target.value)}
+                  className="w-full bg-zinc-700 border border-zinc-600 rounded-lg px-3 py-2 text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-zinc-400 mb-1">New time</label>
+                <select
+                  value={newTime}
+                  onChange={(e) => setNewTime(e.target.value)}
+                  className="w-full bg-zinc-700 border border-zinc-600 rounded-lg px-3 py-2 text-sm"
+                >
+                  <option value="">Select time</option>
+                  {Array.from({ length: 144 }, (_, i) => {
+                    const h24 = Math.floor(i / 6);
+                    const m = String((i % 6) * 10).padStart(2, "0");
+                    const value = `${String(h24).padStart(2, "0")}:${m}`;
+                    const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
+                    const ampm = h24 < 12 ? "AM" : "PM";
+                    return (
+                      <option key={value} value={value}>
+                        {h12}:{m} {ampm}
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
+            </div>
+
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="What do you want to change? New time, address, vehicle..."
-              className="w-full mt-3 bg-zinc-700 border border-zinc-600 rounded-lg px-3 py-2 text-sm min-h-24"
+              placeholder="Anything else? Address or vehicle change..."
+              className="w-full mt-3 bg-zinc-700 border border-zinc-600 rounded-lg px-3 py-2 text-sm min-h-20"
             />
 
             <button

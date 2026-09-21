@@ -12,9 +12,9 @@ const VEHICLES: { id: Vehicle; name: string; seats: string }[] = [
   { id: "sprinter", name: "Sprinter Van", seats: "7–14 passengers" },
 ];
 
-const TIME_OPTIONS = Array.from({ length: 96 }, (_, i) => {
-  const h24 = Math.floor(i / 4);
-  const m = String((i % 4) * 15).padStart(2, "0");
+const TIME_OPTIONS = Array.from({ length: 144 }, (_, i) => {
+  const h24 = Math.floor(i / 6);
+  const m = String((i % 6) * 10).padStart(2, "0");
   const value = `${String(h24).padStart(2, "0")}:${m}`;
   const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
   const ampm = h24 < 12 ? "AM" : "PM";
