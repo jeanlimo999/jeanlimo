@@ -1,327 +1,294 @@
-import QuoteWidget from "@/components/QuoteWidget";
+"use client";
 
-export default function Home() {
+import { useState } from "react";
+import AddressInput from "@/components/AddressInput";
+import { formatDateTime } from "@/lib/booking";
+
+const TIME_OPTIONS = Array.from({ length: 144 }, (_, i) => {
+  const h24 = Math.floor(i / 6);
+  const m = String((i % 6) * 10).padStart(2, "0");
+  const value = `${String(h24).padStart(2, "0")}:${m}`;
+  const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
+  const ampm = h24 < 12 ? "AM" : "PM";
+  return { value, label: `${h12}:${m} ${ampm}` };
+});
+
+export default function ManagePage() {
+  const [confirmation, setConfirmation] = useState("");
+  const [phone, setPhone] = useState("");
+  const [notes, setNotes] = useState("");
+  const [newDate, setNewDate] = useState("");
+  const [newTime, setNewTime] = useState("");
+  const [pickup, setPickup] = useState("");
+  const [dropoff, setDropoff] = useState("");
+  const [flightNumber, setFlightNumber] = useState("");
+  const [returnDate, setReturnDate] = useState("");
+  const [returnTime, setReturnTime] = useState("");
+  const [returnPickup, setReturnPickup] = useState("");
+  const [returnDropoff, setReturnDropoff] = useState("");
+  const [returnFlightNumber, setReturnFlightNumber] = useState("");
+  const [editing, setEditing] = useState(false);
+  const [booking, setBooking] = useState<any>(null);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [done, setDone] = useState<"change" | "cancel" | null>(null);
+
+  const lookup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setMessage("");
+    setBooking(null);
+    setDone(null);
+    setLoading(true);
+    try {
+      const res = await fetch(
+        `/api/booking?confirmation=${encodeURIComponent(confirmation)}&phone=${encodeURIComponent(phone)}`
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Booking not found");
+      const b = data.booking;
+      setBooking(b);
+      setNewDate(b.date || "");
+      setNewTime(b.time || "");
+      setPickup(b.pickup || "");
+      setDropoff(b.dropoff || "");
+      setFlightNumber(b.flightNumber || "");
+      setReturnDate(b.returnDate || "");
+      setReturnTime(b.returnTime || "");
+      setReturnPickup(b.returnPickup || "");
+      setReturnDropoff(b.returnDropoff || "");
+      setReturnFlightNumber(b.returnFlightNumber || "");
+      setEditing(false);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const request = async (action: "change" | "cancel") => {
+    setError("");
+    setMessage("");
+    setLoading(true);
+    try {
+      const res = await fetch("/api/booking", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          confirmation,
+          phone,
+          action,
+          notes,
+          newDate,
+          newTime,
+          pickup,
+          dropoff,
+          flightNumber,
+          returnDate,
+          returnTime,
+          returnPickup,
+          returnDropoff,
+          returnFlightNumber,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Request failed");
+      setDone(action);
+      setBooking(null);
+      setMessage("");
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="bg-zinc-950 text-zinc-100 min-h-screen">
-      {/* NAV */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-zinc-950/90 backdrop-blur-md border-b border-yellow-600/20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 md:h-20">
-            <a href="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full border-2 border-yellow-500 flex items-center justify-center font-serif text-yellow-400 text-xl font-bold">
-                J
-              </div>
-              <div>
-                <div className="font-serif text-xl tracking-wide text-yellow-400">JEAN LIMO</div>
-                <div className="text-[10px] tracking-[0.2em] text-zinc-400 uppercase">LLC · Houston</div>
-              </div>
-            </a>
-            <div className="hidden md:flex items-center gap-8 text-sm font-medium">
-              <a href="#services" className="hover:text-yellow-400 transition">Services</a>
-              <a href="#fleet" className="hover:text-yellow-400 transition">Fleet & Pricing</a>
-              <a href="#quote" className="hover:text-yellow-400 transition">Get Quote</a>
-              <a href="#contact" className="hover:text-yellow-400 transition">Contact</a>
-              <a href="https://maps.app.goo.gl/aDG8UD4nBddGKKmk6" target="_blank" rel="noopener noreferrer" className="hover:text-yellow-400 transition">Reviews</a>
-            </div>
-            <div className="flex items-center gap-2 sm:gap-3">
-              <a href="/manage" className="text-xs sm:text-sm text-zinc-300 hover:text-yellow-400 px-2 whitespace-nowrap">
-                Manage booking
-              </a>
-              <a
-                href="#quote"
-                className="px-3 sm:px-4 py-2 bg-yellow-500 hover:bg-yellow-400 text-zinc-900 font-semibold text-sm rounded transition"
-              >
-                Book Now
-              </a>
-            </div>
-          </div>
-        </div>
-      </nav>
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 px-4 py-16">
+      <div className="max-w-md mx-auto bg-zinc-900 border border-yellow-600/20 rounded-2xl p-8">
+        <a href="/" className="text-xs text-zinc-400 hover:text-yellow-400">← Home</a>
+        <h1 className="font-serif text-3xl text-yellow-500 mt-4 mb-2">Manage Booking</h1>
+        <p className="text-sm text-zinc-400 mb-6">
+          Enter your confirmation number and the last 4 digits of the phone used at checkout.
+        </p>
 
-      {/* HERO */}
-      <section className="relative flex items-start pt-20 md:pt-24">
-        <div className="absolute inset-0 bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950" />
-        <div className="absolute inset-0 bg-gradient-to-r from-zinc-950 via-zinc-950/80 to-transparent" />
-
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-6 w-full">
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-start">
-            <div>
-              <p className="text-yellow-500 tracking-[0.25em] text-xs uppercase mb-4">
-                Premium Chauffeur Service · Houston, TX
-              </p>
-              <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl leading-tight mb-6">
-                Ride in Comfort.
-                <br />
-                <span className="gold-text">Arrive with Style.</span>
-              </h1>
-              <p className="text-zinc-300 text-lg max-w-lg mb-8">
-                Black car, SUV & Sprinter service for airport transfers, Galveston cruise,
-                corporate travel, hourly chauffeur and special events across Greater Houston.
-              </p>
-              <div className="flex flex-wrap gap-4 mb-10">
-                <div className="flex items-center gap-2 text-sm text-zinc-300">
-                  <span className="text-yellow-500">✓</span> Licensed & Insured
-                </div>
-                <div className="flex items-center gap-2 text-sm text-zinc-300">
-                  <span className="text-yellow-500">✓</span> 24/7 Dispatch
-                </div>
-                <div className="flex items-center gap-2 text-sm text-zinc-300">
-                  <span className="text-yellow-500">✓</span> Flat Rates
-                </div>
-              </div>
-              <div className="flex flex-wrap gap-4">
-                <a
-                  href="#quote"
-                  className="px-8 py-3.5 bg-yellow-500 hover:bg-yellow-400 text-zinc-900 font-semibold rounded transition"
-                >
-                  Get Instant Quote
-                </a>
-                <a
-                  href="tel:+12819170929"
-                  className="px-8 py-3.5 border border-yellow-500/50 hover:border-yellow-400 text-yellow-400 font-semibold rounded transition"
-                >
-                  Call Jeannie
-                </a>
-              </div>
-            </div>
-
-            <div id="quote" className="lg:-mt-2">
-              <QuoteWidget />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* TRUST BAR */}
-      <section className="border-y border-yellow-600/10 bg-zinc-900/50">
-        <div className="max-w-7xl mx-auto px-4 py-8 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+        {!done && (
+        <form onSubmit={lookup} className="space-y-4">
           <div>
-            <div className="text-yellow-500 font-serif text-lg mb-1">On-time</div>
-            <div className="text-xs text-zinc-400">Confirmed itinerary</div>
+            <label className="block text-xs text-zinc-400 mb-1 uppercase tracking-wider">Confirmation number</label>
+            <input
+              value={confirmation}
+              onChange={(e) => setConfirmation(e.target.value.toUpperCase())}
+              placeholder="JL-260920-AB12"
+              className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-sm"
+            />
           </div>
           <div>
-            <div className="text-yellow-500 font-serif text-lg mb-1">One clear price</div>
-            <div className="text-xs text-zinc-400">Gratuity & fuel included</div>
+            <label className="block text-xs text-zinc-400 mb-1 uppercase tracking-wider">Phone last 4 digits</label>
+            <input
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="0929"
+              className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-sm"
+            />
           </div>
-          <div>
-            <div className="text-yellow-500 font-serif text-lg mb-1">Professional</div>
-            <div className="text-xs text-zinc-400">Background-checked chauffeurs</div>
-          </div>
-          <div>
-            <div className="text-yellow-500 font-serif text-lg mb-1">Personal service</div>
-            <div className="text-xs text-zinc-400">Dispatch confirms every ride</div>
-          </div>
-        </div>
-      </section>
+          <button type="submit" disabled={loading} className="w-full py-3 bg-yellow-500 text-zinc-900 font-semibold rounded-lg">
+            {loading ? "Looking up…" : "Find booking"}
+          </button>
+        </form>
+        )}
 
-      {/* SERVICES */}
-      <section id="services" className="py-20 md:py-28">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-14">
-            <p className="text-yellow-500 tracking-[0.2em] text-xs uppercase mb-3">Our Services</p>
-            <h2 className="font-serif text-3xl md:text-4xl">Private transportation for every Houston journey</h2>
-          </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[
-              { icon: "✈️", title: "Airport Transfers", desc: "IAH & Hobby door-to-door. Flight monitoring available. Meet & greet options." },
-              { icon: "🚢", title: "Galveston Cruise", desc: "Timed transfers to the Port of Galveston with luggage assistance." },
-              { icon: "🏢", title: "Corporate & Executive", desc: "Discreet, reliable service for meetings, roadshows and client travel." },
-              { icon: "⏱️", title: "Hourly Chauffeur", desc: "As-directed service. 2-hour minimum. Unlimited stops in Greater Houston." },
-              { icon: "💍", title: "Weddings & Events", desc: "Polished arrivals for weddings, galas, concerts and special nights." },
-              { icon: "🛣️", title: "Long Distance", desc: "Houston to Austin, Dallas, San Antonio and beyond — simple per-mile pricing." },
-            ].map((s) => (
-              <div key={s.title} className="bg-zinc-900 border border-yellow-600/10 rounded-xl p-6 hover:border-yellow-600/30 transition">
-                <div className="text-yellow-500 text-2xl mb-3">{s.icon}</div>
-                <h3 className="font-serif text-xl mb-2">{s.title}</h3>
-                <p className="text-zinc-400 text-sm">{s.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+        {error && !done && <p className="mt-4 text-sm text-red-400">{error}</p>}
 
-      {/* PRICING TABLE */}
-      <section id="fleet" className="py-20 md:py-28 bg-zinc-900/40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-14">
-            <p className="text-yellow-500 tracking-[0.2em] text-xs uppercase mb-3">Transparent Pricing</p>
-            <h2 className="font-serif text-3xl md:text-4xl mb-4">Know your fare before you book</h2>
-            <p className="text-zinc-400 max-w-2xl mx-auto">
-              Flat per-trip rates within Greater Houston. Distances measured by best driving route. Gratuity and fuel included.
+        {done && (
+          <div className="mt-6 p-6 bg-zinc-800 border border-yellow-600/30 rounded-xl text-center space-y-4">
+            <div className="text-4xl text-yellow-500">✓</div>
+            <p className="text-lg text-white">
+              {done === "cancel"
+                ? "Your cancel request has been received."
+                : "Your changes have been updated."}
             </p>
+            <p className="text-zinc-300">
+              We will follow up with an email confirmation shortly.
+            </p>
+            <p className="text-zinc-400">Thank you for choosing Jean Limo LLC.</p>
+            <a href="/" className="inline-block mt-2 px-6 py-3 bg-yellow-500 text-zinc-900 font-semibold rounded-lg">
+              Back to Home
+            </a>
           </div>
+        )}
 
-          <div className="overflow-x-auto rounded-xl border border-yellow-600/20">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-gradient-to-r from-yellow-600 to-yellow-500 text-zinc-900">
-                  <th className="px-4 py-4 text-left font-semibold">Trip Distance</th>
-                  <th className="px-4 py-4 text-center font-semibold">Business Sedan</th>
-                  <th className="px-4 py-4 text-center font-semibold">SUV</th>
-                  <th className="px-4 py-4 text-center font-semibold">Sprinter</th>
-                </tr>
-              </thead>
-              <tbody className="bg-zinc-900">
-                {[
-                  ["0 – 10 mi", 110, 130, 300],
-                  ["10 – 20 mi", 120, 145, 340],
-                  ["20 – 30 mi", 130, 160, 380],
-                  ["30 – 40 mi", 155, 180, 420],
-                  ["40 – 50 mi", 165, 195, 460],
-                  ["50 – 60 mi", 180, 215, 500],
-                  ["60 – 70 mi", 195, 230, 540],
-                  ["70 – 80 mi", 205, 255, 580],
-                  ["80 – 90 mi", 220, 275, 620],
-                  ["90 – 100 mi", 235, 285, 660],
-                ].map(([dist, sedan, suv, sprinter]) => (
-                  <tr key={dist as string} className="border-b border-zinc-800">
-                    <td className="px-4 py-3">{dist}</td>
-                    <td className="px-4 py-3 text-center text-yellow-500">${sedan}</td>
-                    <td className="px-4 py-3 text-center text-yellow-500">${suv}</td>
-                    <td className="px-4 py-3 text-center text-yellow-500">${sprinter}</td>
-                  </tr>
-                ))}
-                <tr>
-                  <td className="px-4 py-3 font-medium">100+ mi · per mile</td>
-                  <td className="px-4 py-3 text-center text-yellow-500">$2.50</td>
-                  <td className="px-4 py-3 text-center text-yellow-500">$3.20</td>
-                  <td className="px-4 py-3 text-center text-yellow-500">$7.50</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+        {booking && !done && (
+          <div className="mt-6 p-4 bg-zinc-800 rounded-xl space-y-2 text-sm">
+            <div className="font-mono text-yellow-400 text-lg">{booking.confirmation}</div>
+            <div>Status: {booking.status}</div>
+            <div>{booking.name} · {booking.vehicle}</div>
+            {booking.amount != null && <div>${booking.amount.toFixed(2)} paid</div>}
 
-          <div className="mt-14 grid md:grid-cols-3 gap-6">
-            {[
-              {
-                img: "/fleet/sedan.jpg",
-                name: "Business Sedan",
-                aka: "Standard Class",
-                models: "Mercedes E-Class, BMW 5 Series, Cadillac XTS or similar",
-                seats: "3 passengers",
-                bags: "3 luggage",
-                from: "$110",
-              },
-              {
-                img: "/fleet/suv.jpg",
-                name: "Business SUV",
-                aka: "Most booked",
-                models: "Chevrolet Suburban · GMC Yukon XL or similar",
-                seats: "6 passengers",
-                bags: "6 luggage",
-                from: "$130",
-              },
-              {
-                img: "/fleet/sprinter.jpg",
-                name: "Sprinter Van",
-                aka: "Group travel",
-                models: "Mercedes-Benz Sprinter 2500",
-                seats: "14 passengers",
-                bags: "10 luggage",
-                from: "$300",
-              },
-            ].map((v) => (
-              <div key={v.name} className="bg-zinc-950 border border-yellow-600/20 rounded-2xl overflow-hidden">
-                <div className="aspect-[4/3] overflow-hidden">
-                  <img src={v.img} alt={v.name} className="w-full h-full object-cover" />
+            {!editing ? (
+              <div className="space-y-3 pt-2">
+                <div>
+                  <div className="text-yellow-500 text-xs uppercase tracking-wider">Outbound</div>
+                  <div>{formatDateTime(booking.date, booking.time)}</div>
+                  {booking.flightNumber && <div>Flight: {booking.flightNumber}</div>}
+                  <div className="text-zinc-400">Pickup: {booking.pickup}</div>
+                  <div className="text-zinc-400">Drop-off: {booking.dropoff}</div>
                 </div>
-                <div className="p-5">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <h3 className="font-serif text-2xl text-white">{v.name}</h3>
-                      <p className="text-xs uppercase tracking-wider text-yellow-500 mt-1">{v.aka}</p>
-                    </div>
-                    <div className="text-yellow-500 text-sm whitespace-nowrap">from {v.from}</div>
+                {(booking.returnDate || booking.returnTime || booking.returnPickup) && (
+                  <div>
+                    <div className="text-yellow-500 text-xs uppercase tracking-wider">Return trip</div>
+                    <div>{formatDateTime(booking.returnDate, booking.returnTime)}</div>
+                    {booking.returnFlightNumber && <div>Return flight: {booking.returnFlightNumber}</div>}
+                    <div className="text-zinc-400">Pickup: {booking.returnPickup}</div>
+                    <div className="text-zinc-400">Drop-off: {booking.returnDropoff}</div>
                   </div>
-                  <p className="text-sm text-zinc-400 mt-3">{v.models}</p>
-                  <div className="flex gap-4 mt-4 text-sm text-zinc-300">
-                    <span>{v.seats}</span>
-                    <span>{v.bags}</span>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setEditing(true)}
+                  className="w-full py-2.5 border border-yellow-500/50 text-yellow-400 rounded-lg"
+                >
+                  Make changes
+                </button>
+                <button
+                  onClick={() => request("cancel")}
+                  disabled={loading}
+                  className="w-full py-2.5 border border-red-500/40 text-red-300 rounded-lg"
+                >
+                  Request cancel
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-3 pt-2">
+                <div className="text-yellow-500 text-xs uppercase tracking-wider">Outbound</div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs text-zinc-400 mb-1">Date</label>
+                    <input type="date" value={newDate} onChange={(e) => setNewDate(e.target.value)} className="w-full bg-zinc-700 border border-zinc-600 rounded-lg px-3 py-2 text-sm" />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-zinc-400 mb-1">Time</label>
+                    <select value={newTime} onChange={(e) => setNewTime(e.target.value)} className="w-full bg-zinc-700 border border-zinc-600 rounded-lg px-3 py-2 text-sm">
+                      <option value="">Select time</option>
+                      {TIME_OPTIONS.map((t) => (
+                        <option key={t.value} value={t.value}>{t.label}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+                <div>
+                  <label className="block text-xs text-zinc-400 mb-1">Flight number</label>
+                  <input value={flightNumber} onChange={(e) => setFlightNumber(e.target.value.toUpperCase())} className="w-full bg-zinc-700 border border-zinc-600 rounded-lg px-3 py-2 text-sm" />
+                </div>
+                <div>
+                  <label className="block text-xs text-zinc-400 mb-1">Pickup address</label>
+                  <AddressInput id="manage-pickup" value={pickup} onChange={setPickup} placeholder="Pickup address" />
+                </div>
+                <div>
+                  <label className="block text-xs text-zinc-400 mb-1">Drop-off address</label>
+                  <AddressInput id="manage-dropoff" value={dropoff} onChange={setDropoff} placeholder="Drop-off address" />
+                </div>
 
-          <div className="mt-12 max-w-2xl mx-auto bg-zinc-900 border border-yellow-600/20 rounded-xl p-6 md:p-8">
-            <h3 className="font-serif text-2xl text-yellow-500 text-center mb-6">Hourly Rates · As Directed</h3>
-            <div className="space-y-3">
-              <div className="flex justify-between items-center py-2 border-b border-zinc-800">
-                <span>Business Sedan</span>
-                <span className="text-yellow-500 font-medium">$95 / hr</span>
+                <div className="text-yellow-500 text-xs uppercase tracking-wider pt-2">Return trip</div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs text-zinc-400 mb-1">Return date</label>
+                    <input type="date" value={returnDate} onChange={(e) => setReturnDate(e.target.value)} className="w-full bg-zinc-700 border border-zinc-600 rounded-lg px-3 py-2 text-sm" />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-zinc-400 mb-1">Return time</label>
+                    <select value={returnTime} onChange={(e) => setReturnTime(e.target.value)} className="w-full bg-zinc-700 border border-zinc-600 rounded-lg px-3 py-2 text-sm">
+                      <option value="">Select time</option>
+                      {TIME_OPTIONS.map((t) => (
+                        <option key={t.value} value={t.value}>{t.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs text-zinc-400 mb-1">Return flight</label>
+                  <input value={returnFlightNumber} onChange={(e) => setReturnFlightNumber(e.target.value.toUpperCase())} className="w-full bg-zinc-700 border border-zinc-600 rounded-lg px-3 py-2 text-sm" />
+                </div>
+                <div>
+                  <label className="block text-xs text-zinc-400 mb-1">Return pickup</label>
+                  <AddressInput id="manage-return-pickup" value={returnPickup} onChange={setReturnPickup} placeholder="Return pickup" />
+                </div>
+                <div>
+                  <label className="block text-xs text-zinc-400 mb-1">Return drop-off</label>
+                  <AddressInput id="manage-return-dropoff" value={returnDropoff} onChange={setReturnDropoff} placeholder="Return drop-off" />
+                </div>
+
+                <textarea
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="Anything else?"
+                  className="w-full bg-zinc-700 border border-zinc-600 rounded-lg px-3 py-2 text-sm min-h-16"
+                />
+                <button
+                  onClick={() => request("change")}
+                  disabled={loading}
+                  className="w-full py-2.5 mt-1 bg-yellow-500 text-zinc-900 font-semibold rounded-lg"
+                >
+                  {loading ? "Sending…" : "Request change"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEditing(false)}
+                  className="w-full py-2 text-sm text-zinc-400"
+                >
+                  ← Back to booking
+                </button>
               </div>
-              <div className="flex justify-between items-center py-2 border-b border-zinc-800">
-                <span>Business SUV</span>
-                <span className="text-yellow-500 font-medium">$125 / hr</span>
-              </div>
-              <div className="flex justify-between items-center py-2">
-                <span>Sprinter Van</span>
-                <span className="text-yellow-500 font-medium">$195 / hr</span>
-              </div>
-            </div>
-            <p className="text-center text-xs text-zinc-500 mt-5">
-              2-hour minimum · Unlimited stops within Greater Houston
-              <br />
-              (includes 20 miles per hour · overage $2.50 per mile)
+            )}
+
+            <p className="text-xs text-zinc-500">
+              Requests go to dispatch. Refunds and time changes are confirmed by phone:{" "}
+              <a href="tel:+12819170929" className="text-yellow-500">281-917-0929</a>
             </p>
           </div>
-        </div>
-      </section>
-
-      {/* CONTACT */}
-      <section id="contact" className="py-20 md:py-28">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <p className="text-yellow-500 tracking-[0.2em] text-xs uppercase mb-3">Ready when you are</p>
-          <h2 className="font-serif text-3xl md:text-4xl mb-6">Your chauffeur is a call away</h2>
-          <p className="text-zinc-400 mb-10">24/7 dispatch · Instant online quotes · Greater Houston & beyond</p>
-
-          <div className="grid sm:grid-cols-2 gap-6 mb-10">
-            <a
-              href="tel:+12819170929"
-              className="bg-zinc-900 border border-yellow-600/20 rounded-xl p-6 hover:border-yellow-600/40 transition"
-            >
-              <div className="text-sm text-zinc-400 mb-1">Call or Text</div>
-              <div className="text-xl text-yellow-500 font-medium">Jeannie 281-917-0929</div>
-            </a>
-            <a
-              href="tel:+12819170085"
-              className="bg-zinc-900 border border-yellow-600/20 rounded-xl p-6 hover:border-yellow-600/40 transition"
-            >
-              <div className="text-sm text-zinc-400 mb-1">Call or Text</div>
-              <div className="text-xl text-yellow-500 font-medium">Cash 281-917-0085</div>
-            </a>
-          </div>
-
-          <a
-            href="https://maps.app.goo.gl/aDG8UD4nBddGKKmk6"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-block mb-10 bg-zinc-900 border border-yellow-600/30 rounded-xl px-8 py-5 hover:border-yellow-500 transition"
-          >
-            <div className="text-yellow-500 text-2xl font-serif">5.0 ★★★★★</div>
-            <div className="text-white mt-1">Google reviews</div>
-            <div className="text-sm text-zinc-400 mt-1">Read reviews or leave one on Google</div>
-          </a>
-
-          <div className="flex flex-wrap justify-center gap-4 text-sm text-zinc-400">
-            <span>All major credit cards accepted</span>
-            <span>•</span>
-            <span>VISA · Mastercard · Amex · Discover</span>
-          </div>
-          <p className="mt-6 text-sm text-zinc-500">
-            Book online at <span className="text-yellow-500">jeanlimo.com</span>
-          </p>
-        </div>
-      </section>
-
-      {/* FOOTER */}
-      <footer className="border-t border-yellow-600/10 py-10">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="font-serif text-yellow-500 text-lg">JEAN LIMO LLC</div>
-          <div className="text-sm text-zinc-500">Houston · Airport · Cruise · Chauffeur</div>
-          <div className="text-xs text-zinc-600">© 2026 Jean Limo LLC. All rights reserved.</div>
-        </div>
-      </footer>
+        )}
+      </div>
     </div>
   );
 }
