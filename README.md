@@ -1,92 +1,45 @@
-# Jean Limo LLC – Website
+# Jean Limo — Date Change Email + Stripe Tips
 
-Premium Houston chauffeur / black-car service website with live quote calculator and Stripe payments.
+Files in this folder:
 
-## Features
+- `change-request-email.txt` — copy/paste professional email
+- `tips.html` — tip buttons (10 / 15 / 20 / 25%) that match your booking page
+- `create-checkout-session.example.js` — Stripe Checkout with ride + tip line items
+- `tip-amounts.md` — dollar amounts for the $280 sedan quote
 
-- Dark gold luxury design
-- Instant quote (One-way & Hourly) using your exact rates
-- Stripe Checkout payment flow
-- Success / Cancel pages
-- Mobile responsive
-- Ready for Netlify or Vercel
+## How tips work
 
-## 1. Local Setup
+Stripe Checkout (`checkout.stripe.com`) has **no** built-in 10/15/20/25% tip picker.
 
-```bash
-# Install dependencies
-npm install
+Do this instead:
 
-# Copy environment file and add your Stripe keys
-cp .env.example .env.local
-# Edit .env.local and paste your Stripe test keys
+1. Customer picks a tip on **your** site (`tips.html`).
+2. Your server creates a Checkout Session with:
+   - Ride: $280.00
+   - Tip: selected amount (or omit if $0)
+3. Redirect to Stripe. Total already includes the tip.
 
-# Run development server
-npm run dev
-```
+## $280 sedan amounts
 
-Open http://localhost:3000
+| Tip | Amount | Total |
+|-----|--------|-------|
+| No tip | $0.00 | $280.00 |
+| 10% | $28.00 | $308.00 |
+| 15% | $42.00 | $322.00 |
+| 20% | $56.00 | $336.00 |
+| 25% | $70.00 | $350.00 |
 
-## 2. Stripe Keys
+For other quotes: `tip = Math.round(rideDollars * percent) / 100`
 
-1. Go to https://dashboard.stripe.com/apikeys
-2. Copy **Secret key** → `STRIPE_SECRET_KEY`
-3. Copy **Publishable key** → `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
-4. Use **test** keys first (`sk_test_...` / `pk_test_...`)
+## No-code fallback (Payment Link)
 
-## 3. Deploy to GitHub
+In Stripe Dashboard → Products, create:
 
-```bash
-# Create a new repo on GitHub, then:
-git init
-git add .
-git commit -m "Initial Jean Limo website"
-git branch -M main
-git remote add origin https://github.com/YOUR_USERNAME/jean-limo.git
-git push -u origin main
-```
+- Tip 10% — $28.00
+- Tip 15% — $42.00
+- Tip 20% — $56.00
+- Tip 25% — $70.00
 
-## 4. Deploy to Netlify
+Add them as **optional items** on that Payment Link. Only correct for this $280 fare.
 
-### Option A – From GitHub (recommended)
-1. Go to https://app.netlify.com
-2. Click **Add new site → Import an existing project**
-3. Connect GitHub and select your `jean-limo` repo
-4. Netlify will detect Next.js automatically
-5. Add environment variables in **Site settings → Environment variables**:
-   - `STRIPE_SECRET_KEY`
-   - `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
-   - `NEXT_PUBLIC_SITE_URL` = your Netlify URL (e.g. https://jean-limo.netlify.app)
-6. Deploy
-
-### Option B – Drag & drop (after build)
-```bash
-npm run build
-# Then drag the .next folder or use Netlify CLI
-```
-
-> Note: For best Next.js support on Netlify, the `@netlify/plugin-nextjs` is already configured in `netlify.toml`.
-
-## 5. Environment Variables (required on Netlify)
-
-| Variable | Description |
-|----------|-------------|
-| `STRIPE_SECRET_KEY` | Stripe secret key (sk_...) |
-| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Stripe publishable key (pk_...) |
-| `NEXT_PUBLIC_SITE_URL` | Your live site URL (for Stripe redirects) |
-
-## 6. After Deploy
-
-1. Test a quote and payment with Stripe test card: `4242 4242 4242 4242`
-2. Switch to **live** Stripe keys when ready for real payments
-3. Optional: Add a Stripe webhook later to automatically notify Jeannie/Cash when a payment succeeds
-
-## Contact Info Used
-
-- Jeannie: 281-917-0929
-- Cash: 281-917-0085
-- Domain: jeanlimo.com
-
----
-
-Built for Jean Limo LLC · Houston · Airport · Cruise · Chauffeur
+Jean Limo LLC · Jeannie 281-917-0929 · Cash 281-917-0085
