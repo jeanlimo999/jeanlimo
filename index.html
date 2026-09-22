@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Jean Limo — Pay</title>
+  <style>
+    :root {
+      --bg: #0d0d0d;
+      --card: #161616;
+      --gold: #e0b422;
+      --gold-dim: #8a7018;
+      --text: #f3f0e7;
+      --muted: #9a9588;
+      --field: #2a2a2a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      border-bottom: 1px solid #2a240f;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+    }
+    .logo {
+      width: 36px;
+      height: 36px;
+      border: 2px solid var(--gold);
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      color: var(--gold);
+      font-weight: 700;
+    }
+    .book {
+      background: var(--gold);
+      color: #1a1400;
+      border: 0;
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-weight: 700;
+    }
+    main { padding: 18px 16px 40px; }
+    .card {
+      max-width: 420px;
+      margin: 0 auto;
+      border: 1px solid var(--gold-dim);
+      border-radius: 16px;
+      padding: 22px 18px 24px;
+      background: var(--card);
+    }
+    h1 {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--muted);
+      margin: 0 0 8px;
+    }
+    .price {
+      font-size: 36px;
+      font-weight: 600;
+      color: var(--gold);
+      margin: 0 0 6px;
+    }
+    .sub {
+      font-size: 13px;
+      color: var(--muted);
+      margin: 0 0 18px;
+    }
+    label {
+      display: block;
+      font-size: 13px;
+      margin: 12px 0 6px;
+      color: var(--muted);
+    }
+    input {
+      width: 100%;
+      border: 0;
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 16px;
+      background: var(--field);
+      color: var(--text);
+    }
+    .tip-title { margin: 20px 0 10px; font-size: 15px; }
+    .tips {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .tip {
+      border: 1px solid var(--gold-dim);
+      background: transparent;
+      color: var(--text);
+      border-radius: 10px;
+      padding: 12px 8px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .tip strong { display: block; color: var(--gold); font-size: 15px; }
+    .tip.active {
+      background: var(--gold);
+      color: #1a1400;
+      border-color: var(--gold);
+    }
+    .tip.active strong { color: #1a1400; }
+    .totals {
+      margin-top: 16px;
+      font-size: 14px;
+      line-height: 1.8;
+    }
+    .row { display: flex; justify-content: space-between; }
+    .row.total { font-size: 18px; color: var(--gold); font-weight: 600; }
+    button.pay {
+      width: 100%;
+      margin-top: 18px;
+      border: 0;
+      border-radius: 10px;
+      padding: 14px;
+      background: var(--gold);
+      color: #1a1400;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .note {
+      margin-top: 14px;
+      font-size: 12px;
+      color: #7d786c;
+      text-align: center;
+    }
+    .back { display: block; text-align: center; margin-top: 12px; color: var(--muted); text-decoration: none; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="logo">J</div>
+      <div>JEAN LIMO<br /><span style="font-size:10px;letter-spacing:0.16em;color:#9a9588">LLC · HOUSTON</span></div>
+    </div>
+    <button class="book" type="button">Book Now</button>
+  </header>
+
+  <main>
+    <div class="card">
+      <h1>Business Sedan · Total due</h1>
+      <p class="price" id="displayTotal">$260.00</p>
+      <p class="sub">Outbound 28.8 mi $130 + return 27.0 mi $130</p>
+
+      <label>Total price *</label>
+      <input id="ridePrice" type="number" min="0" step="0.01" value="260.00" />
+
+      <label>Full Name *</label>
+      <input id="name" autocomplete="name" />
+
+      <label>Phone *</label>
+      <input id="phone" inputmode="tel" autocomplete="tel" />
+
+      <label>Email *</label>
+      <input id="email" type="email" autocomplete="email" />
+
+      <p class="tip-title">Add a tip (optional)</p>
+      <div class="tips">
+        <button class="tip active" data-pct="0" type="button"><strong>No tip</strong><span class="amt">$0.00</span></button>
+        <button class="tip" data-pct="10" type="button"><strong>10%</strong><span class="amt">$26.00</span></button>
+        <button class="tip" data-pct="15" type="button"><strong>15%</strong><span class="amt">$39.00</span></button>
+        <button class="tip" data-pct="20" type="button"><strong>20%</strong><span class="amt">$52.00</span></button>
+        <button class="tip" data-pct="25" type="button"><strong>25%</strong><span class="amt">$65.00</span></button>
+      </div>
+
+      <div class="totals">
+        <div class="row"><span>Ride</span><span id="rideLine">$260.00</span></div>
+        <div class="row"><span>Tip</span><span id="tipLine">$0.00</span></div>
+        <div class="row total"><span>Pay now</span><span id="totalLine">$260.00</span></div>
+      </div>
+
+      <button class="pay" id="payBtn" type="button">Pay Securely with Stripe</button>
+      <a class="back" href="#">← Back to vehicles</a>
+      <p class="note">Full refund if canceled at least 12 hours before the scheduled pickup time.<br />Tips are a percent of the total price.</p>
+    </div>
+  </main>
+
+  <script>
+    let tipPct = 0;
+
+    function money(n) {
+      return "$" + Number(n).toFixed(2);
+    }
+
+    function rideTotal() {
+      const n = parseFloat(document.getElementById("ridePrice").value);
+      return Number.isFinite(n) && n > 0 ? n : 0;
+    }
+
+    function tipAmount() {
+      return Math.round(rideTotal() * tipPct) / 100;
+    }
+
+    function render() {
+      const ride = rideTotal();
+      const tip = tipAmount();
+      const total = ride + tip;
+      document.querySelectorAll(".tip").forEach((btn) => {
+        const pct = Number(btn.dataset.pct);
+        btn.querySelector(".amt").textContent = money(Math.round(ride * pct) / 100);
+      });
+      document.getElementById("rideLine").textContent = money(ride);
+      document.getElementById("tipLine").textContent = money(tip);
+      document.getElementById("totalLine").textContent = money(total);
+      document.getElementById("displayTotal").textContent = money(total);
+    }
+
+    document.querySelectorAll(".tip").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".tip").forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        tipPct = Number(btn.dataset.pct);
+        render();
+      });
+    });
+
+    document.getElementById("ridePrice").addEventListener("input", render);
+    render();
+
+    document.getElementById("payBtn").addEventListener("click", async () => {
+      const ride = rideTotal();
+      const payload = {
+        name: document.getElementById("name").value,
+        phone: document.getElementById("phone").value,
+        email: document.getElementById("email").value,
+        rideCents: Math.round(ride * 100),
+        tipCents: Math.round(tipAmount() * 100),
+        tipPercent: tipPct,
+        description: "Outbound 28.8 mi $130 + return 27.0 mi $130",
+      };
+
+      try {
+        const res = await fetch("/.netlify/functions/create-checkout-session", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+        if (data.url) {
+          window.location = data.url;
+          return;
+        }
+        alert(data.error || JSON.stringify(payload, null, 2));
+      } catch (err) {
+        alert(
+          "Stripe function is not live yet.\n\nRide + tip:\n" +
+            JSON.stringify(payload, null, 2)
+        );
+      }
+    });
+  </script>
+</body>
+</html>

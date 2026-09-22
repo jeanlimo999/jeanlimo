@@ -1,45 +1,59 @@
-# Jean Limo — Date Change Email + Stripe Tips
+# Jean Limo — complete checkout + tips
 
-Files in this folder:
+This is a drop-in site you can upload to Netlify.
 
-- `change-request-email.txt` — copy/paste professional email
-- `tips.html` — tip buttons (10 / 15 / 20 / 25%) that match your booking page
-- `create-checkout-session.example.js` — Stripe Checkout with ride + tip line items
-- `tip-amounts.md` — dollar amounts for the $280 sedan quote
+## What is included
+
+- `index.html` — checkout card with 10 / 15 / 20 / 25% tips based on **total price**
+- `netlify/functions/create-checkout-session.js` — sends ride + tip to Stripe
+- `netlify.toml` — function settings
+- `change-request-email.txt` — booking change email
+- `package.json` — Stripe dependency for the function
 
 ## How tips work
 
-Stripe Checkout (`checkout.stripe.com`) has **no** built-in 10/15/20/25% tip picker.
+Tips use the **total price on the page** (example default $260).
 
-Do this instead:
+| Total | 10% | 15% | 20% | 25% |
+|-------|-----|-----|-----|-----|
+| $260  | $26 | $39 | $52 | $65 |
+| $230  | $23 | $34.50 | $46 | $57.50 |
+| $280  | $28 | $42 | $56 | $70 |
 
-1. Customer picks a tip on **your** site (`tips.html`).
-2. Your server creates a Checkout Session with:
-   - Ride: $280.00
-   - Tip: selected amount (or omit if $0)
-3. Redirect to Stripe. Total already includes the tip.
+Change the price in `index.html`:
 
-## $280 sedan amounts
+```html
+<input id="ridePrice" type="hidden" value="260.00" />
+```
 
-| Tip | Amount | Total |
-|-----|--------|-------|
-| No tip | $0.00 | $280.00 |
-| 10% | $28.00 | $308.00 |
-| 15% | $42.00 | $322.00 |
-| 20% | $56.00 | $336.00 |
-| 25% | $70.00 | $350.00 |
+Or type a new amount in the Total price field.
 
-For other quotes: `tip = Math.round(rideDollars * percent) / 100`
+## Upload to Netlify
 
-## No-code fallback (Payment Link)
+1. Unzip this folder.
+2. Go to [app.netlify.com](https://app.netlify.com).
+3. Sites → Add new site → Deploy manually.
+4. Drag the unzipped `jean-limo-complete` folder onto Netlify.
+5. Site settings → Environment variables → add:
 
-In Stripe Dashboard → Products, create:
+```
+STRIPE_SECRET_KEY = sk_live_...   (or sk_test_... for testing)
+SUCCESS_URL = https://YOUR-SITE.netlify.app/success.html
+CANCEL_URL  = https://YOUR-SITE.netlify.app/
+```
 
-- Tip 10% — $28.00
-- Tip 15% — $42.00
-- Tip 20% — $56.00
-- Tip 25% — $70.00
+6. Redeploy.
 
-Add them as **optional items** on that Payment Link. Only correct for this $280 fare.
+Without `STRIPE_SECRET_KEY`, the page still shows tip buttons. Pay will show the amounts instead of opening Stripe.
+
+## Add tips to your existing Jean Limo site
+
+Do not expect tips on `delicate-nougat-e2233ef.netlify.app` until you edit **that** project.
+
+1. Open the file that has **Pay Securely with Stripe**.
+2. Copy the tip block from `index.html` (search for `Add a tip`).
+3. Paste it between Email and the yellow Pay button.
+4. Copy the `<script>` at the bottom of `index.html`.
+5. Redeploy that project.
 
 Jean Limo LLC · Jeannie 281-917-0929 · Cash 281-917-0085
