@@ -1,3 +1,25 @@
+export function formatDateDisplay(value?: string) {
+  if (!value) return "";
+  const m = String(value).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (m) return `${m[2]}/${m[3]}/${m[1]}`;
+  return value;
+}
+
+export function formatTimeDisplay(value?: string) {
+  if (!value) return "";
+  const m = String(value).match(/^(\d{1,2}):(\d{2})/);
+  if (!m) return value;
+  let hour = parseInt(m[1], 10);
+  const min = m[2];
+  const ampm = hour >= 12 ? "PM" : "AM";
+  hour = hour % 12 === 0 ? 12 : hour % 12;
+  return `${hour}:${min} ${ampm}`;
+}
+
+export function formatDateTime(date?: string, time?: string) {
+  return [formatDateDisplay(date), formatTimeDisplay(time)].filter(Boolean).join("  ");
+}
+
 export function makeConfirmationNumber() {
   const d = new Date();
   const y = String(d.getFullYear()).slice(2);

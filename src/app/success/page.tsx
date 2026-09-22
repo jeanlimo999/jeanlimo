@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { formatDateTime } from "@/lib/booking";
 
 function SuccessInner() {
   const params = useSearchParams();
@@ -43,7 +44,7 @@ function SuccessInner() {
             <div className="text-xs uppercase tracking-wider text-zinc-400 mb-1">Confirmation number</div>
             <div className="text-2xl font-mono text-yellow-400">{booking.confirmation}</div>
             <div className="text-xs text-zinc-500 mt-3">
-              {booking.vehicle} · {booking.date} {booking.time}
+              {booking.vehicle} · {formatDateTime(booking.date, booking.time)}
             </div>
             {booking.amount != null && (
               <div className="text-sm text-zinc-300 mt-1">${booking.amount.toFixed(2)} paid</div>

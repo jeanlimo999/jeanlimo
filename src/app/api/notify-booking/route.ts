@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import nodemailer from "nodemailer";
+import { formatDateTime } from "@/lib/booking";
 
 const OWNER_EMAIL = process.env.BOOKING_NOTIFY_EMAIL || "cashtienlam@gmail.com";
 
@@ -12,7 +13,7 @@ function bookingText(b: any) {
     `Vehicle: ${b.vehicle || ""}`,
     `Type: ${b.type || ""}`,
     "",
-    `Date: ${b.date || ""}               Time: ${b.time || ""}`,
+    `Date / time: ${formatDateTime(b.date, b.time)}`,
     `Flight: ${b.flightNumber || ""}`,
     `Pickup address: ${b.pickup || ""}`,
     `Drop-off address: ${b.dropoff || ""}`,
@@ -22,7 +23,7 @@ function bookingText(b: any) {
     lines.push(
       "",
       "Return trip",
-      `Date: ${b.returnDate || ""}               Time: ${b.returnTime || ""}`,
+      `Date / time: ${formatDateTime(b.returnDate, b.returnTime)}`,
       `Return flight: ${b.returnFlightNumber || ""}`,
       `Return pickup: ${b.returnPickup || ""}`,
       `Return drop-off: ${b.returnDropoff || ""}`

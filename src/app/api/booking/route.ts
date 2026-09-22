@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import nodemailer from "nodemailer";
-import { bookingFromSession } from "@/lib/booking";
+import { bookingFromSession, formatDateTime } from "@/lib/booking";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-06-20",
@@ -54,6 +54,14 @@ export async function POST(req: NextRequest) {
     const notes = String(body.notes || "").slice(0, 500);
     const newDate = String(body.newDate || "").slice(0, 20);
     const newTime = String(body.newTime || "").slice(0, 10);
+    const pickup = String(body.pickup || "").slice(0, 400);
+    const dropoff = String(body.dropoff || "").slice(0, 400);
+    const flightNumber = String(body.flightNumber || "").slice(0, 20);
+    const returnDate = String(body.returnDate || "").slice(0, 20);
+    const returnTime = String(body.returnTime || "").slice(0, 10);
+    const returnPickup = String(body.returnPickup || "").slice(0, 400);
+    const returnDropoff = String(body.returnDropoff || "").slice(0, 400);
+    const returnFlightNumber = String(body.returnFlightNumber || "").slice(0, 20);
 
     if (!confirmation) {
       return NextResponse.json({ error: "Confirmation number required" }, { status: 400 });
@@ -81,6 +89,14 @@ export async function POST(req: NextRequest) {
         requestedTime: newTime || booking.time,
         date: action === "change" && newDate ? newDate : booking.date,
         time: action === "change" && newTime ? newTime : booking.time,
+        pickup: action === "change" && pickup ? pickup : booking.pickup,
+        dropoff: action === "change" && dropoff ? dropoff : booking.dropoff,
+        flightNumber: action === "change" ? flightNumber : booking.flightNumber,
+        returnDate: action === "change" ? returnDate || booking.returnDate : booking.returnDate,
+        returnTime: action === "change" ? returnTime || booking.returnTime : booking.returnTime,
+        returnPickup: action === "change" ? returnPickup || booking.returnPickup : booking.returnPickup,
+        returnDropoff: action === "change" ? returnDropoff || booking.returnDropoff : booking.returnDropoff,
+        returnFlightNumber: action === "change" ? returnFlightNumber : booking.returnFlightNumber,
         changeRequestedAt: new Date().toISOString(),
       },
     });
@@ -105,14 +121,16 @@ export async function POST(req: NextRequest) {
         `Email: ${booking.email}`,
         `Vehicle: ${booking.vehicle}`,
         "",
-        `Original date: ${booking.date || "n/a"}`,
-        `Original time: ${booking.time || "n/a"}`,
-        `Requested new date: ${newDate || "(not changed)"}`,
-        `Requested new time: ${newTime || "(not changed)"}`,
+        `Original: ${formatDateTime(booking.date, booking.time) || "n/a"}`,
+        `Requested new: ${formatDateTime(newDate || booking.date, newTime || booking.time)}`,
+        `Pickup: ${pickup || booking.pickup}`,
+        `Drop-off: ${dropoff || booking.dropoff}`,
+        `Flight: ${flightNumber || booking.flightNumber}`,
+        `Return: ${formatDateTime(returnDate || booking.returnDate, returnTime || booking.returnTime)}`,
+        `Return flight: ${returnFlightNumber || booking.returnFlightNumber}`,
+        `Return pickup: ${returnPickup || booking.returnPickup}`,
+        `Return drop-off: ${returnDropoff || booking.returnDropoff}`,
         `Notes: ${notes || "(none)"}`,
-        "",
-        `Pickup: ${booking.pickup}`,
-        `Drop-off: ${booking.dropoff}`,
         `Amount paid: ${booking.amount != null ? "$" + booking.amount.toFixed(2) : ""}`,
         "",
         "Jean Limo LLC · Jeannie 281-917-0929 · Cash 281-917-0085",
