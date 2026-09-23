@@ -51,6 +51,30 @@ export default function QuoteWidget() {
   const resultsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const q = new URLSearchParams(window.location.search);
+    if (q.get("vehicle") === "sedan" || q.get("vehicle") === "suv" || q.get("vehicle") === "sprinter") {
+      setVehicle(q.get("vehicle") as Vehicle);
+    }
+    if (q.get("type") === "hourly") setTripType("hourly");
+    if (q.get("pickup")) setPickup(q.get("pickup") || "");
+    if (q.get("dropoff")) setDropoff(q.get("dropoff") || "");
+    if (q.get("flight")) setFlightNumber(q.get("flight") || "");
+    if (q.get("return") === "1") setWantReturn(true);
+    if (q.get("returnPickup")) setReturnPickup(q.get("returnPickup") || "");
+    if (q.get("returnDropoff")) setReturnDropoff(q.get("returnDropoff") || "");
+    if (q.get("returnFlight")) setReturnFlightNumber(q.get("returnFlight") || "");
+    fetch("/api/account/me")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (!data?.client) return;
+        if (data.client.full_name) setName(data.client.full_name);
+        if (data.client.phone) setPhone(data.client.phone);
+        if (data.client.email) setEmail(data.client.email);
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
     if (quotes && resultsRef.current) {
       resultsRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
     }

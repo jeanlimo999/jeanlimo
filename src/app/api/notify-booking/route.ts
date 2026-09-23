@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 import { formatDateTime } from "@/lib/booking";
+import { saveWebsiteBooking } from "@/lib/portal";
 
 const OWNER_EMAIL = process.env.BOOKING_NOTIFY_EMAIL || "cashtienlam@gmail.com";
 
@@ -37,6 +38,7 @@ function bookingText(b: any) {
     "",
     "Jean Limo LLC",
     "Jeannie 281-917-0929 · Cash 281-917-0085",
+    "My trips: https://delicate-nougat-e223ef.netlify.app/account",
     "Manage booking: https://delicate-nougat-e223ef.netlify.app/manage"
   );
 
@@ -48,6 +50,12 @@ export async function POST(req: NextRequest) {
     const booking = await req.json();
     if (!booking?.confirmation) {
       return NextResponse.json({ error: "Missing booking" }, { status: 400 });
+    }
+
+    try {
+      await saveWebsiteBooking(booking);
+    } catch (err) {
+      console.error("Supabase save failed", err);
     }
 
     const user = process.env.GMAIL_USER;

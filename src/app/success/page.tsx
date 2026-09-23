@@ -55,13 +55,13 @@ function SuccessInner() {
         {error && <p className="text-sm text-red-400 mb-4">{error}</p>}
 
         <p className="text-sm text-zinc-500 mb-6">
-          Need to change or cancel? Use your confirmation number on the manage page, or call Jeannie at{" "}
+          Need to change or cancel? Open My trips, or call Jeannie at{" "}
           <a href="tel:+12819170929" className="text-yellow-500">281-917-0929</a>
         </p>
 
         <div className="flex flex-col gap-3">
-          <a href="/manage" className="px-6 py-3 border border-yellow-500/50 text-yellow-400 font-semibold rounded-lg">
-            Manage booking
+          <a href="/account" className="px-6 py-3 border border-yellow-500/50 text-yellow-400 font-semibold rounded-lg">
+            My trips
           </a>
           <a href="/" className="px-6 py-3 bg-yellow-500 hover:bg-yellow-400 text-zinc-900 font-semibold rounded-lg">
             Back to Home

@@ -24,8 +24,8 @@ export default function Home() {
               <a href="https://maps.app.goo.gl/aDG8UD4nBddGKKmk6" target="_blank" rel="noopener noreferrer" className="hover:text-yellow-400 transition">Reviews</a>
             </div>
             <div className="flex items-center gap-2 sm:gap-3">
-              <a href="/manage" className="text-xs sm:text-sm text-zinc-300 hover:text-yellow-400 px-2 whitespace-nowrap">
-                Manage booking
+              <a href="/account" className="text-xs sm:text-sm text-zinc-300 hover:text-yellow-400 px-2 whitespace-nowrap">
+                My trips
               </a>
               <a
                 href="#quote"
