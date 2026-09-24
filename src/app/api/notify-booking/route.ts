@@ -12,7 +12,13 @@ function bookingText(b: any) {
     `Phone: ${b.phone || ""}`,
     `Email: ${b.email || ""}`,
     `Vehicle: ${b.vehicle || ""}`,
-    `Type: ${b.type || ""}`,
+    `Type: ${
+      String(b.type || "").toLowerCase() === "hourly"
+        ? "hourly"
+        : b.returnDate || b.returnPickup || b.returnDropoff
+          ? "round trip"
+          : "transfer"
+    }`,
     "",
     `Date / time: ${formatDateTime(b.date, b.time)}`,
     `Flight: ${b.flightNumber || ""}`,
