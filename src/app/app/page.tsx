@@ -2,313 +2,203 @@
 
 import { useState } from "react";
 
-type Booking = {
-  confirmation?: string;
-  name?: string;
-  phone?: string;
-  email?: string;
-  vehicle?: string;
-  date?: string;
-  time?: string;
-  pickup?: string;
-  dropoff?: string;
-  flightNumber?: string;
-};
+export default function AppHome() {
+  const [screen, setScreen] = useState<"home" | "trips">("home");
 
-export default function CustomerApp() {
-  const [tab, setTab] = useState<"home" | "book" | "trips" | "account">("home");
+  if (screen === "trips") {
+    return (
+      <main className="min-h-screen bg-black text-white">
+        <div className="mx-auto min-h-screen max-w-md bg-[#070707] px-5 py-6">
+          <button
+            onClick={() => setScreen("home")}
+            className="mb-6 text-[#d8b56b]"
+          >
+            ← Back
+          </button>
 
-  const [confirmation, setConfirmation] = useState("");
-  const [phone, setPhone] = useState("");
-  const [booking, setBooking] = useState<Booking | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
+          <h1 className="text-2xl font-semibold">My Reservations</h1>
 
-  async function lookupBooking() {
-    setLoading(true);
-    setMessage("");
-    setBooking(null);
+          <p className="mt-2 text-sm text-zinc-400">
+            Enter your confirmation number and phone number to manage your ride.
+          </p>
 
-    try {
-      const res = await fetch(
-        `/api/booking?confirmation=${encodeURIComponent(
-          confirmation
-        )}&phone=${encodeURIComponent(phone)}`
-      );
+          <input
+            placeholder="Confirmation number"
+            className="mt-6 w-full rounded-2xl border border-white/10 bg-[#171717] px-4 py-4 outline-none"
+          />
 
-      const data = await res.json();
+          <input
+            placeholder="Phone number"
+            className="mt-3 w-full rounded-2xl border border-white/10 bg-[#171717] px-4 py-4 outline-none"
+          />
 
-      if (!res.ok) {
-        setMessage(data.error || "Booking not found.");
-        return;
-      }
-
-      setBooking(data.booking);
-    } catch {
-      setMessage("Unable to load booking.");
-    } finally {
-      setLoading(false);
-    }
+          <button className="mt-4 w-full rounded-2xl bg-gradient-to-r from-[#e3c17a] to-[#bc8d3d] px-4 py-4 font-semibold text-black">
+            Find Reservation
+          </button>
+        </div>
+      </main>
+    );
   }
 
   return (
-    <main className="min-h-screen bg-[#090909] text-white">
-      <div className="mx-auto min-h-screen max-w-md bg-[#0d0d0f]">
-        <header className="border-b border-white/10 px-5 py-5">
-          <div className="text-2xl font-semibold tracking-[0.18em] text-[#d4af63]">
-            JEAN LIMO
+    <main className="min-h-screen bg-[#141414] text-white">
+      <div className="mx-auto min-h-screen max-w-md overflow-hidden bg-black">
+        {/* HEADER */}
+        <header className="flex items-center justify-between px-6 pb-4 pt-6">
+          <button className="text-3xl text-zinc-300">☰</button>
+
+          <div className="text-center">
+            <div
+              className="text-[30px] tracking-[0.14em] text-[#e5c883]"
+              style={{ fontFamily: "Georgia, serif" }}
+            >
+              JEAN LIMO
+            </div>
+
+            <div className="mt-1 text-[11px] tracking-[0.5em] text-[#d4bb7d]">
+              HOUSTON
+            </div>
           </div>
-          <div className="mt-1 text-xs tracking-[0.25em] text-zinc-400">
-            HOUSTON
-          </div>
+
+          <button className="text-2xl text-zinc-300">♢</button>
         </header>
 
-        <div className="px-4 pb-24 pt-5">
-          {tab === "home" && (
-            <>
-              <section className="rounded-3xl border border-[#d4af63]/30 bg-gradient-to-b from-zinc-900 to-black p-6">
-                <div className="text-sm uppercase tracking-[0.18em] text-[#d4af63]">
-                  Premium Chauffeur Service
-                </div>
+        {/* HERO */}
+        <section className="relative mx-4 overflow-hidden rounded-[26px] border border-white/5">
+          <div
+            className="relative min-h-[560px] bg-cover bg-center"
+            style={{
+              backgroundImage: "url('/fleet/app-hero.png')",
+            }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/10 to-black/80" />
 
-                <h1 className="mt-3 text-4xl font-semibold leading-tight">
-                  More Than a Ride.
-                </h1>
-
-                <p className="mt-3 text-zinc-400">
-                  Airport transfers, hourly chauffeur service, Galveston cruise
-                  transportation, and private rides across Greater Houston.
-                </p>
-
-                <button
-                  onClick={() => setTab("book")}
-                  className="mt-6 w-full rounded-2xl bg-[#d4af63] px-4 py-4 font-semibold text-black"
-                >
-                  Book a Ride
-                </button>
-              </section>
-
-              <div className="mt-5 grid grid-cols-3 gap-3">
-                <ServiceCard icon="✈️" label="Airport Transfer" />
-                <ServiceCard icon="🕒" label="Hourly Service" />
-                <ServiceCard icon="🚢" label="Cruise Transfer" />
+            <div className="absolute left-6 top-8 z-10">
+              <div
+                className="text-[25px] leading-[1.05] tracking-[0.12em] text-[#d8bc78]"
+                style={{ fontFamily: "Georgia, serif" }}
+              >
+                MORE THAN
+                <br />A RIDE.
               </div>
 
+              <div
+                className="mt-4 text-[34px] leading-[1.08] text-white"
+                style={{ fontFamily: "Georgia, serif" }}
+              >
+                A HIGHER
+                <br />
+                STANDARD.
+              </div>
+
+              <div className="mt-5 text-[11px] tracking-[0.17em] text-zinc-300">
+                PROFESSIONAL CHAUFFEURS
+              </div>
+
+              <div className="mt-1 text-[11px] tracking-[0.17em] text-zinc-300">
+                EXCEPTIONAL EXPERIENCES
+              </div>
+            </div>
+
+            <div className="absolute bottom-5 left-4 right-4 z-10">
               <button
-                onClick={() => setTab("trips")}
-                className="mt-5 w-full rounded-2xl border border-white/10 bg-zinc-900 px-4 py-4 text-left"
+                onClick={() => (window.location.href = "/")}
+                className="flex w-full items-center justify-between rounded-[18px] bg-gradient-to-r from-[#f0cd83] to-[#c99a49] px-6 py-5 text-black shadow-lg"
               >
-                <div className="font-semibold">My Reservations</div>
-                <div className="mt-1 text-sm text-zinc-400">
-                  View, change, or cancel a booking
-                </div>
+                <span className="flex items-center gap-4 text-[21px] font-semibold">
+                  <span className="text-2xl">▣</span>
+                  Book a Ride
+                </span>
+
+                <span className="text-3xl font-light">›</span>
               </button>
-            </>
-          )}
+            </div>
+          </div>
+        </section>
 
-          {tab === "book" && (
-            <>
-              <h2 className="text-2xl font-semibold">Book a Ride</h2>
+        {/* MAIN BUTTONS */}
+        <section className="space-y-3 px-4 pt-4">
+          <button
+            onClick={() => setScreen("trips")}
+            className="flex w-full items-center justify-between rounded-[18px] border border-white/5 bg-[#181818] px-6 py-5"
+          >
+            <span className="flex items-center gap-5 text-[18px]">
+              <span className="text-2xl">▣</span>
+              My Reservations
+            </span>
 
-              <p className="mt-2 text-sm text-zinc-400">
-                Use your existing Jean Limo booking and pricing system.
-              </p>
+            <span className="text-3xl text-zinc-400">›</span>
+          </button>
 
-              <a
-                href="/"
-                className="mt-6 block w-full rounded-2xl bg-[#d4af63] px-4 py-4 text-center font-semibold text-black"
-              >
-                Get Instant Quote
-              </a>
-            </>
-          )}
+          <button
+            onClick={() => (window.location.href = "/account")}
+            className="flex w-full items-center justify-between rounded-[18px] border border-white/5 bg-[#181818] px-6 py-5"
+          >
+            <span className="flex items-center gap-5 text-[18px]">
+              <span className="text-2xl">↻</span>
+              Book Again
+            </span>
 
-          {tab === "trips" && (
-            <>
-              <h2 className="text-2xl font-semibold">My Reservations</h2>
+            <span className="text-3xl text-zinc-400">›</span>
+          </button>
 
-              <p className="mt-2 text-sm text-zinc-400">
-                Enter your confirmation number and phone number.
-              </p>
+          <a
+            href="sms:2819170085"
+            className="flex w-full items-center justify-between rounded-[18px] border border-white/5 bg-[#181818] px-6 py-5"
+          >
+            <span className="flex items-center gap-5 text-[18px]">
+              <span className="text-2xl">☎</span>
+              Contact Us
+            </span>
 
-              <div className="mt-5 space-y-3">
-                <input
-                  value={confirmation}
-                  onChange={(e) => setConfirmation(e.target.value)}
-                  placeholder="Confirmation number"
-                  className="w-full rounded-2xl border border-white/10 bg-zinc-900 px-4 py-4 outline-none"
-                />
+            <span className="text-3xl text-zinc-400">›</span>
+          </a>
+        </section>
 
-                <input
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="Phone number"
-                  type="tel"
-                  className="w-full rounded-2xl border border-white/10 bg-zinc-900 px-4 py-4 outline-none"
-                />
+        {/* SERVICE CARDS */}
+        <section className="grid grid-cols-3 gap-3 px-4 pt-4">
+          <button
+            onClick={() => (window.location.href = "/")}
+            className="rounded-[18px] border border-white/5 bg-[#171717] px-2 py-5 text-center"
+          >
+            <div className="text-3xl text-[#d8b56b]">✈</div>
+            <div className="mt-3 text-sm leading-5">
+              Airport
+              <br />
+              Transfer
+            </div>
+          </button>
 
-                <button
-                  onClick={lookupBooking}
-                  disabled={loading || !confirmation}
-                  className="w-full rounded-2xl bg-[#d4af63] px-4 py-4 font-semibold text-black disabled:opacity-50"
-                >
-                  {loading ? "Looking up..." : "Find Reservation"}
-                </button>
-              </div>
+          <button
+            onClick={() => (window.location.href = "/")}
+            className="rounded-[18px] border border-white/5 bg-[#171717] px-2 py-5 text-center"
+          >
+            <div className="text-3xl text-[#d8b56b]">◷</div>
+            <div className="mt-3 text-sm leading-5">
+              Hourly
+              <br />
+              Service
+            </div>
+          </button>
 
-              {message && (
-                <div className="mt-4 rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-200">
-                  {message}
-                </div>
-              )}
+          <button
+            onClick={() => (window.location.href = "/")}
+            className="rounded-[18px] border border-white/5 bg-[#171717] px-2 py-5 text-center"
+          >
+            <div className="text-3xl text-[#d8b56b]">⚓</div>
+            <div className="mt-3 text-sm leading-5">
+              Galveston
+              <br />
+              Cruise Transfer
+            </div>
+          </button>
+        </section>
 
-              {booking && (
-                <div className="mt-5 rounded-3xl border border-[#d4af63]/30 bg-zinc-900 p-5">
-                  <div className="flex items-center justify-between">
-                    <div className="text-lg font-semibold">Confirmed Ride</div>
-
-                    <div className="rounded-full bg-green-500/15 px-3 py-1 text-xs font-semibold text-green-300">
-                      CONFIRMED
-                    </div>
-                  </div>
-
-                  <div className="mt-5 space-y-3 text-sm">
-                    <Detail label="Confirmation" value={booking.confirmation} />
-                    <Detail label="Passenger" value={booking.name} />
-                    <Detail label="Vehicle" value={booking.vehicle} />
-                    <Detail label="Date" value={booking.date} />
-                    <Detail label="Time" value={booking.time} />
-                    <Detail label="Pickup" value={booking.pickup} />
-                    <Detail label="Drop-off" value={booking.dropoff} />
-                    <Detail label="Flight" value={booking.flightNumber} />
-                  </div>
-
-                  <a
-                    href={`/manage?confirmation=${encodeURIComponent(
-                      booking.confirmation || confirmation
-                    )}`}
-                    className="mt-5 block w-full rounded-2xl border border-[#d4af63] px-4 py-4 text-center font-semibold text-[#d4af63]"
-                  >
-                    Request Change or Cancel
-                  </a>
-                </div>
-              )}
-            </>
-          )}
-
-          {tab === "account" && (
-            <>
-              <h2 className="text-2xl font-semibold">My Account</h2>
-
-              <div className="mt-5 rounded-3xl border border-white/10 bg-zinc-900 p-5">
-                <div className="text-lg font-semibold">
-                  Jean Limo Customer Account
-                </div>
-
-                <p className="mt-2 text-sm leading-6 text-zinc-400">
-                  Customer login and saved passenger information can be added
-                  here next.
-                </p>
-              </div>
-
-              <a
-                href="/account"
-                className="mt-4 block w-full rounded-2xl border border-white/10 bg-zinc-900 px-4 py-4 text-center"
-              >
-                Open Existing Account Page
-              </a>
-            </>
-          )}
-        </div>
-
-        <nav className="fixed bottom-0 left-1/2 grid w-full max-w-md -translate-x-1/2 grid-cols-4 border-t border-white/10 bg-black/95 px-2 py-2 backdrop-blur">
-          <NavButton
-            active={tab === "home"}
-            icon="⌂"
-            label="Home"
-            onClick={() => setTab("home")}
-          />
-
-          <NavButton
-            active={tab === "book"}
-            icon="🚘"
-            label="Book"
-            onClick={() => setTab("book")}
-          />
-
-          <NavButton
-            active={tab === "trips"}
-            icon="▣"
-            label="Trips"
-            onClick={() => setTab("trips")}
-          />
-
-          <NavButton
-            active={tab === "account"}
-            icon="◉"
-            label="Account"
-            onClick={() => setTab("account")}
-          />
-        </nav>
+        <footer className="px-4 pb-6 pt-5 text-center text-[10px] tracking-[0.28em] text-[#9b8354]">
+          HOUSTON &nbsp; | &nbsp; AIRPORTS &nbsp; | &nbsp; CORPORATE &nbsp; |
+          &nbsp; SPECIAL EVENTS
+        </footer>
       </div>
     </main>
-  );
-}
-
-function ServiceCard({
-  icon,
-  label,
-}: {
-  icon: string;
-  label: string;
-}) {
-  return (
-    <div className="rounded-2xl border border-white/10 bg-zinc-900 p-4 text-center">
-      <div className="text-2xl">{icon}</div>
-      <div className="mt-2 text-xs text-zinc-300">{label}</div>
-    </div>
-  );
-}
-
-function Detail({
-  label,
-  value,
-}: {
-  label: string;
-  value?: string;
-}) {
-  if (!value) return null;
-
-  return (
-    <div>
-      <div className="text-xs uppercase tracking-wide text-zinc-500">
-        {label}
-      </div>
-      <div className="mt-1 text-white">{value}</div>
-    </div>
-  );
-}
-
-function NavButton({
-  active,
-  icon,
-  label,
-  onClick,
-}: {
-  active: boolean;
-  icon: string;
-  label: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={`rounded-xl px-2 py-2 text-xs ${
-        active ? "text-[#d4af63]" : "text-zinc-500"
-      }`}
-    >
-      <div className="text-lg">{icon}</div>
-      <div className="mt-1">{label}</div>
-    </button>
   );
 }
