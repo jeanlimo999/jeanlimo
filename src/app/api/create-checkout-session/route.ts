@@ -54,7 +54,13 @@ export async function POST(req: NextRequest) {
           price_data: {
             currency: "usd",
             product_data: {
-              name: `Jean Limo – ${vehicle?.toUpperCase() || "Vehicle"} (${type || "oneway"})`,
+              name: `Jean Limo – ${vehicle?.toUpperCase() || "Vehicle"} (${
+                String(type).toLowerCase() === "hourly"
+                  ? "hourly"
+                  : (returnDate || returnPickup)
+                    ? "round trip"
+                    : "transfer"
+              })`,
               description: breakdown || "Private chauffeur service",
             },
             unit_amount: Math.round(Number(price) * 100), // cents
