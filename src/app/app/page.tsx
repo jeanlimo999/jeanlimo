@@ -1,411 +1,314 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { formatDateTime } from "@/lib/booking";
-
-type Client = {
-  id: string;
-  email: string;
-  phone: string;
-  full_name: string;
-  company: string;
-};
-
-type Address = { id: string; label: string; address: string };
+import { useState } from "react";
 
 type Booking = {
-  confirmation: string;
-  status: string;
-  vehicle: string;
-  trip_type: string;
-  ride_date: string;
-  ride_time: string;
-  pickup: string;
-  dropoff: string;
-  flight_number: string;
-  return_date: string;
-  return_time: string;
-  return_pickup: string;
-  return_dropoff: string;
-  return_flight_number: string;
-  amount_cents: number;
+  confirmation?: string;
+  name?: string;
+  phone?: string;
+  email?: string;
+  vehicle?: string;
+  date?: string;
+  time?: string;
+  pickup?: string;
+  dropoff?: string;
+  flightNumber?: string;
 };
 
-const vehicleLabel: Record<string, string> = {
-  sedan: "Business Sedan",
-  suv: "Business SUV",
-  sprinter: "Sprinter Van",
-};
+export default function CustomerApp() {
+  const [tab, setTab] = useState<"home" | "book" | "trips" | "account">("home");
 
-function money(cents: number) {
-  return `$${(Number(cents || 0) / 100).toFixed(2)}`;
-}
-
-function rebookHref(b: Booking) {
-  const q = new URLSearchParams();
-  q.set("rebook", b.confirmation);
-  if (b.vehicle) q.set("vehicle", b.vehicle);
-  if (b.trip_type) q.set("type", b.trip_type);
-  if (b.pickup) q.set("pickup", b.pickup);
-  if (b.dropoff) q.set("dropoff", b.dropoff);
-  if (b.flight_number) q.set("flight", b.flight_number);
-  if (b.return_date || b.return_pickup || b.return_dropoff) q.set("return", "1");
-  if (b.return_pickup) q.set("returnPickup", b.return_pickup);
-  if (b.return_dropoff) q.set("returnDropoff", b.return_dropoff);
-  if (b.return_flight_number) q.set("returnFlight", b.return_flight_number);
-  return `/?${q.toString()}#quote`;
-}
-
-const fieldCls = "w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm";
-
-function TripCard({
-  b,
-  canEdit,
-  onChanged,
-}: {
-  b: Booking;
-  canEdit: boolean;
-  onChanged: () => void;
-}) {
-  const [open, setOpen] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const [msg, setMsg] = useState("");
-  const [err, setErr] = useState("");
-  const [form, setForm] = useState({
-    newDate: b.ride_date || "",
-    newTime: b.ride_time || "",
-    pickup: b.pickup || "",
-    dropoff: b.dropoff || "",
-    flightNumber: b.flight_number || "",
-    returnDate: b.return_date || "",
-    returnTime: b.return_time || "",
-    returnPickup: b.return_pickup || "",
-    returnDropoff: b.return_dropoff || "",
-    returnFlightNumber: b.return_flight_number || "",
-    notes: "",
-  });
-
-  const send = async (action: "change" | "cancel") => {
-    setBusy(true);
-    setErr("");
-    setMsg("");
-    try {
-      const res = await fetch("/api/account/booking-request", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ confirmation: b.confirmation, action, ...form }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Request failed");
-      setMsg(data.message || "Saved");
-      setOpen(false);
-      onChanged();
-    } catch (e: any) {
-      setErr(e.message);
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  return (
-    <article className="bg-zinc-900 border border-yellow-600/20 rounded-2xl p-5">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <div className="text-[11px] tracking-[0.14em] uppercase text-yellow-500">{b.confirmation}</div>
-          <div className="mt-1 font-medium">{formatDateTime(b.ride_date, b.ride_time) || "Date TBD"}</div>
-          <p className="text-sm text-zinc-400 mt-2">{b.pickup || "—"}</p>
-          <p className="text-sm text-zinc-400">→ {b.dropoff || "—"}</p>
-          <p className="text-xs text-zinc-500 mt-2">
-            {vehicleLabel[b.vehicle] || b.vehicle} · {b.trip_type} · {money(b.amount_cents)}
-          </p>
-        </div>
-        <span className="text-[11px] uppercase tracking-wide border border-zinc-700 text-zinc-300 rounded-full px-2 py-1">
-          {b.status}
-        </span>
-      </div>
-      <div className="flex flex-wrap gap-2 mt-4">
-        <a href={rebookHref(b)} className="px-3 py-2 rounded-lg bg-yellow-500 text-zinc-900 text-sm font-semibold">
-          Rebook
-        </a>
-        {canEdit && (
-          <button
-            onClick={() => setOpen(!open)}
-            className="px-3 py-2 rounded-lg border border-yellow-600/30 text-yellow-400 text-sm"
-          >
-            {open ? "Close" : "Change / cancel"}
-          </button>
-        )}
-      </div>
-      {msg && <p className="text-sm text-green-400 mt-3">{msg}</p>}
-      {err && <p className="text-sm text-red-400 mt-3">{err}</p>}
-      {open && canEdit && (
-        <div className="mt-4 grid gap-2">
-          <label className="text-xs text-zinc-400">Date</label>
-          <input type="date" className={fieldCls} value={form.newDate} onChange={(e) => setForm({ ...form, newDate: e.target.value })} />
-          <label className="text-xs text-zinc-400">Time (HH:MM)</label>
-          <input className={fieldCls} value={form.newTime} onChange={(e) => setForm({ ...form, newTime: e.target.value })} placeholder="22:00" />
-          <label className="text-xs text-zinc-400">Pickup</label>
-          <input className={fieldCls} value={form.pickup} onChange={(e) => setForm({ ...form, pickup: e.target.value })} />
-          <label className="text-xs text-zinc-400">Drop-off</label>
-          <input className={fieldCls} value={form.dropoff} onChange={(e) => setForm({ ...form, dropoff: e.target.value })} />
-          <label className="text-xs text-zinc-400">Flight</label>
-          <input className={fieldCls} value={form.flightNumber} onChange={(e) => setForm({ ...form, flightNumber: e.target.value })} />
-          <label className="text-xs text-zinc-400">Return date</label>
-          <input type="date" className={fieldCls} value={form.returnDate} onChange={(e) => setForm({ ...form, returnDate: e.target.value })} />
-          <label className="text-xs text-zinc-400">Return time</label>
-          <input className={fieldCls} value={form.returnTime} onChange={(e) => setForm({ ...form, returnTime: e.target.value })} />
-          <label className="text-xs text-zinc-400">Notes for dispatch</label>
-          <input className={fieldCls} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
-          <p className="text-xs text-zinc-500">Refunds and time changes may still be confirmed by phone: 281-917-0929</p>
-          <div className="flex flex-wrap gap-2 mt-1">
-            <button disabled={busy} onClick={() => send("change")} className="px-3 py-2 rounded-lg bg-yellow-500 text-zinc-900 text-sm font-semibold">
-              {busy ? "Saving…" : "Save changes"}
-            </button>
-            <button disabled={busy} onClick={() => send("cancel")} className="px-3 py-2 rounded-lg border border-red-500/40 text-red-400 text-sm">
-              Request cancel
-            </button>
-          </div>
-        </div>
-      )}
-    </article>
-  );
-}
-
-export default function AccountPage() {
-  const [email, setEmail] = useState("");
+  const [confirmation, setConfirmation] = useState("");
   const [phone, setPhone] = useState("");
-  const [client, setClient] = useState<Client | null>(null);
-  const [addresses, setAddresses] = useState<Address[]>([]);
-  const [upcoming, setUpcoming] = useState<Booking[]>([]);
-  const [history, setHistory] = useState<Booking[]>([]);
-  const [tab, setTab] = useState<"trips" | "profile">("trips");
-  const [error, setError] = useState("");
+  const [booking, setBooking] = useState<Booking | null>(null);
   const [loading, setLoading] = useState(false);
-  const [label, setLabel] = useState("");
-  const [address, setAddress] = useState("");
+  const [message, setMessage] = useState("");
 
-  const load = async () => {
-    const me = await fetch("/api/account/me");
-    if (!me.ok) {
-      setClient(null);
-      return;
-    }
-    const data = await me.json();
-    setClient(data.client);
-    setAddresses(data.addresses || []);
-    const trips = await fetch("/api/account/bookings");
-    if (trips.ok) {
-      const t = await trips.json();
-      setUpcoming(t.upcoming || []);
-      setHistory(t.history || []);
-    }
-  };
-
-  useEffect(() => {
-    load().catch(() => {});
-  }, []);
-
-  const signIn = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
+  async function lookupBooking() {
     setLoading(true);
+    setMessage("");
+    setBooking(null);
+
     try {
-      const res = await fetch("/api/account/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, phone }),
-      });
+      const res = await fetch(
+        `/api/booking?confirmation=${encodeURIComponent(
+          confirmation
+        )}&phone=${encodeURIComponent(phone)}`
+      );
+
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Could not sign in");
-      await load();
-    } catch (err: any) {
-      setError(err.message);
+
+      if (!res.ok) {
+        setMessage(data.error || "Booking not found.");
+        return;
+      }
+
+      setBooking(data.booking);
+    } catch {
+      setMessage("Unable to load booking.");
     } finally {
       setLoading(false);
     }
-  };
-
-  const saveProfile = async () => {
-    setError("");
-    const res = await fetch("/api/account/profile", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(client),
-    });
-    const data = await res.json();
-    if (!res.ok) setError(data.error || "Could not save");
-    else setClient(data.client);
-  };
-
-  const addPlace = async () => {
-    const res = await fetch("/api/account/addresses", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ label, address }),
-    });
-    const data = await res.json();
-    if (!res.ok) return setError(data.error || "Could not save place");
-    setAddresses((prev) => [...prev, data.address]);
-    setLabel("");
-    setAddress("");
-  };
-
-  const signOut = async () => {
-    await fetch("/api/account/logout", { method: "POST" });
-    setClient(null);
-    setUpcoming([]);
-    setHistory([]);
-  };
+  }
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100">
-      <nav className="border-b border-yellow-600/20">
-        <div className="max-w-3xl mx-auto px-4 h-16 flex items-center justify-between">
-          <a href="/" className="font-serif tracking-wide text-yellow-400">
+    <main className="min-h-screen bg-[#090909] text-white">
+      <div className="mx-auto min-h-screen max-w-md bg-[#0d0d0f]">
+        <header className="border-b border-white/10 px-5 py-5">
+          <div className="text-2xl font-semibold tracking-[0.18em] text-[#d4af63]">
             JEAN LIMO
-          </a>
-          <div className="flex items-center gap-3 text-sm">
-            <a href="/#quote" className="text-zinc-300 hover:text-yellow-400">
-              Book
-            </a>
-            {client && (
-              <button onClick={signOut} className="text-zinc-400 hover:text-yellow-400">
-                Sign out
-              </button>
-            )}
           </div>
-        </div>
-      </nav>
+          <div className="mt-1 text-xs tracking-[0.25em] text-zinc-400">
+            HOUSTON
+          </div>
+        </header>
 
-      <main className="max-w-3xl mx-auto px-4 py-10">
-        {!client ? (
-          <form onSubmit={signIn} className="max-w-md bg-zinc-900 border border-yellow-600/20 rounded-2xl p-6">
-            <p className="text-[11px] tracking-[0.16em] uppercase text-yellow-500 mb-2">My trips</p>
-            <h1 className="font-serif text-3xl mb-2">Sign in</h1>
-            <p className="text-sm text-zinc-400 mb-6">
-              Use the email and phone from your Jean Limo website booking.
-            </p>
-            <label className="block text-xs text-zinc-400 mb-1">Email</label>
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full mb-4 bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-sm"
-            />
-            <label className="block text-xs text-zinc-400 mb-1">Phone (last 4 digits is enough)</label>
-            <input
-              type="tel"
-              required
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              className="w-full mb-4 bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-sm"
-              placeholder="281-917-0085"
-            />
-            {error && <p className="text-sm text-red-400 mb-3">{error}</p>}
-            <button
-              disabled={loading}
-              className="w-full py-3 bg-yellow-500 hover:bg-yellow-400 text-zinc-900 font-semibold rounded-lg"
-            >
-              {loading ? "Looking up…" : "Open my trips"}
-            </button>
-          </form>
-        ) : (
-          <>
-            <h1 className="font-serif text-3xl">Hi {client.full_name?.split(" ")[0] || "there"}</h1>
-            <p className="text-zinc-400 mt-1 mb-6">{client.email}</p>
-            <div className="flex gap-2 mb-6">
+        <div className="px-4 pb-24 pt-5">
+          {tab === "home" && (
+            <>
+              <section className="rounded-3xl border border-[#d4af63]/30 bg-gradient-to-b from-zinc-900 to-black p-6">
+                <div className="text-sm uppercase tracking-[0.18em] text-[#d4af63]">
+                  Premium Chauffeur Service
+                </div>
+
+                <h1 className="mt-3 text-4xl font-semibold leading-tight">
+                  More Than a Ride.
+                </h1>
+
+                <p className="mt-3 text-zinc-400">
+                  Airport transfers, hourly chauffeur service, Galveston cruise
+                  transportation, and private rides across Greater Houston.
+                </p>
+
+                <button
+                  onClick={() => setTab("book")}
+                  className="mt-6 w-full rounded-2xl bg-[#d4af63] px-4 py-4 font-semibold text-black"
+                >
+                  Book a Ride
+                </button>
+              </section>
+
+              <div className="mt-5 grid grid-cols-3 gap-3">
+                <ServiceCard icon="✈️" label="Airport Transfer" />
+                <ServiceCard icon="🕒" label="Hourly Service" />
+                <ServiceCard icon="🚢" label="Cruise Transfer" />
+              </div>
+
               <button
                 onClick={() => setTab("trips")}
-                className={`px-4 py-2 rounded-full text-sm ${tab === "trips" ? "bg-yellow-500 text-zinc-900" : "border border-zinc-700 text-zinc-300"}`}
+                className="mt-5 w-full rounded-2xl border border-white/10 bg-zinc-900 px-4 py-4 text-left"
               >
-                Trips
+                <div className="font-semibold">My Reservations</div>
+                <div className="mt-1 text-sm text-zinc-400">
+                  View, change, or cancel a booking
+                </div>
               </button>
-              <button
-                onClick={() => setTab("profile")}
-                className={`px-4 py-2 rounded-full text-sm ${tab === "profile" ? "bg-yellow-500 text-zinc-900" : "border border-zinc-700 text-zinc-300"}`}
+            </>
+          )}
+
+          {tab === "book" && (
+            <>
+              <h2 className="text-2xl font-semibold">Book a Ride</h2>
+
+              <p className="mt-2 text-sm text-zinc-400">
+                Use your existing Jean Limo booking and pricing system.
+              </p>
+
+              <a
+                href="/"
+                className="mt-6 block w-full rounded-2xl bg-[#d4af63] px-4 py-4 text-center font-semibold text-black"
               >
-                Profile
-              </button>
-            </div>
+                Get Instant Quote
+              </a>
+            </>
+          )}
 
-            {error && <p className="text-sm text-red-400 mb-3">{error}</p>}
+          {tab === "trips" && (
+            <>
+              <h2 className="text-2xl font-semibold">My Reservations</h2>
 
-            {tab === "trips" && (
-              <>
-                <p className="text-[11px] tracking-[0.14em] uppercase text-yellow-500 mb-3">Upcoming</p>
-                <div className="grid gap-3 mb-8">
-                  {upcoming.length ? (
-                    upcoming.map((b) => <TripCard key={b.confirmation} b={b} canEdit onChanged={load} />)
-                  ) : (
-                    <p className="text-zinc-500 text-sm">No upcoming Jean Limo trips.</p>
-                  )}
-                </div>
-                <p className="text-[11px] tracking-[0.14em] uppercase text-yellow-500 mb-3">Previous</p>
-                <div className="grid gap-3">
-                  {history.length ? (
-                    history.map((b) => <TripCard key={b.confirmation} b={b} canEdit={false} onChanged={load} />)
-                  ) : (
-                    <p className="text-zinc-500 text-sm">No past trips yet.</p>
-                  )}
-                </div>
-              </>
-            )}
+              <p className="mt-2 text-sm text-zinc-400">
+                Enter your confirmation number and phone number.
+              </p>
 
-            {tab === "profile" && (
-              <div className="grid gap-4">
-                <div className="bg-zinc-900 border border-yellow-600/20 rounded-2xl p-5">
-                  <label className="block text-xs text-zinc-400 mb-1">Full name</label>
-                  <input
-                    value={client.full_name || ""}
-                    onChange={(e) => setClient({ ...client, full_name: e.target.value })}
-                    className="w-full mb-3 bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-sm"
-                  />
-                  <label className="block text-xs text-zinc-400 mb-1">Phone</label>
-                  <input
-                    value={client.phone || ""}
-                    onChange={(e) => setClient({ ...client, phone: e.target.value })}
-                    className="w-full mb-3 bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-sm"
-                  />
-                  <label className="block text-xs text-zinc-400 mb-1">Company</label>
-                  <input
-                    value={client.company || ""}
-                    onChange={(e) => setClient({ ...client, company: e.target.value })}
-                    className="w-full mb-3 bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-sm"
-                  />
-                  <button onClick={saveProfile} className="px-4 py-2 bg-yellow-500 text-zinc-900 font-semibold rounded-lg text-sm">
-                    Save profile
-                  </button>
-                </div>
-                <div className="bg-zinc-900 border border-yellow-600/20 rounded-2xl p-5">
-                  <p className="text-[11px] tracking-[0.14em] uppercase text-yellow-500 mb-3">Saved places</p>
-                  {addresses.map((a) => (
-                    <div key={a.id} className="py-2 border-t border-zinc-800 first:border-0">
-                      <div className="font-medium text-sm">{a.label}</div>
-                      <div className="text-sm text-zinc-400">{a.address}</div>
-                    </div>
-                  ))}
-                  <input
-                    value={label}
-                    onChange={(e) => setLabel(e.target.value)}
-                    placeholder="Label — Home, Office, IAH"
-                    className="w-full mt-3 bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-sm"
-                  />
-                  <input
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                    placeholder="Full address"
-                    className="w-full mt-2 bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-sm"
-                  />
-                  <button onClick={addPlace} className="mt-3 px-4 py-2 border border-yellow-600/30 text-yellow-400 rounded-lg text-sm">
-                    Save place
-                  </button>
-                </div>
+              <div className="mt-5 space-y-3">
+                <input
+                  value={confirmation}
+                  onChange={(e) => setConfirmation(e.target.value)}
+                  placeholder="Confirmation number"
+                  className="w-full rounded-2xl border border-white/10 bg-zinc-900 px-4 py-4 outline-none"
+                />
+
+                <input
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="Phone number"
+                  type="tel"
+                  className="w-full rounded-2xl border border-white/10 bg-zinc-900 px-4 py-4 outline-none"
+                />
+
+                <button
+                  onClick={lookupBooking}
+                  disabled={loading || !confirmation}
+                  className="w-full rounded-2xl bg-[#d4af63] px-4 py-4 font-semibold text-black disabled:opacity-50"
+                >
+                  {loading ? "Looking up..." : "Find Reservation"}
+                </button>
               </div>
-            )}
-          </>
-        )}
-      </main>
+
+              {message && (
+                <div className="mt-4 rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-200">
+                  {message}
+                </div>
+              )}
+
+              {booking && (
+                <div className="mt-5 rounded-3xl border border-[#d4af63]/30 bg-zinc-900 p-5">
+                  <div className="flex items-center justify-between">
+                    <div className="text-lg font-semibold">Confirmed Ride</div>
+
+                    <div className="rounded-full bg-green-500/15 px-3 py-1 text-xs font-semibold text-green-300">
+                      CONFIRMED
+                    </div>
+                  </div>
+
+                  <div className="mt-5 space-y-3 text-sm">
+                    <Detail label="Confirmation" value={booking.confirmation} />
+                    <Detail label="Passenger" value={booking.name} />
+                    <Detail label="Vehicle" value={booking.vehicle} />
+                    <Detail label="Date" value={booking.date} />
+                    <Detail label="Time" value={booking.time} />
+                    <Detail label="Pickup" value={booking.pickup} />
+                    <Detail label="Drop-off" value={booking.dropoff} />
+                    <Detail label="Flight" value={booking.flightNumber} />
+                  </div>
+
+                  <a
+                    href={`/manage?confirmation=${encodeURIComponent(
+                      booking.confirmation || confirmation
+                    )}`}
+                    className="mt-5 block w-full rounded-2xl border border-[#d4af63] px-4 py-4 text-center font-semibold text-[#d4af63]"
+                  >
+                    Request Change or Cancel
+                  </a>
+                </div>
+              )}
+            </>
+          )}
+
+          {tab === "account" && (
+            <>
+              <h2 className="text-2xl font-semibold">My Account</h2>
+
+              <div className="mt-5 rounded-3xl border border-white/10 bg-zinc-900 p-5">
+                <div className="text-lg font-semibold">
+                  Jean Limo Customer Account
+                </div>
+
+                <p className="mt-2 text-sm leading-6 text-zinc-400">
+                  Customer login and saved passenger information can be added
+                  here next.
+                </p>
+              </div>
+
+              <a
+                href="/account"
+                className="mt-4 block w-full rounded-2xl border border-white/10 bg-zinc-900 px-4 py-4 text-center"
+              >
+                Open Existing Account Page
+              </a>
+            </>
+          )}
+        </div>
+
+        <nav className="fixed bottom-0 left-1/2 grid w-full max-w-md -translate-x-1/2 grid-cols-4 border-t border-white/10 bg-black/95 px-2 py-2 backdrop-blur">
+          <NavButton
+            active={tab === "home"}
+            icon="⌂"
+            label="Home"
+            onClick={() => setTab("home")}
+          />
+
+          <NavButton
+            active={tab === "book"}
+            icon="🚘"
+            label="Book"
+            onClick={() => setTab("book")}
+          />
+
+          <NavButton
+            active={tab === "trips"}
+            icon="▣"
+            label="Trips"
+            onClick={() => setTab("trips")}
+          />
+
+          <NavButton
+            active={tab === "account"}
+            icon="◉"
+            label="Account"
+            onClick={() => setTab("account")}
+          />
+        </nav>
+      </div>
+    </main>
+  );
+}
+
+function ServiceCard({
+  icon,
+  label,
+}: {
+  icon: string;
+  label: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-zinc-900 p-4 text-center">
+      <div className="text-2xl">{icon}</div>
+      <div className="mt-2 text-xs text-zinc-300">{label}</div>
     </div>
+  );
+}
+
+function Detail({
+  label,
+  value,
+}: {
+  label: string;
+  value?: string;
+}) {
+  if (!value) return null;
+
+  return (
+    <div>
+      <div className="text-xs uppercase tracking-wide text-zinc-500">
+        {label}
+      </div>
+      <div className="mt-1 text-white">{value}</div>
+    </div>
+  );
+}
+
+function NavButton({
+  active,
+  icon,
+  label,
+  onClick,
+}: {
+  active: boolean;
+  icon: string;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`rounded-xl px-2 py-2 text-xs ${
+        active ? "text-[#d4af63]" : "text-zinc-500"
+      }`}
+    >
+      <div className="text-lg">{icon}</div>
+      <div className="mt-1">{label}</div>
+    </button>
   );
 }
