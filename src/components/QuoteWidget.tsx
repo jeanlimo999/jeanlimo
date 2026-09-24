@@ -286,7 +286,7 @@ export default function QuoteWidget() {
           </>
         )}
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+        <div className="grid grid-cols-2 md:grid-cols-[minmax(9.5rem,1.5fr)_minmax(8rem,1.3fr)_5.6rem_5.6rem] gap-2">
           <div>
             <label className="block text-[11px] text-zinc-400 mb-1 uppercase tracking-wider">Date</label>
             <input
