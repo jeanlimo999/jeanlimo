@@ -48,6 +48,8 @@ export default function QuoteWidget() {
   const [error, setError] = useState("");
   const [tipPct, setTipPct] = useState(0);
   const [customTip, setCustomTip] = useState("");
+  const [passengers, setPassengers] = useState(1);
+  const [luggage, setLuggage] = useState(1);
   const resultsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -183,6 +185,8 @@ export default function QuoteWidget() {
           passengerName: name,
           passengerPhone: phone,
           passengerEmail: email,
+          passengers,
+          luggage,
           date,
           time,
           pickup,
@@ -221,7 +225,7 @@ export default function QuoteWidget() {
             tripType === "oneway" ? "bg-yellow-500 text-zinc-900" : "text-zinc-300 hover:text-white"
           }`}
         >
-          One-Way
+          Transfer
         </button>
         <button
           type="button"
@@ -282,32 +286,48 @@ export default function QuoteWidget() {
           </>
         )}
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
           <div>
-            <label className="block text-xs text-zinc-400 mb-1.5 uppercase tracking-wider">Date</label>
+            <label className="block text-[11px] text-zinc-400 mb-1 uppercase tracking-wider">Date</label>
             <input
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
               required
-              className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-yellow-500"
+              className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-2 py-2.5 text-sm focus:outline-none focus:border-yellow-500"
             />
           </div>
           <div>
-            <label className="block text-xs text-zinc-400 mb-1.5 uppercase tracking-wider">Pickup Time</label>
+            <label className="block text-[11px] text-zinc-400 mb-1 uppercase tracking-wider">Time</label>
             <select
               value={time}
               onChange={(e) => setTime(e.target.value)}
               required
-              className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-yellow-500"
+              className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-2 py-2.5 text-sm focus:outline-none focus:border-yellow-500"
             >
-              <option value="">Select time</option>
+              <option value="">Time</option>
               {TIME_OPTIONS.map((t) => (
                 <option key={t.value} value={t.value}>
                   {t.label}
                 </option>
               ))}
             </select>
+          </div>
+          <div>
+            <label className="block text-[11px] text-zinc-400 mb-1 uppercase tracking-wider">Passengers</label>
+            <div className="flex items-center justify-between bg-zinc-800 border border-zinc-700 rounded-lg px-2 py-1.5">
+              <button type="button" onClick={() => setPassengers((n) => Math.max(1, n - 1))} className="w-7 h-7 rounded-full border border-zinc-600 text-zinc-200">−</button>
+              <span className="text-sm font-medium w-6 text-center">{passengers}</span>
+              <button type="button" onClick={() => setPassengers((n) => Math.min(14, n + 1))} className="w-7 h-7 rounded-full border border-zinc-600 text-zinc-200">+</button>
+            </div>
+          </div>
+          <div>
+            <label className="block text-[11px] text-zinc-400 mb-1 uppercase tracking-wider">Luggage</label>
+            <div className="flex items-center justify-between bg-zinc-800 border border-zinc-700 rounded-lg px-2 py-1.5">
+              <button type="button" onClick={() => setLuggage((n) => Math.max(0, n - 1))} className="w-7 h-7 rounded-full border border-zinc-600 text-zinc-200">−</button>
+              <span className="text-sm font-medium w-6 text-center">{luggage}</span>
+              <button type="button" onClick={() => setLuggage((n) => Math.min(20, n + 1))} className="w-7 h-7 rounded-full border border-zinc-600 text-zinc-200">+</button>
+            </div>
           </div>
         </div>
 
