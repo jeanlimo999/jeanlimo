@@ -18,6 +18,7 @@ function loadGoogleMaps(apiKey: string): Promise<void> {
     const existing = document.querySelector("script[data-jean-limo-maps]");
     if (existing) {
       existing.addEventListener("load", () => resolve());
+      existing.addListener?.("error", () => reject(new Error("Google Maps failed to load")));
       existing.addEventListener("error", () => reject(new Error("Google Maps failed to load")));
       return;
     }
@@ -40,39 +41,34 @@ export default function AddressInput({
   value,
   onChange,
   placeholder,
+  className,
 }: {
   id: string;
   value: string;
   onChange: (value: string) => void;
   placeholder: string;
+  className?: string;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
 
   useEffect(() => {
     if (!apiKey || !inputRef.current) return;
-
     let autocomplete: any;
-
     loadGoogleMaps(apiKey)
       .then(() => {
         if (!inputRef.current || !window.google?.maps?.places) return;
-
         autocomplete = new window.google.maps.places.Autocomplete(inputRef.current, {
           fields: ["formatted_address", "name", "geometry"],
           componentRestrictions: { country: ["us"] },
         });
-
         autocomplete.addListener("place_changed", () => {
           const place = autocomplete.getPlace();
           const address = place?.formatted_address || place?.name || inputRef.current?.value || "";
           onChange(address);
         });
       })
-      .catch((err) => {
-        console.error(err);
-      });
-
+      .catch((err) => console.error(err));
     return () => {
       if (autocomplete && window.google?.maps?.event) {
         window.google.maps.event.clearInstanceListeners(autocomplete);
@@ -89,7 +85,7 @@ export default function AddressInput({
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
       autoComplete="off"
-      className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-yellow-500"
+      className={className || "w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-yellow-500"}
     />
   );
 }
