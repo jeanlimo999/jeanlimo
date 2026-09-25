@@ -23,6 +23,13 @@ export default function ClientApp() {
   const [pax, setPax] = useState("2");
   const [bags, setBags] = useState("2");
   const [flight, setFlight] = useState("");
+  const [hours, setHours] = useState("3");
+  const [guestName, setGuestName] = useState("");
+  const [guestPhone, setGuestPhone] = useState("");
+  const [guestEmail, setGuestEmail] = useState("");
+  const [miles, setMiles] = useState<number | null>(null);
+  const [price, setPrice] = useState<number | null>(null);
+  const [breakdown, setBreakdown] = useState("");
   const [email, setEmail] = useState("");
   const [phone4, setPhone4] = useState("");
   const [me, setMe] = useState<any>(null);
@@ -49,15 +56,97 @@ export default function ClientApp() {
       .then((d) => {
         if (d?.client) {
           setMe(d.client);
+          setGuestName(d.client.full_name || "");
+          setGuestEmail(d.client.email || "");
+          setGuestPhone(d.client.phone || "");
           loadBookings().catch(() => {});
         }
       })
       .catch(() => {});
   }, []);
 
-  function goPay() {
-    const q = new URLSearchParams({ pickup, dropoff, date, time, vehicle, pax, bags, kind, flight });
-    window.location.href = "/?" + q.toString();
+  useEffect(() => {
+    const t = setTimeout(() => { refreshQuote().catch(() => {}); }, 500);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pickup, dropoff, vehicle, kind, hours]);
+
+  async function refreshQuote() {
+    setErr("");
+    if (kind === "hourly") {
+      const res = await fetch("/api/quote", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "hourly", vehicle, hours: Number(hours) || 2 }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setPrice(null); setBreakdown(""); return; }
+      setMiles(null);
+      setPrice(data.price);
+      setBreakdown(data.breakdown || "");
+      return;
+    }
+    if (!pickup.trim() || !dropoff.trim()) { setPrice(null); setMiles(null); setBreakdown(""); return; }
+    const distRes = await fetch("/api/distance", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pickup, dropoff }),
+    });
+    const dist = await distRes.json();
+    if (!distRes.ok) {
+      setPrice(null); setMiles(null);
+      setBreakdown("");
+      setErr(dist.error || "Could not calculate miles");
+      return;
+    }
+    setMiles(dist.miles);
+    const qRes = await fetch("/api/quote", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "oneway", vehicle, miles: dist.miles }),
+    });
+    const q = await qRes.json();
+    if (!qRes.ok) { setPrice(null); setErr(q.error || "Quote failed"); return; }
+    setPrice(q.price);
+    setBreakdown(q.breakdown || `${dist.miles} miles`);
+  }
+
+  async function goPay() {
+    setErr("");
+    if (!price) { setErr("Enter pickup and dropoff so we can price the ride."); return; }
+    if (!guestName.trim() || !guestPhone.trim() || !guestEmail.includes("@")) {
+      setErr("Name, phone, and email are required for checkout.");
+      return;
+    }
+    if (!date || !time) { setErr("Choose a date and time."); return; }
+    setLoading(true);
+    try {
+      const res = await fetch("/api/create-checkout-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          price,
+          vehicle,
+          type: kind === "hourly" ? "hourly" : "oneway",
+          breakdown,
+          passengerName: guestName,
+          passengerPhone: guestPhone,
+          passengerEmail: guestEmail,
+          date,
+          time,
+          pickup,
+          dropoff,
+          flightNumber: flight,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.url) throw new Error(data.error || "Could not start checkout");
+      window.location.href = data.url;
+    } catch (e: any) {
+      setErr(e.message);
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function login() {
@@ -156,6 +245,10 @@ export default function ClientApp() {
               <AddressInput id="app-pickup" value={pickup} onChange={setPickup} placeholder="Address or airport" className={fieldClass} /></label>
             <label className="mt-3 block"><span className="text-xs uppercase tracking-[0.14em] text-zinc-500">Dropoff</span>
               <AddressInput id="app-dropoff" value={dropoff} onChange={setDropoff} placeholder="Address" className={fieldClass} /></label>
+            {kind === "hourly" && (
+              <label className="mt-3 block"><span className="text-xs uppercase tracking-[0.14em] text-zinc-500">Hours</span>
+                <select value={hours} onChange={(e)=>setHours(e.target.value)} className={fieldClass}>{[2,3,4,5,6,8,10].map(n=><option key={n} value={n}>{n} hours</option>)}</select></label>
+            )}
             <Field label="Date" value={date} onChange={setDate} type="date" />
             <Field label="Time" value={time} onChange={setTime} type="time" />
             <Field label="Flight" value={flight} onChange={(v)=>setFlight(v.toUpperCase())} placeholder="UA1234" />
@@ -171,7 +264,22 @@ export default function ClientApp() {
                 <img src={v.img} alt="" className="h-12 w-16 rounded-lg object-cover" />
                 <div><div className="font-medium">{v.name}</div><div className="text-xs text-zinc-400">{v.detail}</div></div>
               </button>))}</div>
-            <button onClick={goPay} className="mt-6 w-full rounded-2xl bg-gradient-to-r from-[#e3c17a] to-[#bc8d3d] py-4 font-semibold text-black">Continue to Payment →</button>
+
+            {(miles != null || price != null) && (
+              <div className="mt-4 rounded-2xl border border-[#d8b56b]/30 bg-[#16120c] p-4">
+                {miles != null && <div className="text-sm text-zinc-300">{miles} miles</div>}
+                {price != null && <div className="mt-1 text-2xl font-semibold text-[#e8d3b0]">${price.toFixed(2)}</div>}
+                {breakdown && <div className="mt-1 text-xs text-zinc-400">{breakdown}</div>}
+              </div>
+            )}
+
+            <Field label="Full name" value={guestName} onChange={setGuestName} placeholder="Name on the reservation" />
+            <Field label="Phone" value={guestPhone} onChange={setGuestPhone} placeholder="2815550100" />
+            <Field label="Email" value={guestEmail} onChange={setGuestEmail} placeholder="you@email.com" />
+            {err && <p className="mt-3 text-sm text-red-400">{err}</p>}
+            <button onClick={goPay} className="mt-6 w-full rounded-2xl bg-gradient-to-r from-[#e3c17a] to-[#bc8d3d] py-4 font-semibold text-black">
+              {loading ? "Opening checkout…" : price != null ? `Pay $${price.toFixed(2)}` : "Continue to Payment →"}
+            </button>
           </div>
         )}
 
@@ -199,14 +307,12 @@ export default function ClientApp() {
                   <button onClick={()=>setTab("past")} className={`rounded-xl py-3 text-sm ${tab==="past"?"bg-gradient-to-r from-[#e3c17a] to-[#bc8d3d] text-black":"text-zinc-300"}`}>Past ({history.length})</button>
                 </div>
                 {msg && <p className="mt-3 text-sm text-[#7DCFB6]">{msg}</p>}
-                {(tab==="upcoming"?upcoming:history).length === 0 && <p className="mt-6 text-sm text-zinc-500">No {tab} rides.</p>}
                 {(tab==="upcoming"?upcoming:history).map((b:any)=>(
                   <div key={b.id || b.confirmation} className="mt-3 rounded-2xl border border-white/10 bg-[#141414] p-4">
                     <div className="text-xs tracking-[0.14em] text-[#d8b56b]">{b.confirmation} · {b.status}</div>
                     <div className="mt-1 text-sm">{b.ride_date} {b.ride_time}</div>
                     <div className="mt-1 text-sm text-zinc-400">{b.pickup}</div>
                     <div className="text-sm text-zinc-400">→ {b.dropoff}</div>
-                    <div className="mt-2 text-sm">{b.driverName ? "Chauffeur: "+b.driverName : "Driver will be assigned"}</div>
                     {tab==="upcoming" && b.status !== "cancelled" && (
                       <div className="mt-3 grid grid-cols-2 gap-2">
                         <button onClick={()=>setEdit({...b})} className="rounded-xl border border-[#d8b56b]/40 py-2 text-sm text-[#e8d3b0]">Change</button>
@@ -214,16 +320,7 @@ export default function ClientApp() {
                       </div>
                     )}
                     {tab==="past" && (
-                      <button
-                        onClick={() => {
-                          setPickup(b.pickup || "");
-                          setDropoff(b.dropoff || "");
-                          setVehicle(b.vehicle || "sedan");
-                          setFlight(b.flight_number || "");
-                          setScreen("book");
-                        }}
-                        className="mt-3 w-full rounded-xl border border-[#d8b56b]/40 py-2 text-sm text-[#e8d3b0]"
-                      >Book again</button>
+                      <button onClick={() => { setPickup(b.pickup || ""); setDropoff(b.dropoff || ""); setVehicle(b.vehicle || "sedan"); setFlight(b.flight_number || ""); setScreen("book"); }} className="mt-3 w-full rounded-xl border border-[#d8b56b]/40 py-2 text-sm text-[#e8d3b0]">Book again</button>
                     )}
                   </div>
                 ))}
@@ -232,26 +329,15 @@ export default function ClientApp() {
             {me && edit && (
               <div className="mt-4">
                 <button onClick={()=>setEdit(null)} className="mb-3 text-sm text-[#d8b56b]">← Back to list</button>
-                <div className="text-xs text-[#d8b56b]">{edit.confirmation}</div>
                 {edit._cancel ? (
-                  <>
-                    <p className="mt-3 text-sm text-zinc-300">Request cancel for this ride? Dispatch will confirm any refund by phone.</p>
-                    <button onClick={()=>requestChange("cancel")} className="mt-4 w-full rounded-2xl border border-red-500/40 py-4 text-red-300">{loading?"Sending…":"Request cancel"}</button>
-                  </>
+                  <button onClick={()=>requestChange("cancel")} className="mt-4 w-full rounded-2xl border border-red-500/40 py-4 text-red-300">{loading?"Sending…":"Request cancel"}</button>
                 ) : (
                   <>
                     <Field label="Date" value={edit.ride_date||""} onChange={(v)=>setEdit({...edit, ride_date:v})} type="date" />
                     <Field label="Time" value={edit.ride_time||""} onChange={(v)=>setEdit({...edit, ride_time:v})} type="time" />
-                    <label className="mt-3 block"><span className="text-xs uppercase tracking-[0.14em] text-zinc-500">Pickup</span>
-                      <AddressInput id="edit-pu" value={edit.pickup||""} onChange={(v)=>setEdit({...edit, pickup:v})} placeholder="Pickup" className={fieldClass} /></label>
-                    <label className="mt-3 block"><span className="text-xs uppercase tracking-[0.14em] text-zinc-500">Dropoff</span>
-                      <AddressInput id="edit-do" value={edit.dropoff||""} onChange={(v)=>setEdit({...edit, dropoff:v})} placeholder="Dropoff" className={fieldClass} /></label>
-                    <Field label="Flight" value={edit.flight_number||""} onChange={(v)=>setEdit({...edit, flight_number:v.toUpperCase()})} />
-                    <Field label="Notes" value={edit.notes||""} onChange={(v)=>setEdit({...edit, notes:v})} />
                     <button onClick={()=>requestChange("change")} className="mt-4 w-full rounded-2xl bg-gradient-to-r from-[#e3c17a] to-[#bc8d3d] py-4 font-semibold text-black">{loading?"Sending…":"Save change request"}</button>
                   </>
                 )}
-                {err && <p className="mt-3 text-sm text-red-400">{err}</p>}
               </div>
             )}
           </div>
@@ -261,8 +347,7 @@ export default function ClientApp() {
           <div className="px-5 pt-6">
             <Back onClick={() => setScreen("home")} />
             <h1 className="text-2xl font-semibold">My Account</h1>
-            <button onClick={()=>setScreen("trips")} className="mt-6 w-full rounded-2xl border border-white/10 py-4">My Reservations</button>
-            <a href="tel:+12819170085" className="mt-3 block text-center text-[#d8b56b]">Call 281-917-0085</a>
+            <a href="tel:+12819170085" className="mt-6 block text-center text-[#d8b56b]">Call 281-917-0085</a>
           </div>
         )}
       </div>
