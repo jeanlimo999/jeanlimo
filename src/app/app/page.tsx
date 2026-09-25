@@ -22,20 +22,33 @@ export default function ClientApp() {
   const [bags, setBags] = useState("2");
   const [conf, setConf] = useState("");
   const [phone, setPhone] = useState("");
+  const [found, setFound] = useState<any>(null);
+  const [err, setErr] = useState("");
+  const [loading, setLoading] = useState(false);
 
   function goPay() {
-    const q = new URLSearchParams({
-      pickup, dropoff, date, time, vehicle, pax, bags, kind,
-    });
+    const q = new URLSearchParams({ pickup, dropoff, date, time, vehicle, pax, bags, kind });
     window.location.href = "/?" + q.toString();
   }
 
-  function findTrip() {
-    const q = new URLSearchParams({
-      confirmation: conf.trim().toUpperCase(),
-      phone: phone.replace(/\D/g, "").slice(-4),
-    });
-    window.location.href = "/manage?" + q.toString();
+  async function findTrip() {
+    setErr("");
+    setFound(null);
+    setLoading(true);
+    try {
+      const q = new URLSearchParams({
+        confirmation: conf.trim().toUpperCase(),
+        phone: phone.replace(/\D/g, "").slice(-4),
+      });
+      const res = await fetch("/api/booking?" + q.toString());
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Not found");
+      setFound(data.booking);
+    } catch (e: any) {
+      setErr(e.message || "Not found");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -51,53 +64,32 @@ export default function ClientApp() {
               </div>
               <button onClick={() => setScreen("trips")} className="text-xl text-zinc-300">☳</button>
             </header>
-
             <section className="relative mx-4 overflow-hidden rounded-[26px]">
-              <div
-                className="relative min-h-[420px] bg-cover bg-center"
-                style={{ backgroundImage: "url('/fleet/sedan.jpg')" }}
-              >
+              <div className="relative min-h-[420px] bg-cover bg-center" style={{ backgroundImage: "url('/fleet/sedan.jpg')" }}>
                 <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/20 to-black/85" />
                 <div className="absolute left-6 top-8 z-10">
-                  <div className="font-serif text-[22px] leading-tight tracking-[0.12em] text-[#d8bc78]">
-                    MORE THAN<br />A RIDE.
-                  </div>
-                  <div className="mt-3 font-serif text-[30px] leading-tight text-white">
-                    A HIGHER<br />STANDARD.
-                  </div>
-                  <div className="mt-4 text-[11px] tracking-[0.16em] text-zinc-300">
-                    PROFESSIONAL CHAUFFEURS<br />EXCEPTIONAL EXPERIENCES
-                  </div>
+                  <div className="font-serif text-[22px] leading-tight tracking-[0.12em] text-[#d8bc78]">MORE THAN<br />A RIDE.</div>
+                  <div className="mt-3 font-serif text-[30px] leading-tight text-white">A HIGHER<br />STANDARD.</div>
                 </div>
                 <div className="absolute bottom-5 left-4 right-4 z-10">
-                  <button
-                    onClick={() => setScreen("book")}
-                    className="flex w-full items-center justify-between rounded-[18px] bg-gradient-to-r from-[#f0cd83] to-[#c99a49] px-6 py-4 font-semibold text-black"
-                  >
-                    <span>Book a Ride</span>
-                    <span>›</span>
+                  <button onClick={() => setScreen("book")} className="flex w-full items-center justify-between rounded-[18px] bg-gradient-to-r from-[#f0cd83] to-[#c99a49] px-6 py-4 font-semibold text-black">
+                    <span>Book a Ride</span><span>›</span>
                   </button>
                 </div>
               </div>
             </section>
-
             <section className="space-y-3 px-4 pt-4">
-              <Row icon="☷" label="My Reservations" onClick={() => setScreen("trips")} />
-              <Row icon="↻" label="Book Again" onClick={() => setScreen("book")} />
+              <Row label="My Reservations" onClick={() => setScreen("trips")} />
+              <Row label="Book Again" onClick={() => setScreen("book")} />
               <a href="tel:+12819170085" className="flex w-full items-center justify-between rounded-[18px] border border-white/5 bg-[#181818] px-6 py-5">
-                <span className="text-[18px]">Contact Us</span>
-                <span className="text-3xl text-zinc-400">›</span>
+                <span className="text-[18px]">Contact Us</span><span className="text-3xl text-zinc-400">›</span>
               </a>
             </section>
-
             <section className="grid grid-cols-3 gap-3 px-4 pt-4">
               <Tile label="Airport Transfer" onClick={() => { setKind("transfer"); setPickup("IAH - George Bush Intercontinental Airport"); setScreen("book"); }} />
               <Tile label="Hourly Service" onClick={() => { setKind("hourly"); setScreen("book"); }} />
               <Tile label="Galveston Cruise" onClick={() => { setKind("transfer"); setDropoff("Port of Galveston"); setScreen("book"); }} />
             </section>
-            <footer className="px-4 pb-6 pt-5 text-center text-[10px] tracking-[0.28em] text-[#9b8354]">
-              HOUSTON | AIRPORTS | CORPORATE | SPECIAL EVENTS
-            </footer>
           </>
         )}
 
@@ -122,28 +114,53 @@ export default function ClientApp() {
               {vehicles.map((v) => (
                 <button key={v.id} onClick={() => setVehicle(v.id)} className={`flex w-full items-center gap-3 rounded-2xl border px-3 py-3 text-left ${vehicle===v.id?"border-[#d8b56b]":"border-white/10"}`}>
                   <img src={v.img} alt="" className="h-12 w-16 rounded-lg object-cover" />
-                  <div>
-                    <div className="font-medium">{v.name}</div>
-                    <div className="text-xs text-zinc-400">{v.detail}</div>
-                  </div>
+                  <div><div className="font-medium">{v.name}</div><div className="text-xs text-zinc-400">{v.detail}</div></div>
                 </button>
               ))}
             </div>
-            <button onClick={goPay} className="mt-6 w-full rounded-2xl bg-gradient-to-r from-[#e3c17a] to-[#bc8d3d] py-4 font-semibold text-black">
-              Continue to Payment →
-            </button>
+            <button onClick={goPay} className="mt-6 w-full rounded-2xl bg-gradient-to-r from-[#e3c17a] to-[#bc8d3d] py-4 font-semibold text-black">Continue to Payment →</button>
           </div>
         )}
 
         {screen === "trips" && (
           <div className="px-5 pt-6">
-            <Back onClick={() => setScreen("home")} />
+            <Back onClick={() => { setFound(null); setScreen("home"); }} />
             <h1 className="text-2xl font-semibold">My Reservations</h1>
-            <p className="mt-2 text-sm text-zinc-400">Enter your confirmation and the last 4 digits of the phone used at checkout.</p>
-            <input value={conf} onChange={(e)=>setConf(e.target.value)} placeholder="JL-260921-XXXX" className="mt-6 w-full rounded-2xl border border-white/10 bg-[#171717] px-4 py-4 outline-none" />
-            <input value={phone} onChange={(e)=>setPhone(e.target.value)} placeholder="Last 4 of phone" className="mt-3 w-full rounded-2xl border border-white/10 bg-[#171717] px-4 py-4 outline-none" />
-            <button onClick={findTrip} className="mt-4 w-full rounded-2xl bg-gradient-to-r from-[#e3c17a] to-[#bc8d3d] py-4 font-semibold text-black">Find Reservation</button>
-            <a href="tel:+12819170085" className="mt-4 block text-center text-sm text-[#d8b56b]">Or call dispatch 281-917-0085</a>
+            {!found && (
+              <>
+                <p className="mt-2 text-sm text-zinc-400">Confirmation and last 4 digits of the checkout phone.</p>
+                <input value={conf} onChange={(e)=>setConf(e.target.value)} placeholder="JL-260921-XXXX" className="mt-6 w-full rounded-2xl border border-white/10 bg-[#171717] px-4 py-4 outline-none" />
+                <input value={phone} onChange={(e)=>setPhone(e.target.value)} placeholder="Last 4 of phone" className="mt-3 w-full rounded-2xl border border-white/10 bg-[#171717] px-4 py-4 outline-none" />
+                <button onClick={findTrip} className="mt-4 w-full rounded-2xl bg-gradient-to-r from-[#e3c17a] to-[#bc8d3d] py-4 font-semibold text-black">{loading ? "Looking up…" : "Find Reservation"}</button>
+                {err && <p className="mt-3 text-sm text-red-400">{err}</p>}
+              </>
+            )}
+            {found && (
+              <div className="mt-6 rounded-2xl border border-white/10 bg-[#141414] p-4">
+                <div className="text-xs tracking-[0.16em] text-[#d8b56b]">{found.confirmation}</div>
+                <div className="mt-1 text-lg font-medium">{found.name}</div>
+                <div className="mt-3 text-sm text-zinc-300">{found.date} {found.time}</div>
+                <div className="mt-1 text-sm text-zinc-400">{found.pickup}</div>
+                <div className="text-sm text-zinc-400">→ {found.dropoff}</div>
+                <div className="mt-4 rounded-2xl border border-[#d8b56b]/30 bg-[#16120c] p-4">
+                  <div className="text-xs uppercase tracking-[0.16em] text-[#d8b56b]">Your chauffeur</div>
+                  {found.driverName ? (
+                    <>
+                      <div className="mt-2 text-xl">{found.driverName}</div>
+                      {found.driverPhone && <a href={"tel:+1"+String(found.driverPhone).replace(/\D/g,"")} className="mt-1 block text-sm text-[#e8d3b0]">{found.driverPhone}</a>}
+                      {found.tripStatus && <div className="mt-1 text-xs text-zinc-400">{String(found.tripStatus).replaceAll("_"," ")}</div>}
+                    </>
+                  ) : (
+                    <div className="mt-2 text-sm text-zinc-300">Driver will be assigned by dispatch. You will see the name here after assignment.</div>
+                  )}
+                </div>
+                {found.driverPhone && (
+                  <a href={"sms:+1"+String(found.driverPhone).replace(/\D/g,"")} className="mt-3 block rounded-2xl bg-gradient-to-r from-[#e3c17a] to-[#bc8d3d] py-3 text-center font-semibold text-black">Message driver</a>
+                )}
+                <a href={"/manage?confirmation="+encodeURIComponent(found.confirmation||"")} className="mt-3 block text-center text-sm text-[#d8b56b]">Request change</a>
+                <button onClick={()=>setFound(null)} className="mt-3 w-full text-sm text-zinc-500">Look up another</button>
+              </div>
+            )}
           </div>
         )}
 
@@ -151,14 +168,7 @@ export default function ClientApp() {
           <div className="px-5 pt-6">
             <Back onClick={() => setScreen("home")} />
             <h1 className="text-2xl font-semibold">My Account</h1>
-            <div className="mt-6 rounded-2xl border border-[#d8b56b]/30 bg-[#16120c] p-4 text-sm text-[#e8d3b0]">Preferred Customer — thank you for riding with Jean Limo.</div>
-            <div className="mt-4 divide-y divide-white/10 rounded-2xl border border-white/10 bg-[#141414]">
-              <LinkRow href="/account" label="Passenger Information" />
-              <LinkRow href="/account" label="Payment Methods" />
-              <LinkRow href="/manage" label="My Reservations" />
-            </div>
-            <p className="mt-6 text-xs uppercase tracking-[0.16em] text-zinc-500">Support &amp; Contact</p>
-            <div className="mt-2 divide-y divide-white/10 rounded-2xl border border-white/10 bg-[#141414]">
+            <div className="mt-6 divide-y divide-white/10 rounded-2xl border border-white/10 bg-[#141414]">
               <LinkRow href="tel:+12819170085" label="Call Us" extra="281-917-0085" />
               <LinkRow href="sms:+12819170085" label="Text Us" extra="281-917-0085" />
               <LinkRow href="mailto:info@jeanlimo.com" label="Email Us" extra="info@jeanlimo.com" />
@@ -173,20 +183,15 @@ export default function ClientApp() {
 function Back({ onClick }: { onClick: () => void }) {
   return <button onClick={onClick} className="mb-5 text-[#d8b56b]">← Back</button>;
 }
-function Row({ label, onClick }: { icon?: string; label: string; onClick: () => void }) {
+function Row({ label, onClick }: { label: string; onClick: () => void }) {
   return (
     <button onClick={onClick} className="flex w-full items-center justify-between rounded-[18px] border border-white/5 bg-[#181818] px-6 py-5">
-      <span className="text-[18px]">{label}</span>
-      <span className="text-3xl text-zinc-400">›</span>
+      <span className="text-[18px]">{label}</span><span className="text-3xl text-zinc-400">›</span>
     </button>
   );
 }
 function Tile({ label, onClick }: { label: string; onClick: () => void }) {
-  return (
-    <button onClick={onClick} className="rounded-[18px] border border-white/5 bg-[#171717] px-2 py-5 text-center text-sm leading-5">
-      {label}
-    </button>
-  );
+  return <button onClick={onClick} className="rounded-[18px] border border-white/5 bg-[#171717] px-2 py-5 text-center text-sm leading-5">{label}</button>;
 }
 function Field({ label, value, onChange, placeholder, type="text" }: { label: string; value: string; onChange: (v: string)=>void; placeholder?: string; type?: string }) {
   return (
@@ -199,8 +204,7 @@ function Field({ label, value, onChange, placeholder, type="text" }: { label: st
 function LinkRow({ href, label, extra }: { href: string; label: string; extra?: string }) {
   return (
     <a href={href} className="flex items-center justify-between px-4 py-4 text-sm">
-      <span>{label}</span>
-      <span className="text-zinc-500">{extra || "›"}</span>
+      <span>{label}</span><span className="text-zinc-500">{extra || "›"}</span>
     </a>
   );
 }
