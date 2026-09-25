@@ -43,14 +43,33 @@
     .roster { margin-top:16px; }
     .roster-row { display:flex; align-items:center; gap:10px; padding:10px 0; border-top:1px solid var(--line); }
     .roster-row img, .ph { width:40px; height:40px; border-radius:50%; object-fit:cover; background:#2a2418; display:flex; align-items:center; justify-content:center; color:var(--gold2); font-size:14px; }
+    #gate { min-height:100dvh; }
+    #board { display:none; }
+    #board.on { display:block; }
   </style>
 </head>
 <body>
+  <div id="gate">
+    <div class="top"><div class="brand">JEAN LIMO DISPATCH</div></div>
+    <div class="hero">
+      <div class="eyebrow">Owner login</div>
+      <h1>Dispatch PIN</h1>
+      <p class="sub">Only Cash or Jeannie can open the live board.</p>
+    </div>
+    <div class="scroll">
+      <label>PIN</label>
+      <input id="gate-pin" type="password" inputmode="numeric" placeholder="4-digit PIN" />
+      <button class="primary" type="button" id="gate-go">Open dispatch</button>
+    </div>
+  </div>
+
+  <div id="board">
   <div class="top">
     <div class="brand">JEAN LIMO DISPATCH</div>
     <div>
       <button class="ghost" type="button" id="refresh">Refresh</button>
       <button class="ghost" type="button" id="add-driver">Add driver</button>
+      <button class="ghost" type="button" id="signout">Sign out</button>
     </div>
   </div>
   <div class="hero">
@@ -68,6 +87,7 @@
   </div>
   <div id="map"></div>
   <div class="scroll" id="list"></div>
+  </div>
 
   <div class="sheet" id="driver-sheet">
     <div class="panel">
@@ -106,10 +126,37 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="config.js"></script>
+  <script src="config.js?v=pin1"></script>
   <script src="jl.js?v=photo2"></script>
   <script>
     const toast = (m) => { const t = document.getElementById("toast"); t.textContent = m; t.classList.add("show"); setTimeout(() => t.classList.remove("show"), 2200); };
+    function allowedPins() {
+      const c = (window.JL_CONFIG || {});
+      const pins = [c.dispatchPin, ...(c.extraDispatchPins || [])].filter(Boolean).map(String);
+      return pins.length ? pins : ["0085", "0929"];
+    }
+    function unlocked() { return sessionStorage.getItem("jl_dispatch_ok") === "1"; }
+    function lock() {
+      sessionStorage.removeItem("jl_dispatch_ok");
+      document.getElementById("gate").style.display = "block";
+      document.getElementById("board").classList.remove("on");
+    }
+    function unlock() {
+      sessionStorage.setItem("jl_dispatch_ok", "1");
+      document.getElementById("gate").style.display = "none";
+      document.getElementById("board").classList.add("on");
+      if (!map) initMap();
+      load();
+      setTimeout(() => { try { map && map.invalidateSize(); } catch (e) {} }, 300);
+    }
+    document.getElementById("gate-go").onclick = () => {
+      const pin = document.getElementById("gate-pin").value.trim();
+      if (!allowedPins().includes(pin)) { toast("Wrong PIN"); return; }
+      unlock();
+    };
+    document.getElementById("gate-pin").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") document.getElementById("gate-go").click();
+    });
     function shrinkPhoto(file) {
       if (window.JL && typeof JL.shrinkPhoto === "function") return JL.shrinkPhoto(file);
       return new Promise((resolve, reject) => {
@@ -222,6 +269,7 @@
       drawMap();
     }
     async function load() {
+      if (!unlocked()) return;
       drivers = await JL.listDrivers();
       jobs = await JL.listJobs();
       render();
@@ -247,6 +295,7 @@
       } catch (e) { toast(e.message || "Could not add driver"); }
     };
     document.getElementById("refresh").onclick = load;
+    document.getElementById("signout").onclick = lock;
     document.getElementById("close-sheet").onclick = () => document.getElementById("sheet").classList.remove("show");
     document.getElementById("save-sb").onclick = async () => {
       localStorage.setItem("jl_supabase_url", document.getElementById("sb-url").value.trim());
@@ -254,8 +303,7 @@
       document.getElementById("sheet").classList.remove("show");
       await load();
     };
-    initMap();
-    load();
+    if (unlocked()) unlock();
     setInterval(load, 20000);
   </script>
 </body>
