@@ -11,7 +11,7 @@ export async function GET() {
 
   const { data, error } = await db
     .from("bookings")
-    .select("*")
+    .select("*, drivers(name, phone)")
     .eq("client_id", session.clientId)
     .order("ride_date", { ascending: true });
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -22,7 +22,14 @@ export async function GET() {
     return Number.isNaN(stamp) ? 0 : stamp;
   };
 
-  const rows = data || [];
+  const rows = (data || []).map((b: any) => {
+    const d = Array.isArray(b.drivers) ? b.drivers[0] : b.drivers;
+    return {
+      ...b,
+      driverName: d?.name || "",
+      driverPhone: d?.phone || "",
+    };
+  });
   const upcoming = rows.filter((b) => bookingIsUpcoming(b)).sort((a, b) => when(a) - when(b));
   const history = rows.filter((b) => !bookingIsUpcoming(b)).sort((a, b) => when(b) - when(a));
   return NextResponse.json({ upcoming, history });
