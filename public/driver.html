@@ -33,6 +33,8 @@
     .status.next .dot { background:var(--gold); }
     .status.done .dot { background:var(--ok); }
     .job { background:var(--bg2); border:1px solid var(--line); border-radius:16px; padding:14px; margin-bottom:10px; }
+    .job.done { opacity:.85; }
+    .sec { margin:18px 0 8px; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--gold); }
     .gps { font-size:12px; color:var(--muted); padding:0 18px 10px; }
     .gps.on { color:var(--ok); }
     .sheet { display:none; position:fixed; inset:0; background:rgba(0,0,0,.8); align-items:flex-end; z-index:50; }
@@ -122,6 +124,17 @@
     function note() {
       $("conn-note").textContent = hasKey() ? "Connected. Sign in with your PIN." : "This phone is not connected. Tap Connect and paste the same anon key as the laptop.";
     }
+    function jobDate(j) { return j.rideDate || String(j.when || "").slice(0,10); }
+    function withinYear(j) {
+      const d = jobDate(j);
+      if (!d) return true;
+      const cut = new Date(); cut.setFullYear(cut.getFullYear() - 1);
+      const c = cut.getFullYear() + "-" + String(cut.getMonth()+1).padStart(2,"0") + "-" + String(cut.getDate()).padStart(2,"0");
+      return d >= c;
+    }
+    function card(j, done) {
+      return "<div class=\"job"+(done?" done":"")+"\" data-open=\""+JL.esc(j.id)+"\"><div style=\"font-size:17px;font-weight:560\">"+JL.esc(j.guestName)+"</div><div class=\"sub\">"+JL.esc(j.when)+" · "+JL.esc(JL.shortAddr(j.pickup))+"</div><div class=\"sub\">→ "+JL.esc(JL.shortAddr(j.dropoff))+"</div></div>";
+    }
     async function fillLogin() {
       const drivers = await JL.listDrivers();
       $("who").innerHTML = drivers.map(d => "<option value=\""+d.id+"\">"+JL.esc(d.name)+"</option>").join("");
@@ -148,9 +161,13 @@
     async function loadJobs() {
       const all = await JL.listJobs();
       jobs = all.filter(j => mine(j) && j.tripStatus !== "dropped_off");
-      $("joblist").innerHTML = jobs.length
-        ? jobs.map(j => "<div class=\"job\" data-open=\""+JL.esc(j.id)+"\"><div style=\"font-size:17px;font-weight:560\">"+JL.esc(j.guestName)+"</div><div class=\"sub\">"+JL.esc(j.when)+" · "+JL.esc(JL.shortAddr(j.pickup))+"</div><div class=\"sub\">→ "+JL.esc(JL.shortAddr(j.dropoff))+"</div></div>").join("")
-        : "<p class=\"sub\">No open jobs assigned to you yet. Dispatch must assign first.</p>";
+      const done = all.filter(j => mine(j) && j.tripStatus === "dropped_off" && withinYear(j))
+        .sort((a,b) => String(b.when).localeCompare(String(a.when)));
+      let html = "<div class=\"sec\">Open ("+jobs.length+")</div>";
+      html += jobs.length ? jobs.map(j => card(j,false)).join("") : "<p class=\"sub\">No open jobs assigned to you yet.</p>";
+      html += "<div class=\"sec\">Completed · last 12 months ("+done.length+")</div>";
+      html += done.length ? done.map(j => card(j,true)).join("") : "<p class=\"sub\">No completed jobs in the last year.</p>";
+      $("joblist").innerHTML = html;
       $("joblist").querySelectorAll("[data-open]").forEach(el => el.onclick = () => openTrip(el.dataset.open));
     }
     function openTrip(id) {
