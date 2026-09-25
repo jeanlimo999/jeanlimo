@@ -139,7 +139,6 @@ export default function ClientApp() {
             </section>
             <section className="space-y-3 px-4 pt-4">
               <Row label="My Reservations" onClick={() => setScreen("trips")} />
-              <Row label="Book Again" onClick={() => setScreen("book")} />
               <a href="tel:+12819170085" className="flex w-full items-center justify-between rounded-[18px] border border-white/5 bg-[#181818] px-6 py-5"><span className="text-[18px]">Contact Us</span><span className="text-3xl text-zinc-400">›</span></a>
             </section>
           </>
@@ -214,7 +213,6 @@ export default function ClientApp() {
                         <button onClick={()=>setEdit({...b, _cancel:true})} className="rounded-xl border border-red-500/30 py-2 text-sm text-red-300">Cancel</button>
                       </div>
                     )}
-                    {tab==="past" && <button onClick={()=>{ setPickup(b.pickup||""); setDropoff(b.dropoff||""); setVehicle(b.vehicle||"sedan"); setScreen("book"); }} className="mt-3 w-full rounded-xl border border-[#d8b56b]/40 py-2 text-sm text-[#e8d3b0]">Book again</button>}
                   </div>
                 ))}
               </>
