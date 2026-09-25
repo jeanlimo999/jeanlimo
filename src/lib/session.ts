@@ -2,6 +2,7 @@ import { createHmac, timingSafeEqual } from "crypto";
 import { cookies } from "next/headers";
 
 const COOKIE = "jl_session";
+const DISPATCH_COOKIE = "jl_dispatch";
 
 type SessionPayload = {
   clientId: string;
@@ -9,17 +10,22 @@ type SessionPayload = {
   exp: number;
 };
 
+type DispatchPayload = {
+  role: "dispatch";
+  exp: number;
+};
+
 function secret() {
   return process.env.SESSION_SECRET || process.env.STRIPE_SECRET_KEY || "jean-limo-dev-secret";
 }
 
-function sign(payload: SessionPayload) {
+function sign(payload: object) {
   const body = Buffer.from(JSON.stringify(payload)).toString("base64url");
   const sig = createHmac("sha256", secret()).update(body).digest("base64url");
   return `${body}.${sig}`;
 }
 
-function verify(token: string): SessionPayload | null {
+function verify<T extends { exp: number }>(token: string): T | null {
   const [body, sig] = token.split(".");
   if (!body || !sig) return null;
   const expected = createHmac("sha256", secret()).update(body).digest("base64url");
@@ -27,8 +33,8 @@ function verify(token: string): SessionPayload | null {
   const b = Buffer.from(expected);
   if (a.length !== b.length || !timingSafeEqual(a, b)) return null;
   try {
-    const payload = JSON.parse(Buffer.from(body, "base64url").toString()) as SessionPayload;
-    if (!payload?.clientId || payload.exp < Date.now()) return null;
+    const payload = JSON.parse(Buffer.from(body, "base64url").toString()) as T;
+    if (!payload || payload.exp < Date.now()) return null;
     return payload;
   } catch {
     return null;
@@ -53,10 +59,35 @@ export function makeSessionToken(clientId: string, email: string) {
   });
 }
 
+export function makeDispatchToken() {
+  return sign({
+    role: "dispatch",
+    exp: Date.now() + 1000 * 60 * 60 * 12,
+  } satisfies DispatchPayload);
+}
+
 export function readSession(): SessionPayload | null {
   const token = cookies().get(COOKIE)?.value;
   if (!token) return null;
-  return verify(token);
+  const payload = verify<SessionPayload>(token);
+  if (!payload?.clientId) return null;
+  return payload;
 }
 
-export { COOKIE };
+export function readDispatchSession(): DispatchPayload | null {
+  const token = cookies().get(DISPATCH_COOKIE)?.value;
+  if (!token) return null;
+  const payload = verify<DispatchPayload>(token);
+  if (payload?.role !== "dispatch") return null;
+  return payload;
+}
+
+export function dispatchPins() {
+  const raw = process.env.DISPATCH_PINS || process.env.DISPATCH_PIN || "0085,0929";
+  return raw
+    .split(/[,\s]+/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+}
+
+export { COOKIE, DISPATCH_COOKIE };
