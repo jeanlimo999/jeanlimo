@@ -213,6 +213,18 @@ export default function ClientApp() {
                         <button onClick={()=>setEdit({...b, _cancel:true})} className="rounded-xl border border-red-500/30 py-2 text-sm text-red-300">Cancel</button>
                       </div>
                     )}
+                    {tab==="past" && (
+                      <button
+                        onClick={() => {
+                          setPickup(b.pickup || "");
+                          setDropoff(b.dropoff || "");
+                          setVehicle(b.vehicle || "sedan");
+                          setFlight(b.flight_number || "");
+                          setScreen("book");
+                        }}
+                        className="mt-3 w-full rounded-xl border border-[#d8b56b]/40 py-2 text-sm text-[#e8d3b0]"
+                      >Book again</button>
+                    )}
                   </div>
                 ))}
               </>
