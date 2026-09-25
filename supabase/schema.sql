@@ -1,7 +1,6 @@
 -- =============================================================================
 -- Jean Limo LLC — paste this entire file into Supabase → SQL Editor → Run
--- Website customer accounts + bookings + chauffeurs
--- Safe to re-run (IF NOT EXISTS / ADD COLUMN IF NOT EXISTS).
+-- Compatible with an existing drivers.id UUID column.
 -- =============================================================================
 
 create extension if not exists "pgcrypto";
@@ -27,7 +26,7 @@ create table if not exists public.client_addresses (
 );
 
 create table if not exists public.drivers (
-  id          text primary key default ('d_' || substr(gen_random_uuid()::text, 1, 8)),
+  id          uuid primary key default gen_random_uuid(),
   name        text not null,
   phone       text not null default '',
   pin         text not null default '',
@@ -38,6 +37,11 @@ create table if not exists public.drivers (
   last_gps_at timestamptz,
   created_at  timestamptz not null default now()
 );
+
+alter table public.drivers add column if not exists phone text not null default '';
+alter table public.drivers add column if not exists pin text not null default '';
+alter table public.drivers add column if not exists vehicle text not null default 'sedan';
+alter table public.drivers add column if not exists active boolean not null default true;
 
 create table if not exists public.bookings (
   id                    uuid primary key default gen_random_uuid(),
@@ -60,22 +64,29 @@ create table if not exists public.bookings (
   breakdown             text not null default '',
   stripe_session_id     text unique,
   passenger_notes       text not null default '',
-  assigned_driver_id    text references public.drivers(id) on delete set null,
-  trip_status           text not null default 'confirmed',
-  live_leg              text not null default 'outbound',
-  last_lat              double precision,
-  last_lng              double precision,
-  last_gps_at           timestamptz,
   created_at            timestamptz not null default now(),
   updated_at            timestamptz not null default now()
 );
 
-alter table public.bookings add column if not exists assigned_driver_id text;
+alter table public.bookings add column if not exists assigned_driver_id uuid;
 alter table public.bookings add column if not exists trip_status text not null default 'confirmed';
 alter table public.bookings add column if not exists live_leg text not null default 'outbound';
 alter table public.bookings add column if not exists last_lat double precision;
 alter table public.bookings add column if not exists last_lng double precision;
 alter table public.bookings add column if not exists last_gps_at timestamptz;
+
+do $$
+begin
+  if exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'bookings'
+      and column_name = 'assigned_driver_id' and data_type = 'text'
+  ) then
+    alter table public.bookings alter column assigned_driver_id type uuid using nullif(assigned_driver_id, '')::uuid;
+  end if;
+exception when others then
+  null;
+end $$;
 
 do $$
 begin
@@ -86,6 +97,8 @@ begin
       add constraint bookings_assigned_driver_id_fkey
       foreign key (assigned_driver_id) references public.drivers(id) on delete set null;
   end if;
+exception when others then
+  null;
 end $$;
 
 create index if not exists bookings_client_idx on public.bookings (client_id, ride_date desc);
@@ -102,7 +115,7 @@ create table if not exists public.booking_requests (
 
 create table if not exists public.gps_pings (
   id          uuid primary key default gen_random_uuid(),
-  driver_id   text,
+  driver_id   uuid,
   booking_id  uuid,
   lat         double precision,
   lng         double precision,
@@ -116,8 +129,13 @@ alter table public.booking_requests enable row level security;
 alter table public.drivers enable row level security;
 alter table public.gps_pings enable row level security;
 
-insert into public.drivers (id, name, phone, pin, vehicle, active)
-values
-  ('d_cash', 'Cash', '2819170085', '1111', 'sedan', true),
-  ('d_jeannie', 'Jeannie', '2819170929', '2222', 'sedan', true)
-on conflict (id) do nothing;
+insert into public.drivers (name, phone, pin, vehicle, active)
+select v.name, v.phone, v.pin, v.vehicle, v.active
+from (values
+  ('Cash', '2819170085', '1111', 'sedan', true),
+  ('Jeannie', '2819170929', '2222', 'sedan', true)
+) as v(name, phone, pin, vehicle, active)
+where not exists (
+  select 1 from public.drivers d
+  where d.name ilike v.name or right(regexp_replace(coalesce(d.phone,''), '\D', '', 'g'), 10) = v.phone
+);
