@@ -12,6 +12,8 @@ type SessionPayload = {
 
 type DispatchPayload = {
   role: "dispatch";
+  email: string;
+  name: string;
   exp: number;
 };
 
@@ -59,9 +61,11 @@ export function makeSessionToken(clientId: string, email: string) {
   });
 }
 
-export function makeDispatchToken() {
+export function makeDispatchToken(email: string, name: string) {
   return sign({
     role: "dispatch",
+    email,
+    name,
     exp: Date.now() + 1000 * 60 * 60 * 12,
   } satisfies DispatchPayload);
 }
@@ -80,14 +84,6 @@ export function readDispatchSession(): DispatchPayload | null {
   const payload = verify<DispatchPayload>(token);
   if (payload?.role !== "dispatch") return null;
   return payload;
-}
-
-export function dispatchPins() {
-  const raw = process.env.DISPATCH_PINS || process.env.DISPATCH_PIN || "0085,0929";
-  return raw
-    .split(/[,\s]+/)
-    .map((p) => p.trim())
-    .filter(Boolean);
 }
 
 export { COOKIE, DISPATCH_COOKIE };
