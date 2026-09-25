@@ -55,7 +55,14 @@ export default function RideCard({
   const d = prettyDate(b.ride_date);
   const status = String(b.status || "confirmed").replaceAll("_", " ");
   const chauffeur = String(b.driverName || "").trim();
+  const photo = String(b.driverPhoto || "").trim();
   const initial = (chauffeur || "J").charAt(0).toUpperCase();
+
+  const avatar = photo ? (
+    <img src={photo} alt="" className="h-11 w-11 shrink-0 rounded-full object-cover" />
+  ) : (
+    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#2a2418] text-[#e8d3b0]">{initial}</div>
+  );
 
   if (past) {
     return (
@@ -111,9 +118,7 @@ export default function RideCard({
 
       <div className="mt-4 flex items-center justify-between gap-3 rounded-2xl bg-[#0d0d0d] p-3">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#2a2418] text-[#e8d3b0]">
-            {initial}
-          </div>
+          {avatar}
           <div className="min-w-0">
             <div className="text-[11px] text-zinc-500">Your Chauffeur</div>
             <div className="truncate font-medium">{chauffeur || "Assigned at dispatch"}</div>

@@ -3,7 +3,7 @@ import { readSession } from "@/lib/session";
 import { supabaseAdmin } from "@/lib/supabase";
 import { bookingIsUpcoming } from "@/lib/portal";
 
-type DriverRow = { id: string; name?: string; phone?: string; vehicle?: string };
+type DriverRow = { id: string; name?: string; phone?: string; vehicle?: string; photo_url?: string };
 
 export async function GET() {
   const session = readSession();
@@ -28,14 +28,10 @@ export async function GET() {
   ) as string[];
 
   const driversById: Record<string, DriverRow> = {};
-  if (ids.length) {
-    const { data: drivers } = await db.from("drivers").select("id, name, phone, vehicle").in("id", ids);
-    for (const d of drivers || []) driversById[d.id] = d as DriverRow;
-  } else {
-    // Fallback if assigned_driver_id is missing but trip is assigned in dispatch local state.
-    const { data: drivers } = await db.from("drivers").select("id, name, phone, vehicle").eq("active", true);
-    for (const d of drivers || []) driversById[d.id] = d as DriverRow;
-  }
+  const { data: drivers } = ids.length
+    ? await db.from("drivers").select("id, name, phone, vehicle, photo_url").in("id", ids)
+    : await db.from("drivers").select("id, name, phone, vehicle, photo_url").eq("active", true);
+  for (const d of drivers || []) driversById[d.id] = d as DriverRow;
 
   const when = (b: { ride_date?: string; ride_time?: string }) => {
     const t = b.ride_time && /^\d{1,2}:\d{2}/.test(b.ride_time) ? b.ride_time.slice(0, 5) : "00:00";
@@ -44,14 +40,13 @@ export async function GET() {
   };
 
   const mapped = rows.map((b: any) => {
-    const d =
-      driversById[b.assigned_driver_id] ||
-      (b.driver_name ? { name: b.driver_name, phone: b.driver_phone } : null);
+    const d = driversById[b.assigned_driver_id] || null;
     return {
       ...b,
-      driverName: d?.name || b.driverName || "",
-      driverPhone: d?.phone || b.driverPhone || "",
+      driverName: d?.name || "",
+      driverPhone: d?.phone || "",
       driverVehicle: d?.vehicle || "",
+      driverPhoto: d?.photo_url || "",
     };
   });
 
