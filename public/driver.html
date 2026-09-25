@@ -6,9 +6,211 @@
   <meta name="theme-color" content="#0B0B0C" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <title>Jean Limo Driver</title>
+  <style>
+    :root { --bg:#0B0B0C; --bg2:#141416; --line:rgba(255,255,255,.08); --gold:#C4A574; --gold2:#E8D3B0; --text:#F6F1E8; --muted:#9A9388; --ok:#7DCFB6; --safe-t:env(safe-area-inset-top); --safe-b:env(safe-area-inset-bottom); }
+    * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+    body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; background:var(--bg); color:var(--text); height:100dvh; display:flex; flex-direction:column; }
+    .screen { display:none; flex:1; flex-direction:column; min-height:0; }
+    .screen.on { display:flex; }
+    .top { padding:calc(16px + var(--safe-t)) 18px 8px; display:flex; justify-content:space-between; align-items:center; }
+    .brand { letter-spacing:.16em; font-size:13px; color:var(--gold2); font-weight:600; }
+    .ghost { background:transparent; border:1px solid var(--line); color:var(--muted); border-radius:999px; padding:7px 12px; font-size:12px; }
+    .hero { padding:8px 18px 16px; }
+    .eyebrow { color:var(--gold); font-size:11px; letter-spacing:.2em; text-transform:uppercase; }
+    h1 { font-size:28px; font-weight:560; letter-spacing:-.03em; margin-top:6px; }
+    .sub { color:var(--muted); margin-top:6px; font-size:14px; line-height:1.45; }
+    .pad { padding:0 18px calc(18px + var(--safe-b)); }
+    input, select { width:100%; background:#1C1C20; border:1px solid var(--line); color:var(--text); border-radius:14px; padding:14px; font-size:16px; margin-top:10px; }
+    .primary, .status { width:100%; border:0; border-radius:16px; padding:16px; font-size:17px; font-weight:600; }
+    .primary { background:linear-gradient(180deg,var(--gold2),var(--gold)); color:#16110a; margin-top:14px; }
+    .status { text-align:left; background:var(--bg2); border:1px solid var(--line); color:var(--text); margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; min-height:84px; }
+    .status.next { border-color:rgba(196,165,116,.55); background:linear-gradient(180deg,#1b1814,#141210); }
+    .status.next .title { color:var(--gold2); }
+    .status.done .title { color:var(--ok); }
+    .kicker { font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); }
+    .title { font-size:20px; margin-top:3px; }
+    .dot { width:12px; height:12px; border-radius:50%; background:#3a3a40; }
+    .status.next .dot { background:var(--gold); box-shadow:0 0 0 6px rgba(196,165,116,.16); }
+    .status.done .dot { background:var(--ok); }
+    .job { background:var(--bg2); border:1px solid var(--line); border-radius:16px; padding:14px; margin-bottom:10px; }
+    .gps { font-size:12px; color:var(--muted); padding:0 18px 10px; }
+    .gps.on { color:var(--ok); }
+    .sheet { display:none; position:fixed; inset:0; background:rgba(0,0,0,.55); align-items:flex-end; z-index:20; }
+    .sheet.show { display:flex; }
+    .panel { width:100%; background:#161618; border-radius:24px 24px 0 0; padding:16px 18px calc(18px + var(--safe-b)); }
+    .preview { background:#1C1C20; border-radius:14px; padding:12px; margin:12px 0; font-size:14px; line-height:1.5; color:#ddd6cc; white-space:pre-wrap; }
+    .act { width:100%; border:1px solid var(--line); background:var(--bg2); color:var(--text); border-radius:14px; padding:14px; font-weight:600; margin-top:8px; }
+    .act.gold { background:linear-gradient(180deg,var(--gold2),var(--gold)); color:#16110a; border:0; }
+    .toast { position:fixed; left:50%; bottom:calc(24px + var(--safe-b)); transform:translateX(-50%); background:#222; border:1px solid var(--line); padding:10px 14px; border-radius:999px; font-size:13px; opacity:0; z-index:30; }
+    .toast.show { opacity:1; }
+    .scroll { flex:1; overflow:auto; }
+  </style>
 </head>
 <body>
-<p>Loading driver app…</p>
-<script>location.replace('/driver-app.html');</script>
+  <section class="screen on" id="login">
+    <div class="top"><div class="brand">JEAN LIMO DRIVER</div></div>
+    <div class="hero">
+      <div class="eyebrow">Sign in</div>
+      <h1>Who is driving?</h1>
+      <p class="sub">Use your PIN. Keep this page open so GPS stays live.</p>
+    </div>
+    <div class="pad">
+      <select id="who"></select>
+      <input id="pin" type="password" inputmode="numeric" placeholder="PIN" />
+      <button class="primary" id="signin">Start shift</button>
+      <p class="sub" style="margin-top:16px">PINs: Cash 1111 · Jeannie 2222</p>
+    </div>
+  </section>
+  <section class="screen" id="jobs">
+    <div class="top">
+      <div class="brand" id="hello">DRIVER</div>
+      <button class="ghost" id="signout">Sign out</button>
+    </div>
+    <div class="hero">
+      <div class="eyebrow">Your jobs</div>
+      <h1>Assigned to you</h1>
+      <p class="sub">Open a trip, then tap status as you go.</p>
+    </div>
+    <div class="gps" id="gps">GPS off</div>
+    <div class="scroll pad" id="joblist"></div>
+  </section>
+  <section class="screen" id="trip">
+    <div class="top">
+      <button class="ghost" id="back">Jobs</button>
+      <div class="brand">LIVE</div>
+      <span></span>
+    </div>
+    <div class="hero">
+      <div class="eyebrow" id="trip-when"></div>
+      <h1 id="trip-guest">Guest</h1>
+      <p class="sub" id="trip-route"></p>
+    </div>
+    <div class="gps" id="gps2">GPS off</div>
+    <div class="scroll pad">
+      <button class="status next" data-status="on_the_way"><div><div class="kicker">Step 1 · texts the guest</div><div class="title">On the way</div></div><div class="dot"></div></button>
+      <button class="status" data-status="on_location"><div><div class="kicker">Step 2 · texts the guest</div><div class="title">On location</div></div><div class="dot"></div></button>
+      <button class="status" data-status="dropped_off"><div><div class="kicker">Step 3 · texts dispatch</div><div class="title">Dropped off</div></div><div class="dot"></div></button>
+    </div>
+  </section>
+  <div class="sheet" id="sheet">
+    <div class="panel">
+      <div class="eyebrow" id="sheet-kicker">Notify</div>
+      <h1 style="font-size:22px;margin-top:6px" id="sheet-title">Send text</h1>
+      <div class="preview" id="sheet-preview"></div>
+      <button class="act gold" id="send-sms">Open Messages and send</button>
+      <button class="act" id="send-wa">WhatsApp</button>
+      <button class="act" id="skip">Mark status only</button>
+    </div>
+  </div>
+  <div class="toast" id="toast"></div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="jl.js"></script>
+  <script>
+    const $ = id => document.getElementById(id);
+    const toast = m => { const t=$("toast"); t.textContent=m; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),2200); };
+    const show = id => { document.querySelectorAll(".screen").forEach(s=>s.classList.remove("on")); $(id).classList.add("on"); };
+    let driver = null, jobs = [], current = null, pending = null, watchId = null;
+    async function fillLogin() {
+      const drivers = await JL.listDrivers();
+      $("who").innerHTML = drivers.map(d => "<option value=\""+d.id+"\">"+JL.esc(d.name)+"</option>").join("");
+    }
+    function setGpsLabel(text, on) {
+      ["gps","gps2"].forEach(id => { $(id).textContent = text; $(id).className = "gps" + (on ? " on" : ""); });
+    }
+    function startGps() {
+      if (!navigator.geolocation) { setGpsLabel("GPS not available"); return; }
+      watchId = navigator.geolocation.watchPosition(async pos => {
+        const { latitude, longitude } = pos.coords;
+        setGpsLabel("GPS live · " + latitude.toFixed(5) + ", " + longitude.toFixed(5), true);
+        if (driver) await JL.pingGps(driver, current, latitude, longitude);
+      }, err => setGpsLabel("GPS permission needed — " + err.message), {
+        enableHighAccuracy: true, maximumAge: 5000, timeout: 20000
+      });
+    }
+    function stopGps() {
+      if (watchId != null) navigator.geolocation.clearWatch(watchId);
+      watchId = null;
+    }
+    async function loadJobs() {
+      const all = await JL.listJobs();
+      jobs = all.filter(j => j.assignedDriverId === driver.id && j.tripStatus !== "dropped_off");
+      $("joblist").innerHTML = jobs.length
+        ? jobs.map(j => "<div class=\"job\" data-open=\""+JL.esc(j.id)+"\"><div style=\"font-size:17px;font-weight:560\">"+JL.esc(j.guestName)+"</div><div class=\"sub\">"+JL.esc(j.when)+" · "+JL.esc(JL.shortAddr(j.pickup))+"</div><div class=\"sub\">→ "+JL.esc(JL.shortAddr(j.dropoff))+"</div></div>").join("")
+        : "<p class=\"sub\">No open jobs assigned to you yet. Dispatch must assign first.</p>";
+      $("joblist").querySelectorAll("[data-open]").forEach(el => el.onclick = () => openTrip(el.dataset.open));
+    }
+    function openTrip(id) {
+      current = jobs.find(j => j.id === id) || current;
+      if (!current) return;
+      $("trip-when").textContent = current.when || "Pickup";
+      $("trip-guest").textContent = current.guestName;
+      $("trip-route").textContent = [current.pickup, current.dropoff].filter(Boolean).join(" → ");
+      paintStatus();
+      show("trip");
+    }
+    function paintStatus() {
+      const order = ["on_the_way","on_location","dropped_off"];
+      const idx = order.indexOf(current.tripStatus);
+      document.querySelectorAll(".status").forEach(btn => {
+        const i = order.indexOf(btn.dataset.status);
+        btn.classList.remove("next","done");
+        if (idx >= i) btn.classList.add("done");
+        else if (idx + 1 === i || (idx < 0 && i === 0)) btn.classList.add("next");
+      });
+    }
+    $("signin").onclick = async () => {
+      const drivers = await JL.listDrivers();
+      const pick = drivers.find(d => d.id === $("who").value);
+      if (!pick) return;
+      if (String(pick.pin || "") && $("pin").value.trim() !== String(pick.pin)) { toast("Wrong PIN"); return; }
+      driver = pick;
+      $("hello").textContent = pick.name.toUpperCase();
+      startGps();
+      await loadJobs();
+      show("jobs");
+    };
+    $("signout").onclick = () => { stopGps(); driver=null; current=null; show("login"); };
+    $("back").onclick = async () => { current=null; await loadJobs(); show("jobs"); };
+    document.querySelectorAll(".status").forEach(btn => btn.onclick = () => {
+      if (!current) return;
+      const status = btn.dataset.status;
+      const msgs = JL.messages(current, driver);
+      pending = { status, msgs };
+      if (status === "dropped_off") {
+        $("sheet-kicker").textContent = "Text dispatch";
+        $("sheet-title").textContent = "Ride is done";
+        $("sheet-preview").textContent = msgs.dropped_off_owner + "\n\nGuest: " + msgs.dropped_off_guest;
+      } else {
+        $("sheet-kicker").textContent = "Text guest";
+        $("sheet-title").textContent = status === "on_the_way" ? "On the way" : "On location";
+        $("sheet-preview").textContent = msgs[status];
+      }
+      $("sheet").classList.add("show");
+    });
+    async function apply() {
+      await JL.setTripStatus(current, pending.status);
+      current.tripStatus = pending.status;
+      paintStatus();
+    }
+    $("send-sms").onclick = async () => {
+      await apply();
+      const cfg = JL.cfg();
+      if (pending.status === "dropped_off") location.href = JL.smsUrl(cfg.ownerPhone, pending.msgs.dropped_off_owner);
+      else location.href = JL.smsUrl(current.guestPhone, pending.msgs[pending.status]);
+      $("sheet").classList.remove("show");
+    };
+    $("send-wa").onclick = async () => {
+      await apply();
+      const cfg = JL.cfg();
+      const phone = pending.status === "dropped_off" ? cfg.ownerPhone : current.guestPhone;
+      const body = pending.status === "dropped_off" ? pending.msgs.dropped_off_owner : pending.msgs[pending.status];
+      const num = JL.digits(phone);
+      location.href = num ? "https://wa.me/"+num+"?text="+encodeURIComponent(body) : "https://wa.me/?text="+encodeURIComponent(body);
+      $("sheet").classList.remove("show");
+    };
+    $("skip").onclick = async () => { await apply(); $("sheet").classList.remove("show"); toast(pending.status.replaceAll("_"," ")); };
+    fillLogin();
+  </script>
 </body>
 </html>
