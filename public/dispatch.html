@@ -40,6 +40,9 @@
     .toast.show { opacity:1; }
     .banner { margin:0 18px 10px; padding:10px 12px; border:1px solid var(--line); border-radius:12px; color:var(--muted); font-size:13px; position:relative; z-index:20; }
     .banner.on { color:var(--ok); border-color:rgba(125,207,182,.3); }
+    .roster { margin-top:16px; }
+    .roster-row { display:flex; align-items:center; gap:10px; padding:10px 0; border-top:1px solid var(--line); }
+    .roster-row img, .ph { width:40px; height:40px; border-radius:50%; object-fit:cover; background:#2a2418; display:flex; align-items:center; justify-content:center; color:var(--gold2); font-size:14px; }
   </style>
 </head>
 <body>
@@ -78,7 +81,12 @@
       <input id="dr-pin" inputmode="numeric" placeholder="e.g. 3333" />
       <label>Vehicle</label>
       <input id="dr-car" placeholder="sedan" />
+      <label>Photo file</label>
+      <input id="dr-photo-file" type="file" accept="image/*" />
+      <label>Or photo URL</label>
+      <input id="dr-photo-url" placeholder="https://..." />
       <button class="primary" type="button" id="save-driver">Save driver</button>
+      <div class="roster" id="roster"></div>
       <button class="ghost" type="button" style="width:100%;margin-top:10px;padding:12px" id="close-driver">Close</button>
     </div>
   </div>
@@ -116,6 +124,27 @@
       document.getElementById("sb-url").value = localStorage.getItem("jl_supabase_url") || "https://zfsthgozqowubpmscibd.supabase.co";
       document.getElementById("sb-key").value = localStorage.getItem("jl_supabase_key") || "";
       document.getElementById("sheet").classList.add("show");
+    }
+    function renderRoster() {
+      const box = document.getElementById("roster");
+      if (!drivers.length) { box.innerHTML = ""; return; }
+      box.innerHTML = "<div class='eyebrow' style='margin-top:8px'>Existing chauffeurs</div>" + drivers.map(d => {
+        const pic = d.photo_url
+          ? "<img src=\""+JL.esc(d.photo_url)+"\" alt=\"\" />"
+          : "<div class='ph'>"+JL.esc((d.name||"J").charAt(0))+"</div>";
+        return "<div class='roster-row'>"+pic+"<div style='flex:1'>"+JL.esc(d.name)+"</div><input type='file' accept='image/*' data-photo='"+JL.esc(d.id)+"' /></div>";
+      }).join("");
+      box.querySelectorAll("[data-photo]").forEach(inp => {
+        inp.onchange = async () => {
+          try {
+            const photo = await JL.shrinkPhoto(inp.files[0]);
+            await JL.updateDriver(inp.dataset.photo, { photo_url: photo });
+            toast("Photo saved");
+            await load();
+            renderRoster();
+          } catch (e) { toast(e.message || "Could not save photo"); }
+        };
+      });
     }
     function initMap() {
       try {
@@ -168,17 +197,21 @@
       drivers = await JL.listDrivers();
       jobs = await JL.listJobs();
       render();
+      renderRoster();
     }
     document.getElementById("settings").onclick = openSetup;
-    document.getElementById("add-driver").onclick = () => document.getElementById("driver-sheet").classList.add("show");
+    document.getElementById("add-driver").onclick = () => { renderRoster(); document.getElementById("driver-sheet").classList.add("show"); };
     document.getElementById("close-driver").onclick = () => document.getElementById("driver-sheet").classList.remove("show");
     document.getElementById("save-driver").onclick = async () => {
       try {
+        const file = document.getElementById("dr-photo-file").files[0];
+        const photo = file ? await JL.shrinkPhoto(file) : document.getElementById("dr-photo-url").value.trim();
         const d = await JL.addDriver({
           name: document.getElementById("dr-name").value,
           phone: document.getElementById("dr-phone").value,
           pin: document.getElementById("dr-pin").value,
-          vehicle: document.getElementById("dr-car").value
+          vehicle: document.getElementById("dr-car").value,
+          photo_url: photo
         });
         document.getElementById("driver-sheet").classList.remove("show");
         toast(d.name + " added");
