@@ -9,16 +9,17 @@
   <style>
     :root { --bg:#0B0B0C; --bg2:#141416; --line:rgba(255,255,255,.08); --gold:#C4A574; --gold2:#E8D3B0; --text:#F6F1E8; --muted:#9A9388; --ok:#7DCFB6; --safe-t:env(safe-area-inset-top); --safe-b:env(safe-area-inset-bottom); }
     * { box-sizing:border-box; margin:0; padding:0; }
-    body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; background:var(--bg); color:var(--text); height:100dvh; display:flex; flex-direction:column; }
-    .top { padding:calc(14px + var(--safe-t)) 18px 10px; display:flex; justify-content:space-between; align-items:center; }
+    body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; background:var(--bg); color:var(--text); min-height:100dvh; }
+    .top { padding:calc(14px + var(--safe-t)) 18px 10px; display:flex; justify-content:space-between; align-items:center; position:relative; z-index:20; }
     .brand { letter-spacing:.16em; font-size:13px; color:var(--gold2); font-weight:600; }
-    .ghost { background:transparent; border:1px solid var(--line); color:var(--muted); border-radius:999px; padding:7px 12px; font-size:12px; }
-    .hero { padding:4px 18px 12px; }
+    .ghost { background:transparent; border:1px solid var(--line); color:var(--muted); border-radius:999px; padding:7px 12px; font-size:12px; cursor:pointer; }
+    .hero { padding:4px 18px 12px; position:relative; z-index:20; }
     .eyebrow { color:var(--gold); font-size:11px; letter-spacing:.2em; text-transform:uppercase; }
     h1 { font-size:26px; font-weight:560; margin-top:4px; }
     .sub { color:var(--muted); font-size:14px; margin-top:4px; }
-    #map { height:210px; margin:0 18px 12px; border-radius:16px; border:1px solid var(--line); z-index:1; position:relative; }
-    .scroll { flex:1; overflow:auto; padding:0 18px calc(16px + var(--safe-b)); }
+    #map { height:210px; margin:0 18px 12px; border-radius:16px; border:1px solid var(--line); z-index:1 !important; position:relative; }
+    .leaflet-pane, .leaflet-top, .leaflet-bottom, .leaflet-control { z-index:1 !important; }
+    .scroll { padding:0 18px calc(16px + var(--safe-b)); position:relative; z-index:20; }
     .job { background:var(--bg2); border:1px solid var(--line); border-radius:16px; padding:14px; margin-bottom:10px; }
     .row { display:flex; justify-content:space-between; gap:8px; align-items:baseline; }
     .name { font-size:17px; font-weight:560; }
@@ -28,14 +29,14 @@
     .chip { display:inline-block; margin-top:8px; font-size:11px; border:1px solid var(--line); color:var(--muted); padding:4px 8px; border-radius:999px; }
     .chip.gold { color:var(--gold2); border-color:rgba(196,165,116,.35); }
     .chip.ok { color:var(--ok); border-color:rgba(125,207,182,.35); }
-    .sheet { display:none; position:fixed; inset:0; background:rgba(0,0,0,.72); align-items:flex-end; z-index:5000; }
+    .sheet { display:none; position:fixed; inset:0; background:rgba(0,0,0,.8); align-items:flex-end; z-index:99999 !important; }
     .sheet.show { display:flex; }
-    .panel { width:100%; background:#161618; border-radius:24px 24px 0 0; padding:16px 18px calc(18px + var(--safe-b)); max-height:88vh; overflow:auto; z-index:5001; }
+    .panel { width:100%; background:#161618; border-radius:24px 24px 0 0; padding:16px 18px calc(18px + var(--safe-b)); max-height:88vh; overflow:auto; }
     label { display:block; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:10px 0 6px; }
-    .primary { width:100%; border:0; border-radius:14px; padding:14px; font-weight:600; background:linear-gradient(180deg,var(--gold2),var(--gold)); color:#16110a; margin-top:12px; }
-    .toast { position:fixed; left:50%; bottom:24px; transform:translateX(-50%); background:#222; border:1px solid var(--line); padding:10px 14px; border-radius:999px; font-size:13px; opacity:0; }
+    .primary { width:100%; border:0; border-radius:14px; padding:14px; font-weight:600; background:linear-gradient(180deg,var(--gold2),var(--gold)); color:#16110a; margin-top:12px; cursor:pointer; }
+    .toast { position:fixed; left:50%; bottom:24px; transform:translateX(-50%); background:#222; border:1px solid var(--line); padding:10px 14px; border-radius:999px; font-size:13px; opacity:0; z-index:100000; }
     .toast.show { opacity:1; }
-    .banner { margin:0 18px 10px; padding:10px 12px; border:1px solid var(--line); border-radius:12px; color:var(--muted); font-size:13px; }
+    .banner { margin:0 18px 10px; padding:10px 12px; border:1px solid var(--line); border-radius:12px; color:var(--muted); font-size:13px; position:relative; z-index:20; }
     .banner.on { color:var(--ok); border-color:rgba(125,207,182,.3); }
   </style>
 </head>
@@ -43,9 +44,8 @@
   <div class="top">
     <div class="brand">JEAN LIMO DISPATCH</div>
     <div>
-      <button class="ghost" id="refresh">Refresh</button>
-      <button class="ghost" id="add-driver">Add driver</button>
-      <button class="ghost" id="settings">Setup</button>
+      <button class="ghost" type="button" id="refresh">Refresh</button>
+      <button class="ghost" type="button" id="add-driver">Add driver</button>
     </div>
   </div>
   <div class="hero">
@@ -53,7 +53,10 @@
     <h1>Assign jobs</h1>
     <p class="sub">Pick a chauffeur. Their phone shares GPS while the trip is live.</p>
   </div>
-  <div class="banner" id="mode">Offline demo — add Supabase in Setup to load real bookings</div>
+  <div class="banner" id="mode">Offline demo — connect Supabase below to load real bookings</div>
+  <div class="scroll" style="padding-bottom:8px">
+    <button class="primary" type="button" id="settings" style="margin:0 0 12px">Connect Supabase / Setup</button>
+  </div>
   <div id="map"></div>
   <div class="scroll" id="list"></div>
 
@@ -69,9 +72,8 @@
       <input id="dr-pin" inputmode="numeric" placeholder="e.g. 3333" />
       <label>Vehicle</label>
       <input id="dr-car" placeholder="sedan" />
-      <p class="sub">They sign into driver.html with this PIN. Guest texts will use this name.</p>
-      <button class="primary" id="save-driver">Save driver</button>
-      <button class="ghost" style="width:100%;margin-top:10px;padding:12px" id="close-driver">Close</button>
+      <button class="primary" type="button" id="save-driver">Save driver</button>
+      <button class="ghost" type="button" style="width:100%;margin-top:10px;padding:12px" id="close-driver">Close</button>
     </div>
   </div>
   <div class="sheet" id="sheet">
@@ -82,9 +84,8 @@
       <input id="sb-url" placeholder="https://xxxx.supabase.co" />
       <label>Anon public key</label>
       <input id="sb-key" placeholder="eyJ..." />
-      <p class="sub">Run schema-dispatch.sql in the SQL editor first. Then paste the anon key from Project Settings → API.</p>
-      <button class="primary" id="save-sb">Save and load jobs</button>
-      <button class="ghost" style="width:100%;margin-top:10px;padding:12px" id="close-sheet">Close</button>
+      <button class="primary" type="button" id="save-sb">Save and load jobs</button>
+      <button class="ghost" type="button" style="width:100%;margin-top:10px;padding:12px" id="close-sheet">Close</button>
     </div>
   </div>
   <div class="toast" id="toast"></div>
@@ -96,18 +97,23 @@
   <script>
     const toast = (m) => { const t = document.getElementById("toast"); t.textContent = m; t.classList.add("show"); setTimeout(() => t.classList.remove("show"), 2200); };
     let jobs = [], drivers = [], map, markers = {};
-
     function connected() {
       const c = JL.cfg();
       return !!(c.supabaseUrl && c.supabaseAnonKey);
     }
-
-    function initMap() {
-      map = L.map("map", { zoomControl: false }).setView([29.76, -95.37], 10);
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "© OSM" }).addTo(map);
+    function openSetup() {
+      document.getElementById("sb-url").value = localStorage.getItem("jl_supabase_url") || "https://zfsthgozqowubpmscibd.supabase.co";
+      document.getElementById("sb-key").value = localStorage.getItem("jl_supabase_key") || "";
+      document.getElementById("sheet").classList.add("show");
     }
-
+    function initMap() {
+      try {
+        map = L.map("map", { zoomControl: false }).setView([29.76, -95.37], 10);
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "OSM" }).addTo(map);
+      } catch (e) {}
+    }
     function drawMap() {
+      if (!map) return;
       Object.values(markers).forEach(m => map.removeLayer(m));
       markers = {};
       const pts = [];
@@ -119,36 +125,19 @@
           pts.push([d.last_lat, d.last_lng]);
         }
       });
-      jobs.forEach(j => {
-        if (j.last_lat && j.last_lng && ["on_the_way","on_location"].includes(j.tripStatus)) {
-          const m = L.circleMarker([j.last_lat, j.last_lng], { radius: 6, color: "#7DCFB6" }).addTo(map);
-          m.bindPopup(j.guestName);
-          pts.push([j.last_lat, j.last_lng]);
-        }
-      });
       if (pts.length) map.fitBounds(pts, { padding: [30, 30], maxZoom: 12 });
     }
-
     function render() {
       document.getElementById("mode").className = "banner" + (connected() ? " on" : "");
-      document.getElementById("mode").textContent = connected()
-        ? "Connected to Supabase — live bookings"
-        : "Offline demo — add Supabase in Setup to load real bookings";
+      document.getElementById("mode").textContent = connected() ? "Connected to Supabase — live bookings" : "Offline demo — connect Supabase below to load real bookings";
       const box = document.getElementById("list");
       if (!jobs.length) { box.innerHTML = "<p class='sub'>No jobs</p>"; return; }
       box.innerHTML = jobs.map(j => {
         const d = drivers.find(x => x.id === j.assignedDriverId);
-        const opts = `<option value="">Unassigned</option>` + drivers.map(dr =>
-          `<option value="${dr.id}" ${dr.id===j.assignedDriverId?"selected":"">${JL.esc(dr.name)}</option>`
+        const opts = "<option value=\"\">Unassigned</option>" + drivers.map(dr =>
+          "<option value=\""+dr.id+"\" "+(dr.id===j.assignedDriverId?"selected":"")+">"+JL.esc(dr.name)+"</option>"
         ).join("");
-        return `<div class="job">
-          <div class="row"><div class="name">${JL.esc(j.guestName)}</div><div class="src">${JL.esc(j.conf||"")}</div></div>
-          <div class="meta">${JL.esc(j.when||"")} · ${JL.esc(JL.shortAddr(j.pickup))}</div>
-          <div class="meta">→ ${JL.esc(JL.shortAddr(j.dropoff))}</div>
-          <span class="chip ${d?"gold":"">${d ? "Driver "+JL.esc(d.name) : "Unassigned"}</span>
-          <span class="chip ${j.tripStatus==="dropped_off"?"ok":"">${JL.esc(j.tripStatus||"confirmed")}</span>
-          <select data-assign="${JL.esc(j.id)}">${opts}</select>
-        </div>`;
+        return "<div class=\"job\"><div class=\"row\"><div class=\"name\">"+JL.esc(j.guestName)+"</div><div class=\"src\">"+JL.esc(j.conf||"")+"</div></div><div class=\"meta\">"+JL.esc(j.when||"")+" · "+JL.esc(JL.shortAddr(j.pickup))+"</div><div class=\"meta\">→ "+JL.esc(JL.shortAddr(j.dropoff))+"</div><span class=\"chip "+(d?"gold":"")+"\">"+(d?("Driver "+JL.esc(d.name)):"Unassigned")+"</span><span class=\"chip\">"+JL.esc(j.tripStatus||"confirmed")+"</span><select data-assign=\""+JL.esc(j.id)+"\">"+opts+"</select></div>";
       }).join("");
       box.querySelectorAll("[data-assign]").forEach(sel => {
         sel.onchange = async () => {
@@ -160,13 +149,12 @@
       });
       drawMap();
     }
-
     async function load() {
       drivers = await JL.listDrivers();
       jobs = await JL.listJobs();
       render();
     }
-
+    document.getElementById("settings").onclick = openSetup;
     document.getElementById("add-driver").onclick = () => document.getElementById("driver-sheet").classList.add("show");
     document.getElementById("close-driver").onclick = () => document.getElementById("driver-sheet").classList.remove("show");
     document.getElementById("save-driver").onclick = async () => {
@@ -177,18 +165,12 @@
           pin: document.getElementById("dr-pin").value,
           vehicle: document.getElementById("dr-car").value
         });
-        ["dr-name","dr-phone","dr-pin","dr-car"].forEach(id => document.getElementById(id).value = "");
         document.getElementById("driver-sheet").classList.remove("show");
         toast(d.name + " added");
         await load();
       } catch (e) { toast(e.message || "Could not add driver"); }
     };
     document.getElementById("refresh").onclick = load;
-    document.getElementById("settings").onclick = () => {
-      document.getElementById("sb-url").value = localStorage.getItem("jl_supabase_url") || "";
-      document.getElementById("sb-key").value = localStorage.getItem("jl_supabase_key") || "";
-      document.getElementById("sheet").classList.add("show");
-    };
     document.getElementById("close-sheet").onclick = () => document.getElementById("sheet").classList.remove("show");
     document.getElementById("save-sb").onclick = async () => {
       localStorage.setItem("jl_supabase_url", document.getElementById("sb-url").value.trim());
@@ -196,7 +178,6 @@
       document.getElementById("sheet").classList.remove("show");
       await load();
     };
-
     initMap();
     load();
     setInterval(load, 20000);
