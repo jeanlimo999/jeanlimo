@@ -24,41 +24,41 @@
     .primary, .status { width:100%; border:0; border-radius:16px; padding:16px; font-size:17px; font-weight:600; }
     .primary { background:linear-gradient(180deg,var(--gold2),var(--gold)); color:#16110a; margin-top:14px; }
     .status { text-align:left; background:var(--bg2); border:1px solid var(--line); color:var(--text); margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; min-height:84px; }
-    .status.next { border-color:rgba(196,165,116,.55); background:linear-gradient(180deg,#1b1814,#141210); }
+    .status.next { border-color:rgba(196,165,116,.55); }
     .status.next .title { color:var(--gold2); }
     .status.done .title { color:var(--ok); }
     .kicker { font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); }
     .title { font-size:20px; margin-top:3px; }
     .dot { width:12px; height:12px; border-radius:50%; background:#3a3a40; }
-    .status.next .dot { background:var(--gold); box-shadow:0 0 0 6px rgba(196,165,116,.16); }
+    .status.next .dot { background:var(--gold); }
     .status.done .dot { background:var(--ok); }
     .job { background:var(--bg2); border:1px solid var(--line); border-radius:16px; padding:14px; margin-bottom:10px; }
     .gps { font-size:12px; color:var(--muted); padding:0 18px 10px; }
     .gps.on { color:var(--ok); }
-    .sheet { display:none; position:fixed; inset:0; background:rgba(0,0,0,.55); align-items:flex-end; z-index:20; }
+    .sheet { display:none; position:fixed; inset:0; background:rgba(0,0,0,.8); align-items:flex-end; z-index:50; }
     .sheet.show { display:flex; }
     .panel { width:100%; background:#161618; border-radius:24px 24px 0 0; padding:16px 18px calc(18px + var(--safe-b)); }
     .preview { background:#1C1C20; border-radius:14px; padding:12px; margin:12px 0; font-size:14px; line-height:1.5; color:#ddd6cc; white-space:pre-wrap; }
     .act { width:100%; border:1px solid var(--line); background:var(--bg2); color:var(--text); border-radius:14px; padding:14px; font-weight:600; margin-top:8px; }
     .act.gold { background:linear-gradient(180deg,var(--gold2),var(--gold)); color:#16110a; border:0; }
-    .toast { position:fixed; left:50%; bottom:calc(24px + var(--safe-b)); transform:translateX(-50%); background:#222; border:1px solid var(--line); padding:10px 14px; border-radius:999px; font-size:13px; opacity:0; z-index:30; }
+    .toast { position:fixed; left:50%; bottom:calc(24px + var(--safe-b)); transform:translateX(-50%); background:#222; border:1px solid var(--line); padding:10px 14px; border-radius:999px; font-size:13px; opacity:0; z-index:60; }
     .toast.show { opacity:1; }
     .scroll { flex:1; overflow:auto; }
+    label { display:block; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:10px 0 6px; }
   </style>
 </head>
 <body>
   <section class="screen on" id="login">
-    <div class="top"><div class="brand">JEAN LIMO DRIVER</div></div>
+    <div class="top"><div class="brand">JEAN LIMO DRIVER</div><button class="ghost" id="open-setup">Connect</button></div>
     <div class="hero">
       <div class="eyebrow">Sign in</div>
       <h1>Who is driving?</h1>
-      <p class="sub">Use your PIN. Keep this page open so GPS stays live.</p>
+      <p class="sub" id="conn-note">Connect this phone to Supabase first, same key as the laptop.</p>
     </div>
     <div class="pad">
       <select id="who"></select>
       <input id="pin" type="password" inputmode="numeric" placeholder="PIN" />
       <button class="primary" id="signin">Start shift</button>
-      <p class="sub" style="margin-top:16px">PINs: Cash 1111 · Jeannie 2222</p>
     </div>
   </section>
   <section class="screen" id="jobs">
@@ -69,17 +69,12 @@
     <div class="hero">
       <div class="eyebrow">Your jobs</div>
       <h1>Assigned to you</h1>
-      <p class="sub">Open a trip, then tap status as you go.</p>
     </div>
     <div class="gps" id="gps">GPS off</div>
     <div class="scroll pad" id="joblist"></div>
   </section>
   <section class="screen" id="trip">
-    <div class="top">
-      <button class="ghost" id="back">Jobs</button>
-      <div class="brand">LIVE</div>
-      <span></span>
-    </div>
+    <div class="top"><button class="ghost" id="back">Jobs</button><div class="brand">LIVE</div><span></span></div>
     <div class="hero">
       <div class="eyebrow" id="trip-when"></div>
       <h1 id="trip-guest">Guest</h1>
@@ -92,6 +87,18 @@
       <button class="status" data-status="dropped_off"><div><div class="kicker">Step 3 · texts dispatch</div><div class="title">Dropped off</div></div><div class="dot"></div></button>
     </div>
   </section>
+  <div class="sheet" id="setup">
+    <div class="panel">
+      <div class="eyebrow">Supabase</div>
+      <h1 style="font-size:22px;margin-top:6px">Connect this phone</h1>
+      <label>Project URL</label>
+      <input id="sb-url" />
+      <label>Anon public key</label>
+      <input id="sb-key" placeholder="same key as laptop Setup" />
+      <button class="act gold" id="save-sb">Save</button>
+      <button class="act" id="close-setup">Close</button>
+    </div>
+  </div>
   <div class="sheet" id="sheet">
     <div class="panel">
       <div class="eyebrow" id="sheet-kicker">Notify</div>
@@ -111,9 +118,14 @@
     const toast = m => { const t=$("toast"); t.textContent=m; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),2200); };
     const show = id => { document.querySelectorAll(".screen").forEach(s=>s.classList.remove("on")); $(id).classList.add("on"); };
     let driver = null, jobs = [], current = null, pending = null, watchId = null;
+    function hasKey() { return !!(localStorage.getItem("jl_supabase_key") || (JL.cfg().supabaseAnonKey)); }
+    function note() {
+      $("conn-note").textContent = hasKey() ? "Connected. Sign in with your PIN." : "This phone is not connected. Tap Connect and paste the same anon key as the laptop.";
+    }
     async function fillLogin() {
       const drivers = await JL.listDrivers();
       $("who").innerHTML = drivers.map(d => "<option value=\""+d.id+"\">"+JL.esc(d.name)+"</option>").join("");
+      note();
     }
     function setGpsLabel(text, on) {
       ["gps","gps2"].forEach(id => { $(id).textContent = text; $(id).className = "gps" + (on ? " on" : ""); });
@@ -124,17 +136,18 @@
         const { latitude, longitude } = pos.coords;
         setGpsLabel("GPS live · " + latitude.toFixed(5) + ", " + longitude.toFixed(5), true);
         if (driver) await JL.pingGps(driver, current, latitude, longitude);
-      }, err => setGpsLabel("GPS permission needed — " + err.message), {
-        enableHighAccuracy: true, maximumAge: 5000, timeout: 20000
-      });
+      }, err => setGpsLabel("GPS permission needed — " + err.message), { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 });
     }
-    function stopGps() {
-      if (watchId != null) navigator.geolocation.clearWatch(watchId);
-      watchId = null;
+    function stopGps() { if (watchId != null) navigator.geolocation.clearWatch(watchId); watchId = null; }
+    function mine(j) {
+      if (!driver) return false;
+      if (j.assignedDriverId && j.assignedDriverId === driver.id) return true;
+      const n = (driver.name || "").toLowerCase();
+      return n && String(j.assignedDriverName || "").toLowerCase() === n;
     }
     async function loadJobs() {
       const all = await JL.listJobs();
-      jobs = all.filter(j => j.assignedDriverId === driver.id && j.tripStatus !== "dropped_off");
+      jobs = all.filter(j => mine(j) && j.tripStatus !== "dropped_off");
       $("joblist").innerHTML = jobs.length
         ? jobs.map(j => "<div class=\"job\" data-open=\""+JL.esc(j.id)+"\"><div style=\"font-size:17px;font-weight:560\">"+JL.esc(j.guestName)+"</div><div class=\"sub\">"+JL.esc(j.when)+" · "+JL.esc(JL.shortAddr(j.pickup))+"</div><div class=\"sub\">→ "+JL.esc(JL.shortAddr(j.dropoff))+"</div></div>").join("")
         : "<p class=\"sub\">No open jobs assigned to you yet. Dispatch must assign first.</p>";
@@ -146,8 +159,7 @@
       $("trip-when").textContent = current.when || "Pickup";
       $("trip-guest").textContent = current.guestName;
       $("trip-route").textContent = [current.pickup, current.dropoff].filter(Boolean).join(" → ");
-      paintStatus();
-      show("trip");
+      paintStatus(); show("trip");
     }
     function paintStatus() {
       const order = ["on_the_way","on_location","dropped_off"];
@@ -159,16 +171,26 @@
         else if (idx + 1 === i || (idx < 0 && i === 0)) btn.classList.add("next");
       });
     }
+    $("open-setup").onclick = () => {
+      $("sb-url").value = localStorage.getItem("jl_supabase_url") || "https://zfsthgozqowubpmscibd.supabase.co";
+      $("sb-key").value = localStorage.getItem("jl_supabase_key") || "";
+      $("setup").classList.add("show");
+    };
+    $("close-setup").onclick = () => $("setup").classList.remove("show");
+    $("save-sb").onclick = async () => {
+      localStorage.setItem("jl_supabase_url", $("sb-url").value.trim());
+      localStorage.setItem("jl_supabase_key", $("sb-key").value.trim());
+      location.reload();
+    };
     $("signin").onclick = async () => {
+      if (!hasKey()) { toast("Tap Connect first"); return; }
       const drivers = await JL.listDrivers();
       const pick = drivers.find(d => d.id === $("who").value);
       if (!pick) return;
       if (String(pick.pin || "") && $("pin").value.trim() !== String(pick.pin)) { toast("Wrong PIN"); return; }
       driver = pick;
       $("hello").textContent = pick.name.toUpperCase();
-      startGps();
-      await loadJobs();
-      show("jobs");
+      startGps(); await loadJobs(); show("jobs");
     };
     $("signout").onclick = () => { stopGps(); driver=null; current=null; show("login"); };
     $("back").onclick = async () => { current=null; await loadJobs(); show("jobs"); };
@@ -177,27 +199,16 @@
       const status = btn.dataset.status;
       const msgs = JL.messages(current, driver);
       pending = { status, msgs };
-      if (status === "dropped_off") {
-        $("sheet-kicker").textContent = "Text dispatch";
-        $("sheet-title").textContent = "Ride is done";
-        $("sheet-preview").textContent = msgs.dropped_off_owner + "\n\nGuest: " + msgs.dropped_off_guest;
-      } else {
-        $("sheet-kicker").textContent = "Text guest";
-        $("sheet-title").textContent = status === "on_the_way" ? "On the way" : "On location";
-        $("sheet-preview").textContent = msgs[status];
-      }
+      $("sheet-kicker").textContent = status === "dropped_off" ? "Text dispatch" : "Text guest";
+      $("sheet-title").textContent = status.replaceAll("_"," ");
+      $("sheet-preview").textContent = status === "dropped_off" ? msgs.dropped_off_owner : msgs[status];
       $("sheet").classList.add("show");
     });
-    async function apply() {
-      await JL.setTripStatus(current, pending.status);
-      current.tripStatus = pending.status;
-      paintStatus();
-    }
+    async function apply() { await JL.setTripStatus(current, pending.status); current.tripStatus = pending.status; paintStatus(); }
     $("send-sms").onclick = async () => {
       await apply();
       const cfg = JL.cfg();
-      if (pending.status === "dropped_off") location.href = JL.smsUrl(cfg.ownerPhone, pending.msgs.dropped_off_owner);
-      else location.href = JL.smsUrl(current.guestPhone, pending.msgs[pending.status]);
+      location.href = pending.status === "dropped_off" ? JL.smsUrl(cfg.ownerPhone, pending.msgs.dropped_off_owner) : JL.smsUrl(current.guestPhone, pending.msgs[pending.status]);
       $("sheet").classList.remove("show");
     };
     $("send-wa").onclick = async () => {
@@ -209,7 +220,7 @@
       location.href = num ? "https://wa.me/"+num+"?text="+encodeURIComponent(body) : "https://wa.me/?text="+encodeURIComponent(body);
       $("sheet").classList.remove("show");
     };
-    $("skip").onclick = async () => { await apply(); $("sheet").classList.remove("show"); toast(pending.status.replaceAll("_"," ")); };
+    $("skip").onclick = async () => { await apply(); $("sheet").classList.remove("show"); };
     fillLogin();
   </script>
 </body>
