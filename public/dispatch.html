@@ -7,96 +7,84 @@
   <title>Jean Limo Dispatch</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
-    :root { --bg:#0B0B0C; --card:#161618; --line:rgba(255,255,255,.1); --gold:#C4A574; --gold2:#E8D3B0; --text:#F6F1E8; --muted:#9A9388; --ok:#7DCFB6; }
+    :root { --bg:#0B0B0C; --bg2:#141416; --line:rgba(255,255,255,.08); --gold:#C4A574; --gold2:#E8D3B0; --text:#F6F1E8; --muted:#9A9388; --ok:#7DCFB6; --safe-t:env(safe-area-inset-top); --safe-b:env(safe-area-inset-bottom); }
     * { box-sizing:border-box; margin:0; padding:0; }
-    body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; background:var(--bg); color:var(--text); padding:18px 16px 40px; }
-    .head { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:16px; }
-    h1 { font-size:28px; font-weight:650; }
-    .co { color:var(--muted); margin-top:4px; font-size:14px; }
-    .goldbtn { background:linear-gradient(180deg,var(--gold2),var(--gold)); color:#16110a; border:0; border-radius:14px; padding:12px 14px; font-weight:700; font-size:14px; text-decoration:none; display:inline-block; }
-    .card { background:var(--card); border:1px solid var(--line); border-radius:18px; padding:14px; margin-bottom:12px; }
-    .lbl { font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); }
-    .datebox { text-align:center; background:#111; border-radius:12px; padding:12px; margin:10px 0; font-size:16px; }
-    .row2 { display:flex; gap:8px; }
-    .row2 button { flex:1; background:#111; border:1px solid var(--line); color:var(--text); border-radius:12px; padding:12px; }
-    .stat { font-size:32px; font-weight:650; margin-top:8px; }
-    #map { height:220px; border-radius:14px; margin-top:10px; }
-    .job { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:14px; margin-bottom:10px; }
+    body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; background:var(--bg); color:var(--text); min-height:100dvh; }
+    .top { padding:calc(14px + var(--safe-t)) 18px 10px; display:flex; justify-content:space-between; align-items:center; position:relative; z-index:20; }
+    .brand { letter-spacing:.16em; font-size:13px; color:var(--gold2); font-weight:600; }
+    .ghost { background:transparent; border:1px solid var(--line); color:var(--muted); border-radius:999px; padding:7px 12px; font-size:12px; cursor:pointer; }
+    .hero { padding:4px 18px 12px; position:relative; z-index:20; }
+    .eyebrow { color:var(--gold); font-size:11px; letter-spacing:.2em; text-transform:uppercase; }
+    h1 { font-size:26px; font-weight:560; margin-top:4px; }
+    .sub { color:var(--muted); font-size:14px; margin-top:4px; }
+    #map { height:210px; margin:0 18px 12px; border-radius:16px; border:1px solid var(--line); z-index:1 !important; position:relative; }
+    .leaflet-pane, .leaflet-top, .leaflet-bottom, .leaflet-control { z-index:1 !important; }
+    .scroll { padding:0 18px calc(16px + var(--safe-b)); position:relative; z-index:20; }
+    .job { background:var(--bg2); border:1px solid var(--line); border-radius:16px; padding:14px; margin-bottom:10px; }
+    .row { display:flex; justify-content:space-between; gap:8px; align-items:baseline; }
     .name { font-size:17px; font-weight:560; }
-    .meta { color:var(--muted); font-size:13px; margin-top:4px; }
+    .src { font-size:10px; letter-spacing:.12em; color:var(--gold); text-transform:uppercase; }
+    .meta { color:var(--muted); font-size:13px; margin-top:4px; line-height:1.4; }
     select, input { width:100%; background:#1C1C20; border:1px solid var(--line); color:var(--text); border-radius:12px; padding:10px 12px; font-size:15px; margin-top:10px; }
-    .chip { display:inline-block; margin-top:8px; margin-right:6px; font-size:11px; border:1px solid var(--line); color:var(--muted); padding:4px 8px; border-radius:999px; }
-    .chip.gold { color:var(--gold2); }
-    .sheet { display:none; position:fixed; inset:0; background:rgba(0,0,0,.8); align-items:flex-end; z-index:99999; }
+    .chip { display:inline-block; margin-top:8px; font-size:11px; border:1px solid var(--line); color:var(--muted); padding:4px 8px; border-radius:999px; }
+    .chip.gold { color:var(--gold2); border-color:rgba(196,165,116,.35); }
+    .sheet { display:none; position:fixed; inset:0; background:rgba(0,0,0,.8); align-items:flex-end; z-index:99999 !important; }
     .sheet.show { display:flex; }
-    .panel { width:100%; background:#161618; border-radius:24px 24px 0 0; padding:16px 18px 28px; }
-    .primary { width:100%; border:0; border-radius:14px; padding:14px; font-weight:600; background:linear-gradient(180deg,var(--gold2),var(--gold)); color:#16110a; margin-top:12px; }
-    .ghost { width:100%; margin-top:10px; background:transparent; border:1px solid var(--line); color:var(--muted); border-radius:14px; padding:12px; }
-    .live { float:right; background:#14352c; color:var(--ok); border-radius:999px; padding:4px 8px; font-size:11px; }
-    .toast { position:fixed; left:50%; bottom:24px; transform:translateX(-50%); background:#222; padding:10px 14px; border-radius:999px; opacity:0; }
-    .toast.show { opacity:1; }
+    .panel { width:100%; background:#161618; border-radius:24px 24px 0 0; padding:16px 18px calc(18px + var(--safe-b)); max-height:88vh; overflow:auto; }
     label { display:block; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:10px 0 6px; }
+    .primary { width:100%; border:0; border-radius:14px; padding:14px; font-weight:600; background:linear-gradient(180deg,var(--gold2),var(--gold)); color:#16110a; margin-top:12px; cursor:pointer; }
+    .toast { position:fixed; left:50%; bottom:24px; transform:translateX(-50%); background:#222; border:1px solid var(--line); padding:10px 14px; border-radius:999px; font-size:13px; opacity:0; z-index:100000; }
+    .toast.show { opacity:1; }
+    .banner { margin:0 18px 10px; padding:10px 12px; border:1px solid var(--line); border-radius:12px; color:var(--muted); font-size:13px; position:relative; z-index:20; }
+    .banner.on { color:var(--ok); border-color:rgba(125,207,182,.3); }
   </style>
 </head>
 <body>
-  <div class="head">
+  <div class="top">
+    <div class="brand">JEAN LIMO DISPATCH</div>
     <div>
-      <h1>Daily Dispatch</h1>
-      <div class="co">Jean Limo · Houston Operations</div>
-    </div>
-    <a class="goldbtn" href="https://jeanlimo.com" target="_blank">+ New Reservation</a>
-  </div>
-
-  <div class="card">
-    <div class="lbl">Dispatch date</div>
-    <div class="datebox" id="date-label">Today</div>
-    <div class="row2">
-      <button type="button" id="prev">‹ Previous</button>
-      <button type="button" id="today">Today</button>
+      <button class="ghost" type="button" id="refresh">Refresh</button>
+      <button class="ghost" type="button" id="add-driver">Add driver</button>
     </div>
   </div>
-
-  <div class="card"><div class="lbl">Active / Upcoming</div><div class="stat" id="n-active">0</div></div>
-  <div class="card"><div class="lbl">Unassigned</div><div class="stat" id="n-open">0</div></div>
-  <div class="card"><div class="lbl">Booked Revenue</div><div class="stat" id="n-rev">$0</div></div>
-  <div class="card"><div class="lbl">Drivers Active</div><div class="stat" id="n-drv">0</div></div>
-
-  <div class="card">
-    <span class="live" id="n-live">0 LIVE</span>
-    <div class="lbl">Live chauffeur GPS</div>
-    <div class="meta">Drivers sharing location in the last 2 minutes</div>
-    <div id="map"></div>
+  <div class="hero">
+    <div class="eyebrow">Live board</div>
+    <h1>Assign jobs</h1>
+    <p class="sub">Pick a chauffeur. Their phone shares GPS while the trip is live.</p>
   </div>
-
-  <div class="row2" style="margin-bottom:12px">
-    <button type="button" id="settings">Setup</button>
-    <button type="button" id="add-driver">Add driver</button>
+  <div class="banner" id="mode">Offline demo — connect Supabase below to load real bookings</div>
+  <div class="scroll" style="padding-bottom:8px">
+    <button class="primary" type="button" id="settings" style="margin:0 0 12px">Connect Supabase / Setup</button>
   </div>
+  <div id="map"></div>
+  <div class="scroll" id="list"></div>
 
-  <div id="list"></div>
-
-  <div class="sheet" id="sheet">
-    <div class="panel">
-      <div class="lbl">Supabase</div>
-      <h1 style="font-size:22px;margin:8px 0">Connect bookings</h1>
-      <label>Project URL</label>
-      <input id="sb-url" />
-      <label>Anon public key</label>
-      <input id="sb-key" />
-      <button class="primary" type="button" id="save-sb">Save and load jobs</button>
-      <button class="ghost" type="button" id="close-sheet">Close</button>
-    </div>
-  </div>
   <div class="sheet" id="driver-sheet">
     <div class="panel">
-      <div class="lbl">Roster</div>
+      <div class="eyebrow">Roster</div>
       <h1 style="font-size:22px;margin:8px 0">Add a driver</h1>
-      <label>Name</label><input id="dr-name" />
-      <label>Phone</label><input id="dr-phone" />
-      <label>PIN</label><input id="dr-pin" inputmode="numeric" />
-      <label>Vehicle</label><input id="dr-car" placeholder="sedan" />
+      <label>Name</label>
+      <input id="dr-name" placeholder="Full name" />
+      <label>Phone</label>
+      <input id="dr-phone" type="tel" placeholder="2815550100" />
+      <label>PIN for driver app</label>
+      <input id="dr-pin" inputmode="numeric" placeholder="e.g. 3333" />
+      <label>Vehicle</label>
+      <input id="dr-car" placeholder="sedan" />
       <button class="primary" type="button" id="save-driver">Save driver</button>
-      <button class="ghost" type="button" id="close-driver">Close</button>
+      <button class="ghost" type="button" style="width:100%;margin-top:10px;padding:12px" id="close-driver">Close</button>
+    </div>
+  </div>
+  <div class="sheet" id="sheet">
+    <div class="panel">
+      <div class="eyebrow">Supabase</div>
+      <h1 style="font-size:22px;margin:8px 0">Connect bookings</h1>
+      <label>Project URL</label>
+      <input id="sb-url" placeholder="https://xxxx.supabase.co" />
+      <label>Anon public key</label>
+      <input id="sb-key" placeholder="eyJ..." />
+      <button class="primary" type="button" id="save-sb">Save and load jobs</button>
+      <button class="ghost" type="button" style="width:100%;margin-top:10px;padding:12px" id="close-sheet">Close</button>
     </div>
   </div>
   <div class="toast" id="toast"></div>
@@ -106,94 +94,92 @@
   <script src="config.js"></script>
   <script src="jl.js"></script>
   <script>
-    const toast = m => { const t=document.getElementById("toast"); t.textContent=m; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),2000); };
-    let jobs=[], drivers=[], map, markers={}, day = new Date();
-    function ymd(d){ return d.toISOString().slice(0,10); }
-    function label(){
-      document.getElementById("date-label").textContent = day.toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
+    const toast = (m) => { const t = document.getElementById("toast"); t.textContent = m; t.classList.add("show"); setTimeout(() => t.classList.remove("show"), 2200); };
+    let jobs = [], drivers = [], map, markers = {};
+    function connected() {
+      const c = JL.cfg();
+      return !!(c.supabaseUrl && c.supabaseAnonKey);
     }
-    function initMap(){
+    function openSetup() {
+      document.getElementById("sb-url").value = localStorage.getItem("jl_supabase_url") || "https://zfsthgozqowubpmscibd.supabase.co";
+      document.getElementById("sb-key").value = localStorage.getItem("jl_supabase_key") || "";
+      document.getElementById("sheet").classList.add("show");
+    }
+    function initMap() {
       try {
-        map = L.map("map",{zoomControl:false}).setView([29.76,-95.37],10);
-        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
-      } catch(e){}
+        map = L.map("map", { zoomControl: false }).setView([29.76, -95.37], 10);
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "OSM" }).addTo(map);
+      } catch (e) {}
     }
-    function drawMap(){
-      if(!map) return;
-      Object.values(markers).forEach(m=>map.removeLayer(m)); markers={};
-      const pts=[]; let live=0;
-      drivers.forEach(d=>{
-        if(d.last_lat && d.last_lng){
-          live++;
-          const m=L.circleMarker([d.last_lat,d.last_lng],{radius:8,color:"#C4A574",fillColor:"#E8D3B0",fillOpacity:1}).addTo(map);
-          m.bindPopup(d.name); markers[d.id]=m; pts.push([d.last_lat,d.last_lng]);
+    function drawMap() {
+      if (!map) return;
+      Object.values(markers).forEach(m => map.removeLayer(m));
+      markers = {};
+      const pts = [];
+      drivers.forEach(d => {
+        if (d.last_lat && d.last_lng) {
+          const m = L.circleMarker([d.last_lat, d.last_lng], { radius: 8, color: "#C4A574", fillColor: "#E8D3B0", fillOpacity: 1 }).addTo(map);
+          m.bindPopup(d.name);
+          markers[d.id] = m;
+          pts.push([d.last_lat, d.last_lng]);
         }
       });
-      document.getElementById("n-live").textContent = live + " LIVE";
-      document.getElementById("n-drv").textContent = live;
-      if(pts.length) map.fitBounds(pts,{padding:[24,24],maxZoom:12});
+      if (pts.length) map.fitBounds(pts, { padding: [30, 30], maxZoom: 12 });
     }
-    function sameDay(j){
-      const d = j.rideDate || String(j.when||"").slice(0,10);
-      return d === ymd(day);
-    }
-    function render(){
-      const dayJobs = jobs.filter(sameDay);
-      const active = dayJobs.filter(j => j.tripStatus !== "dropped_off");
-      const open = dayJobs.filter(j => !j.assignedDriverId);
-      const rev = dayJobs.reduce((s,j)=>s+(j.amountCents||0),0);
-      document.getElementById("n-active").textContent = active.length;
-      document.getElementById("n-open").textContent = open.length;
-      document.getElementById("n-rev").textContent = "$" + (rev/100).toFixed(0);
-      const box=document.getElementById("list");
-      const show = dayJobs.length ? dayJobs : jobs.slice(0,20);
-      if(!show.length){ box.innerHTML="<p class='meta'>No jobs</p>"; drawMap(); return; }
-      if(!dayJobs.length) box.innerHTML = "<p class='meta' style='margin-bottom:10px'>No jobs on this date. Showing all bookings.</p>";
-      else box.innerHTML="";
-      box.innerHTML += show.map(j=>{
-        const d=drivers.find(x=>x.id===j.assignedDriverId);
-        const opts="<option value=\"\">Unassigned</option>"+drivers.map(dr=>"<option value=\""+dr.id+"\" "+(dr.id===j.assignedDriverId?"selected":"")+">"+JL.esc(dr.name)+"</option>").join("");
-        return "<div class='job'><div style='display:flex;justify-content:space-between'><div class='name'>"+JL.esc(j.guestName)+"</div><div class='lbl'>"+JL.esc(j.conf||"")+"</div></div><div class='meta'>"+JL.esc(j.when||"")+" · "+JL.esc(JL.shortAddr(j.pickup))+"</div><div class='meta'>→ "+JL.esc(JL.shortAddr(j.dropoff))+"</div><span class='chip "+(d?"gold":"")+"'>"+(d?("Driver "+JL.esc(d.name)):"Unassigned")+"</span><span class='chip'>"+JL.esc(j.tripStatus||"")+"</span><select data-assign='"+JL.esc(j.id)+"'>"+opts+"</select></div>";
+    function render() {
+      document.getElementById("mode").className = "banner" + (connected() ? " on" : "");
+      document.getElementById("mode").textContent = connected() ? "Connected to Supabase — live bookings" : "Offline demo — connect Supabase below to load real bookings";
+      const box = document.getElementById("list");
+      if (!jobs.length) { box.innerHTML = "<p class='sub'>No jobs</p>"; return; }
+      box.innerHTML = jobs.map(j => {
+        const d = drivers.find(x => x.id === j.assignedDriverId);
+        const opts = "<option value=\"\">Unassigned</option>" + drivers.map(dr =>
+          "<option value=\""+dr.id+"\" "+(dr.id===j.assignedDriverId?"selected":"")+">"+JL.esc(dr.name)+"</option>"
+        ).join("");
+        return "<div class=\"job\"><div class=\"row\"><div class=\"name\">"+JL.esc(j.guestName)+"</div><div class=\"src\">"+JL.esc(j.conf||"")+"</div></div><div class=\"meta\">"+JL.esc(j.when||"")+" · "+JL.esc(JL.shortAddr(j.pickup))+"</div><div class=\"meta\">→ "+JL.esc(JL.shortAddr(j.dropoff))+"</div><span class=\"chip "+(d?"gold":"")+"\">"+(d?("Driver "+JL.esc(d.name)):"Unassigned")+"</span><span class=\"chip\">"+JL.esc(j.tripStatus||"confirmed")+"</span><select data-assign=\""+JL.esc(j.id)+"\">"+opts+"</select></div>";
       }).join("");
-      box.querySelectorAll("[data-assign]").forEach(sel=>{
-        sel.onchange=async()=>{
-          const job=jobs.find(j=>j.id===sel.dataset.assign);
+      box.querySelectorAll("[data-assign]").forEach(sel => {
+        sel.onchange = async () => {
+          const job = jobs.find(j => j.id === sel.dataset.assign);
           await JL.assignDriver(job, sel.value);
-          toast(sel.value?"Driver assigned":"Unassigned");
+          toast(sel.value ? "Driver assigned" : "Unassigned");
           await load();
         };
       });
       drawMap();
     }
-    async function load(){
+    async function load() {
       drivers = await JL.listDrivers();
       jobs = await JL.listJobs();
-      label(); render();
+      render();
     }
-    document.getElementById("prev").onclick=()=>{ day.setDate(day.getDate()-1); load(); };
-    document.getElementById("today").onclick=()=>{ day=new Date(); load(); };
-    document.getElementById("settings").onclick=()=>{
-      document.getElementById("sb-url").value=localStorage.getItem("jl_supabase_url")||"https://zfsthgozqowubpmscibd.supabase.co";
-      document.getElementById("sb-key").value=localStorage.getItem("jl_supabase_key")||"";
-      document.getElementById("sheet").classList.add("show");
+    document.getElementById("settings").onclick = openSetup;
+    document.getElementById("add-driver").onclick = () => document.getElementById("driver-sheet").classList.add("show");
+    document.getElementById("close-driver").onclick = () => document.getElementById("driver-sheet").classList.remove("show");
+    document.getElementById("save-driver").onclick = async () => {
+      try {
+        const d = await JL.addDriver({
+          name: document.getElementById("dr-name").value,
+          phone: document.getElementById("dr-phone").value,
+          pin: document.getElementById("dr-pin").value,
+          vehicle: document.getElementById("dr-car").value
+        });
+        document.getElementById("driver-sheet").classList.remove("show");
+        toast(d.name + " added");
+        await load();
+      } catch (e) { toast(e.message || "Could not add driver"); }
     };
-    document.getElementById("close-sheet").onclick=()=>document.getElementById("sheet").classList.remove("show");
-    document.getElementById("save-sb").onclick=async()=>{
+    document.getElementById("refresh").onclick = load;
+    document.getElementById("close-sheet").onclick = () => document.getElementById("sheet").classList.remove("show");
+    document.getElementById("save-sb").onclick = async () => {
       localStorage.setItem("jl_supabase_url", document.getElementById("sb-url").value.trim());
       localStorage.setItem("jl_supabase_key", document.getElementById("sb-key").value.trim());
       document.getElementById("sheet").classList.remove("show");
       await load();
     };
-    document.getElementById("add-driver").onclick=()=>document.getElementById("driver-sheet").classList.add("show");
-    document.getElementById("close-driver").onclick=()=>document.getElementById("driver-sheet").classList.remove("show");
-    document.getElementById("save-driver").onclick=async()=>{
-      try{
-        const d=await JL.addDriver({name:document.getElementById("dr-name").value,phone:document.getElementById("dr-phone").value,pin:document.getElementById("dr-pin").value,vehicle:document.getElementById("dr-car").value});
-        document.getElementById("driver-sheet").classList.remove("show");
-        toast(d.name+" added"); await load();
-      }catch(e){ toast(e.message||"Could not add"); }
-    };
-    initMap(); load(); setInterval(load,20000);
+    initMap();
+    load();
+    setInterval(load, 20000);
   </script>
 </body>
 </html>
