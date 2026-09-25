@@ -11,8 +11,8 @@
   });
 
   const DEMO_DRIVERS = [
-    { id: "d_cash", name: "Cash", phone: "2819170085", pin: "1111", vehicle: "sedan", last_lat: 29.7604, last_lng: -95.3698 },
-    { id: "d_jeannie", name: "Jeannie", phone: "2819170929", pin: "2222", vehicle: "sedan", last_lat: 29.6198, last_lng: -95.6349 }
+    { id: "d_cash", name: "Cash", phone: "2819170085", pin: "1111", vehicle: "sedan", photo_url: "", last_lat: 29.7604, last_lng: -95.3698 },
+    { id: "d_jeannie", name: "Jeannie", phone: "2819170929", pin: "2222", vehicle: "sedan", photo_url: "", last_lat: 29.6198, last_lng: -95.6349 }
   ];
 
   function digits(p) {
@@ -47,6 +47,28 @@
       dropped_off_guest: "Hi " + guest + ", you've been dropped off. Thank you — " + dname + ", Jean Limo.",
       dropped_off_owner: ("DONE: " + job.guestName + " dropped off by " + dname + ". " + (job.conf || "")).replace(/\s+/g, " ").trim()
     };
+  }
+  function shrinkPhoto(file) {
+    return new Promise((resolve, reject) => {
+      if (!file) return resolve("");
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        const size = 256;
+        const canvas = document.createElement("canvas");
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext("2d");
+        const side = Math.min(img.width, img.height);
+        const sx = (img.width - side) / 2;
+        const sy = (img.height - side) / 2;
+        ctx.drawImage(img, sx, sy, side, side, 0, 0, size, size);
+        URL.revokeObjectURL(url);
+        resolve(canvas.toDataURL("image/jpeg", 0.72));
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("Could not read photo")); };
+      img.src = url;
+    });
   }
   let client = null;
   function sb() {
@@ -107,8 +129,15 @@
       { id: "JL-260921-XGTN", bookingId: "local-1", conf: "JL-260921-XGTN", guestName: "Tien Lam", guestPhone: "2819170085", when: "2026-09-24 22:00", rideDate: "2026-09-24", pickup: "11002 Myrtle Dr, Sugar Land, TX", dropoff: "12888 S Texas 6, Sugar Land, TX", assignedDriverId: "", tripStatus: "confirmed", amountCents: 0 }
     ];
   }
-  async function addDriver({ name, phone, pin, vehicle }) {
-    const row = { name: String(name || "").trim(), phone: String(phone || "").replace(/\D/g, ""), pin: String(pin || "").trim(), vehicle: String(vehicle || "sedan").trim() || "sedan", active: true };
+  async function addDriver({ name, phone, pin, vehicle, photo_url }) {
+    const row = {
+      name: String(name || "").trim(),
+      phone: String(phone || "").replace(/\D/g, ""),
+      pin: String(pin || "").trim(),
+      vehicle: String(vehicle || "sedan").trim() || "sedan",
+      photo_url: String(photo_url || "").trim(),
+      active: true
+    };
     if (!row.name) throw new Error("Name required");
     const db = sb();
     if (db) {
@@ -119,6 +148,18 @@
     const list = loadLocal("jl_drivers", DEMO_DRIVERS);
     const local = { ...row, id: "d_" + Date.now() };
     list.push(local); saveLocal("jl_drivers", list); return local;
+  }
+  async function updateDriver(id, patch) {
+    if (!id) throw new Error("Driver required");
+    const db = sb();
+    if (db) {
+      const { data, error } = await db.from("drivers").update(patch).eq("id", id).select("*").single();
+      if (error) throw error;
+      return data;
+    }
+    const list = loadLocal("jl_drivers", DEMO_DRIVERS).map((d) => d.id === id ? { ...d, ...patch } : d);
+    saveLocal("jl_drivers", list);
+    return list.find((d) => d.id === id);
   }
   async function assignDriver(job, driverId) {
     const db = sb();
@@ -143,5 +184,5 @@
       }
     }
   }
-  w.JL = { cfg, digits, prettyPhone, firstName, shortAddr, esc, smsUrl, messages, sb, listDrivers, listJobs, addDriver, assignDriver, setTripStatus, pingGps, DEMO_DRIVERS, saveLocal, loadLocal };
+  w.JL = { cfg, digits, prettyPhone, firstName, shortAddr, esc, smsUrl, messages, sb, listDrivers, listJobs, addDriver, updateDriver, shrinkPhoto, assignDriver, setTripStatus, pingGps, DEMO_DRIVERS, saveLocal, loadLocal };
 })(window);
