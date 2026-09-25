@@ -17,6 +17,9 @@
     .eyebrow { color:var(--gold); font-size:11px; letter-spacing:.2em; text-transform:uppercase; }
     h1 { font-size:26px; font-weight:560; margin-top:4px; }
     .sub { color:var(--muted); font-size:14px; margin-top:4px; }
+    .stats { display:flex; gap:10px; margin:0 18px 12px; position:relative; z-index:20; }
+    .stat { flex:1; background:var(--bg2); border:1px solid var(--line); border-radius:16px; padding:12px; }
+    .stat b { display:block; font-size:28px; font-weight:650; margin-top:4px; }
     #map { height:210px; margin:0 18px 12px; border-radius:16px; border:1px solid var(--line); z-index:1 !important; position:relative; }
     .leaflet-pane, .leaflet-top, .leaflet-bottom, .leaflet-control { z-index:1 !important; }
     .scroll { padding:0 18px calc(16px + var(--safe-b)); position:relative; z-index:20; }
@@ -51,6 +54,10 @@
     <div class="eyebrow">Live board</div>
     <h1>Assign jobs</h1>
     <p class="sub">Pick a chauffeur. Their phone shares GPS while the trip is live.</p>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="eyebrow">Today</div><b id="n-today">0</b></div>
+    <div class="stat"><div class="eyebrow">Upcoming</div><b id="n-up">0</b></div>
   </div>
   <div class="banner" id="mode">Offline demo — connect Supabase below to load real bookings</div>
   <div class="scroll" style="padding-bottom:8px">
@@ -96,6 +103,11 @@
   <script>
     const toast = (m) => { const t = document.getElementById("toast"); t.textContent = m; t.classList.add("show"); setTimeout(() => t.classList.remove("show"), 2200); };
     let jobs = [], drivers = [], map, markers = {};
+    function todayStr() {
+      const d = new Date();
+      return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+    }
+    function jobDate(j) { return j.rideDate || String(j.when || "").slice(0,10); }
     function connected() {
       const c = JL.cfg();
       return !!(c.supabaseUrl && c.supabaseAnonKey);
@@ -129,6 +141,10 @@
     function render() {
       document.getElementById("mode").className = "banner" + (connected() ? " on" : "");
       document.getElementById("mode").textContent = connected() ? "Connected to Supabase — live bookings" : "Offline demo — connect Supabase below to load real bookings";
+      const t = todayStr();
+      const open = jobs.filter(j => j.tripStatus !== "dropped_off");
+      document.getElementById("n-today").textContent = open.filter(j => jobDate(j) === t).length;
+      document.getElementById("n-up").textContent = open.filter(j => jobDate(j) > t).length;
       const box = document.getElementById("list");
       if (!jobs.length) { box.innerHTML = "<p class='sub'>No jobs</p>"; return; }
       box.innerHTML = jobs.map(j => {
