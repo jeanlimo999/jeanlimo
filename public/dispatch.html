@@ -107,9 +107,37 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
-  <script src="jl.js"></script>
+  <script src="jl.js?v=photo2"></script>
   <script>
     const toast = (m) => { const t = document.getElementById("toast"); t.textContent = m; t.classList.add("show"); setTimeout(() => t.classList.remove("show"), 2200); };
+    function shrinkPhoto(file) {
+      if (window.JL && typeof JL.shrinkPhoto === "function") return JL.shrinkPhoto(file);
+      return new Promise((resolve, reject) => {
+        if (!file) return resolve("");
+        const img = new Image();
+        const url = URL.createObjectURL(file);
+        img.onload = () => {
+          const size = 256;
+          const canvas = document.createElement("canvas");
+          canvas.width = size; canvas.height = size;
+          const ctx = canvas.getContext("2d");
+          const side = Math.min(img.width, img.height);
+          ctx.drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, size, size);
+          URL.revokeObjectURL(url);
+          resolve(canvas.toDataURL("image/jpeg", 0.72));
+        };
+        img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("Could not read photo")); };
+        img.src = url;
+      });
+    }
+    async function saveDriverPhoto(id, photo) {
+      if (window.JL && typeof JL.updateDriver === "function") return JL.updateDriver(id, { photo_url: photo });
+      const db = JL.sb && JL.sb();
+      if (!db) throw new Error("Connect Supabase first");
+      const { data, error } = await db.from("drivers").update({ photo_url: photo }).eq("id", id).select("*").single();
+      if (error) throw error;
+      return data;
+    }
     let jobs = [], drivers = [], map, markers = {};
     function todayStr() {
       const d = new Date();
@@ -137,8 +165,8 @@
       box.querySelectorAll("[data-photo]").forEach(inp => {
         inp.onchange = async () => {
           try {
-            const photo = await JL.shrinkPhoto(inp.files[0]);
-            await JL.updateDriver(inp.dataset.photo, { photo_url: photo });
+            const photo = await shrinkPhoto(inp.files[0]);
+            await saveDriverPhoto(inp.dataset.photo, photo);
             toast("Photo saved");
             await load();
             renderRoster();
@@ -205,7 +233,7 @@
     document.getElementById("save-driver").onclick = async () => {
       try {
         const file = document.getElementById("dr-photo-file").files[0];
-        const photo = file ? await JL.shrinkPhoto(file) : document.getElementById("dr-photo-url").value.trim();
+        const photo = file ? await shrinkPhoto(file) : document.getElementById("dr-photo-url").value.trim();
         const d = await JL.addDriver({
           name: document.getElementById("dr-name").value,
           phone: document.getElementById("dr-phone").value,
