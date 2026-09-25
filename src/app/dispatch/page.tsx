@@ -30,20 +30,32 @@ function shrinkPhoto(file: File) {
   });
 }
 
+const inputCls = "w-full rounded-2xl border border-white/10 bg-[#1C1C20] px-4 py-4 outline-none";
+
 export default function DispatchPage() {
   const [authed, setAuthed] = useState<boolean | null>(null);
-  const [pin, setPin] = useState("");
+  const [needsSetup, setNeedsSetup] = useState(false);
+  const [who, setWho] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
   const [drivers, setDrivers] = useState<any[]>([]);
   const [jobs, setJobs] = useState<any[]>([]);
   const [err, setErr] = useState("");
   const [msg, setMsg] = useState("");
   const [rosterOpen, setRosterOpen] = useState(false);
   const [form, setForm] = useState({ name: "", phone: "", pin: "", vehicle: "sedan" });
+  const [owner, setOwner] = useState({ name: "", email: "", password: "" });
 
   async function check() {
     const res = await fetch("/api/dispatch/me");
+    const data = await res.json().catch(() => ({}));
+    setNeedsSetup(!!data.needsSetup);
     setAuthed(res.ok);
-    if (res.ok) await load();
+    if (res.ok) {
+      setWho(data.name || data.email || "");
+      await load();
+    }
   }
 
   async function load() {
@@ -78,16 +90,52 @@ export default function DispatchPage() {
     const res = await fetch("/api/dispatch/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ pin }),
+      body: JSON.stringify({ email, password }),
     });
     const data = await res.json();
     if (!res.ok) {
-      setErr(data.error || "Wrong PIN");
+      setErr(data.error || "Wrong email or password");
       return;
     }
-    setPin("");
+    setPassword("");
+    setWho(data.name || data.email || "");
     setAuthed(true);
     await load();
+  }
+
+  async function setup(e: React.FormEvent) {
+    e.preventDefault();
+    setErr("");
+    const res = await fetch("/api/dispatch/setup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password, name }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      setErr(data.error || "Could not create owner");
+      return;
+    }
+    setNeedsSetup(false);
+    setPassword("");
+    setWho(data.name || data.email || "");
+    setAuthed(true);
+    await load();
+  }
+
+  async function addOwner(e: React.FormEvent) {
+    e.preventDefault();
+    const res = await fetch("/api/dispatch/users", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(owner),
+    });
+    const data = await res.json();
+    if (!res.ok) setErr(data.error || "Could not add owner");
+    else {
+      setMsg("Owner added: " + (data.user?.email || owner.email));
+      setOwner({ name: "", email: "", password: "" });
+    }
   }
 
   async function assign(job: any, driverId: string) {
@@ -145,20 +193,21 @@ export default function DispatchPage() {
       <div className="min-h-screen bg-[#0B0B0C] text-[#F6F1E8]">
         <div className="mx-auto max-w-md px-5 pt-16">
           <div className="text-[13px] tracking-[0.16em] text-[#E8D3B0]">JEAN LIMO DISPATCH</div>
-          <h1 className="mt-6 text-3xl font-semibold">Owner login</h1>
-          <p className="mt-2 text-sm text-[#9A9388]">PIN is checked on the server. It is not in the page source.</p>
-          <form onSubmit={login} className="mt-8">
-            <input
-              type="password"
-              inputMode="numeric"
-              value={pin}
-              onChange={(e) => setPin(e.target.value)}
-              placeholder="Dispatch PIN"
-              className="w-full rounded-2xl border border-white/10 bg-[#1C1C20] px-4 py-4 outline-none"
-            />
-            {err && <p className="mt-3 text-sm text-red-400">{err}</p>}
-            <button className="mt-4 w-full rounded-2xl bg-gradient-to-b from-[#E8D3B0] to-[#C4A574] py-4 font-semibold text-[#16110a]">
-              Open dispatch
+          <h1 className="mt-6 text-3xl font-semibold">{needsSetup ? "Create owner login" : "Owner login"}</h1>
+          <p className="mt-2 text-sm text-[#9A9388]">
+            {needsSetup
+              ? "First time only. Password is stored hashed on the server, not in the page."
+              : "Email and password are checked on the server."}
+          </p>
+          <form onSubmit={needsSetup ? setup : login} className="mt-8 space-y-3">
+            {needsSetup && (
+              <input className={inputCls} placeholder="Your name" value={name} onChange={(e) => setName(e.target.value)} />
+            )}
+            <input className={inputCls} type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            <input className={inputCls} type="password" placeholder="Password (8+ characters)" value={password} onChange={(e) => setPassword(e.target.value)} required />
+            {err && <p className="text-sm text-red-400">{err}</p>}
+            <button className="w-full rounded-2xl bg-gradient-to-b from-[#E8D3B0] to-[#C4A574] py-4 font-semibold text-[#16110a]">
+              {needsSetup ? "Create login" : "Sign in"}
             </button>
           </form>
         </div>
@@ -172,12 +221,8 @@ export default function DispatchPage() {
         <div className="flex items-center justify-between">
           <div className="text-[13px] tracking-[0.16em] text-[#E8D3B0]">JEAN LIMO DISPATCH</div>
           <div className="flex gap-2">
-            <button onClick={() => load()} className="rounded-full border border-white/10 px-3 py-1 text-xs text-[#9A9388]">
-              Refresh
-            </button>
-            <button onClick={() => setRosterOpen(!rosterOpen)} className="rounded-full border border-white/10 px-3 py-1 text-xs text-[#9A9388]">
-              Drivers
-            </button>
+            <button onClick={() => load()} className="rounded-full border border-white/10 px-3 py-1 text-xs text-[#9A9388]">Refresh</button>
+            <button onClick={() => setRosterOpen(!rosterOpen)} className="rounded-full border border-white/10 px-3 py-1 text-xs text-[#9A9388]">Drivers</button>
             <button
               onClick={async () => {
                 await fetch("/api/dispatch/logout", { method: "POST" });
@@ -189,7 +234,7 @@ export default function DispatchPage() {
             </button>
           </div>
         </div>
-        <p className="mt-4 text-[11px] tracking-[0.2em] uppercase text-[#C4A574]">Live board</p>
+        <p className="mt-4 text-[11px] uppercase tracking-[0.2em] text-[#C4A574]">Live board{who ? ` · ${who}` : ""}</p>
         <h1 className="text-3xl font-semibold">Assign jobs</h1>
         <div className="mt-4 grid grid-cols-2 gap-3">
           <div className="rounded-2xl border border-white/10 bg-[#141416] p-4">
@@ -212,9 +257,7 @@ export default function DispatchPage() {
                 {d.photo_url ? (
                   <img src={d.photo_url} alt="" className="h-10 w-10 rounded-full object-cover" />
                 ) : (
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#2a2418] text-[#E8D3B0]">
-                    {String(d.name || "J").charAt(0)}
-                  </div>
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#2a2418] text-[#E8D3B0]">{String(d.name || "J").charAt(0)}</div>
                 )}
                 <div className="flex-1 text-sm">{d.name}</div>
                 <input type="file" accept="image/*" onChange={(e) => savePhoto(d.id, e.target.files?.[0])} />
@@ -225,6 +268,13 @@ export default function DispatchPage() {
               <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" placeholder="Phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
               <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" placeholder="Driver app PIN" value={form.pin} onChange={(e) => setForm({ ...form, pin: e.target.value })} />
               <button className="rounded-xl bg-gradient-to-b from-[#E8D3B0] to-[#C4A574] py-3 font-semibold text-[#16110a]">Save driver</button>
+            </form>
+            <form onSubmit={addOwner} className="mt-6 grid gap-2 border-t border-white/10 pt-4">
+              <div className="text-[11px] uppercase tracking-widest text-[#C4A574]">Add another owner</div>
+              <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" placeholder="Name" value={owner.name} onChange={(e) => setOwner({ ...owner, name: e.target.value })} />
+              <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" placeholder="Email" value={owner.email} onChange={(e) => setOwner({ ...owner, email: e.target.value })} />
+              <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" type="password" placeholder="Password" value={owner.password} onChange={(e) => setOwner({ ...owner, password: e.target.value })} />
+              <button className="rounded-xl border border-[#C4A574]/40 py-3 text-sm text-[#E8D3B0]">Add owner login</button>
             </form>
           </div>
         )}
@@ -239,21 +289,13 @@ export default function DispatchPage() {
                     <div className="text-lg font-medium">{j.guestName}</div>
                     <div className="text-[10px] tracking-widest text-[#C4A574]">{j.confirmation}</div>
                   </div>
-                  <div className="mt-1 text-sm text-[#9A9388]">
-                    {j.when} · {shortAddr(j.pickup)}
-                  </div>
+                  <div className="mt-1 text-sm text-[#9A9388]">{j.when} · {shortAddr(j.pickup)}</div>
                   <div className="text-sm text-[#9A9388]">→ {shortAddr(j.dropoff)}</div>
                   <div className="mt-2 text-xs text-[#E8D3B0]">{d ? `Driver ${d.name}` : "Unassigned"}</div>
-                  <select
-                    className="mt-3 w-full rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2"
-                    value={j.assignedDriverId || ""}
-                    onChange={(e) => assign(j, e.target.value)}
-                  >
+                  <select className="mt-3 w-full rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" value={j.assignedDriverId || ""} onChange={(e) => assign(j, e.target.value)}>
                     <option value="">Unassigned</option>
                     {drivers.map((dr) => (
-                      <option key={dr.id} value={dr.id}>
-                        {dr.name}
-                      </option>
+                      <option key={dr.id} value={dr.id}>{dr.name}</option>
                     ))}
                   </select>
                 </div>
