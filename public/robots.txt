@@ -1,8 +1,0 @@
-User-agent: *
-Allow: /
-
-Disallow: /dispatch
-Disallow: /api/
-Disallow: /app
-
-Sitemap: https://jeanlimo.com/sitemap.xml
