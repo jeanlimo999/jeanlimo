@@ -47,16 +47,13 @@ export default function Home() {
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-start">
             <div>
               <p className="text-yellow-500 tracking-[0.25em] text-xs uppercase mb-4">
-                Premium Chauffeur Service · Houston, TX
+                Private Chauffeur Service · Houston, TX
               </p>
               <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl leading-tight mb-6">
-                Ride in Comfort.
-                <br />
-                <span className="gold-text">Arrive with Style.</span>
+                Houston Black Car, Airport & Private Chauffeur Service
               </h1>
               <p className="text-zinc-300 text-lg max-w-lg mb-8">
-                Black car, SUV & Sprinter service for airport transfers, Galveston cruise,
-                corporate travel, hourly chauffeur and special events across Greater Houston.
+                Jean Limo LLC provides private chauffeur, black car, SUV and Sprinter transportation throughout Greater Houston. We serve IAH and Hobby Airport, Downtown Houston, Sugar Land, Galveston cruise terminals, corporate travel, hourly service and special events.
               </p>
               <div className="flex flex-wrap gap-4 mb-10">
                 <div className="flex items-center gap-2 text-sm text-zinc-300">
