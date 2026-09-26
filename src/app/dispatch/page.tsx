@@ -6,6 +6,10 @@ function shortAddr(a?: string) {
   return String(a || "").split(",")[0];
 }
 
+function money(cents: number) {
+  return "$" + (Number(cents || 0) / 100).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+
 function shrinkPhoto(file: File) {
   return new Promise<string>((resolve, reject) => {
     const img = new Image();
@@ -13,8 +17,7 @@ function shrinkPhoto(file: File) {
     img.onload = () => {
       const size = 256;
       const canvas = document.createElement("canvas");
-      canvas.width = size;
-      canvas.height = size;
+      canvas.width = size; canvas.height = size;
       const ctx = canvas.getContext("2d");
       if (!ctx) return reject(new Error("No canvas"));
       const side = Math.min(img.width, img.height);
@@ -41,6 +44,7 @@ export default function DispatchPage() {
   const [name, setName] = useState("");
   const [drivers, setDrivers] = useState<any[]>([]);
   const [jobs, setJobs] = useState<any[]>([]);
+  const [revenue, setRevenue] = useState({ week: 0, month: 0, year: 0, lifetime: 0 });
   const [err, setErr] = useState("");
   const [msg, setMsg] = useState("");
   const [rosterOpen, setRosterOpen] = useState(false);
@@ -68,6 +72,7 @@ export default function DispatchPage() {
     }
     setDrivers(data.drivers || []);
     setJobs(data.jobs || []);
+    setRevenue(data.revenue || { week: 0, month: 0, year: 0, lifetime: 0 });
     setErr("");
   }
 
@@ -246,6 +251,24 @@ export default function DispatchPage() {
             <div className="mt-1 text-3xl font-semibold">{nUp}</div>
           </div>
         </div>
+        <div className="mt-3 grid grid-cols-2 gap-3">
+          <div className="rounded-2xl border border-white/10 bg-[#141416] p-4">
+            <div className="text-[11px] uppercase tracking-widest text-[#C4A574]">Week</div>
+            <div className="mt-1 text-2xl font-semibold">{money(revenue.week)}</div>
+          </div>
+          <div className="rounded-2xl border border-white/10 bg-[#141416] p-4">
+            <div className="text-[11px] uppercase tracking-widest text-[#C4A574]">Month</div>
+            <div className="mt-1 text-2xl font-semibold">{money(revenue.month)}</div>
+          </div>
+          <div className="rounded-2xl border border-white/10 bg-[#141416] p-4">
+            <div className="text-[11px] uppercase tracking-widest text-[#C4A574]">Year</div>
+            <div className="mt-1 text-2xl font-semibold">{money(revenue.year)}</div>
+          </div>
+          <div className="rounded-2xl border border-white/10 bg-[#141416] p-4">
+            <div className="text-[11px] uppercase tracking-widest text-[#C4A574]">Lifetime</div>
+            <div className="mt-1 text-2xl font-semibold">{money(revenue.lifetime)}</div>
+          </div>
+        </div>
         {msg && <p className="mt-3 text-sm text-[#7DCFB6]">{msg}</p>}
         {err && <p className="mt-3 text-sm text-red-400">{err}</p>}
 
@@ -291,7 +314,7 @@ export default function DispatchPage() {
                   </div>
                   <div className="mt-1 text-sm text-[#9A9388]">{j.when} · {shortAddr(j.pickup)}</div>
                   <div className="text-sm text-[#9A9388]">→ {shortAddr(j.dropoff)}</div>
-                  <div className="mt-2 text-xs text-[#E8D3B0]">{d ? `Driver ${d.name}` : "Unassigned"}</div>
+                  <div className="mt-2 text-xs text-[#E8D3B0]">{d ? `Driver ${d.name}` : "Unassigned"}{j.amountCents ? ` · ${money(j.amountCents)}` : ""}</div>
                   <select className="mt-3 w-full rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" value={j.assignedDriverId || ""} onChange={(e) => assign(j, e.target.value)}>
                     <option value="">Unassigned</option>
                     {drivers.map((dr) => (
