@@ -7,9 +7,9 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-playfair" });
 
 export const metadata: Metadata = {
-  title: "Jean Limo LLC | Premium Houston Chauffeur & Airport Service",
+  title: "Houston Black Car, Airport & Private Chauffeur Service | Jean Limo",
   description:
-    "Jean Limo LLC - Premium black car, SUV & Sprinter chauffeur service in Houston. Airport transfers (IAH & Hobby), Galveston cruise, corporate, hourly & events. Flat rates. Call Jeannie 281-917-0929.",
+    "Jean Limo offers private chauffeur, black car, airport and Sprinter service in Houston, including IAH, HOU, Sugar Land and Galveston transfers.",
 };
 
 export default function RootLayout({
