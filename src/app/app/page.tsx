@@ -12,6 +12,7 @@ const vehicles = [
   { id: "sprinter", name: "Sprinter Van", detail: "1–14 passengers · 12 luggage", img: "/fleet/sprinter.jpg" },
 ];
 const fieldClass = "mt-1 w-full rounded-2xl border border-white/10 bg-[#171717] px-4 py-3 outline-none text-sm";
+const HERO = "/hero-houston.jpg";
 
 export default function ClientApp() {
   const [screen, setScreen] = useState<Screen>("home");
@@ -161,7 +162,7 @@ export default function ClientApp() {
               <button onClick={() => setScreen("trips")} className="text-xl text-[#e5c883]">●</button>
             </header>
             <section className="relative mx-4 overflow-hidden rounded-[28px]">
-              <div className="relative min-h-[420px] bg-cover bg-center" style={{ backgroundImage: "url('/fleet/sedan.jpg')" }}>
+              <div className="relative min-h-[420px] bg-cover bg-center" style={{ backgroundImage: `url('${HERO}')` }}>
                 <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/90" />
                 <div className="absolute left-5 right-5 top-8 z-10">
                   <p className="text-[11px] uppercase tracking-[0.22em] text-[#e8d3b0]">More than a ride.</p>
