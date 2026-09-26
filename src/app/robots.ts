@@ -5,7 +5,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/dispatch", "/api/", "/app"],
+      disallow: ["/dispatch", "/api/", "/app", "/account", "/manage"],
     },
     sitemap: "https://jeanlimo.com/sitemap.xml",
   };
