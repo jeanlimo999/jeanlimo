@@ -29,9 +29,6 @@ export default function SiteHeader() {
           </a>
 
           <div className="flex items-center gap-2 sm:gap-3">
-            <a href="/#contact" className="hidden text-sm text-zinc-300 hover:text-yellow-400 sm:inline">
-              Contact
-            </a>
             <a href="/account" className="whitespace-nowrap px-2 text-xs text-zinc-300 hover:text-yellow-400 sm:text-sm">
               My trips
             </a>
@@ -44,12 +41,13 @@ export default function SiteHeader() {
             <div ref={box} className="relative">
               <button
                 type="button"
-                aria-label="Open menu"
+                aria-label="Menu"
                 aria-expanded={open}
                 onClick={() => setOpen((v) => !v)}
-                className="grid h-10 w-10 place-items-center rounded-lg border border-white/10 text-zinc-100 hover:border-yellow-500/50 hover:text-yellow-400"
+                className="flex items-center gap-2 rounded-lg border border-white/10 px-3 py-2 text-sm text-zinc-100 hover:border-yellow-500/50 hover:text-yellow-400"
               >
-                <span className="text-xl leading-none">{open ? "×" : "☰"}</span>
+                <span className="text-lg leading-none">{open ? "×" : "☰"}</span>
+                <span className="font-medium">Menu</span>
               </button>
               {open && (
                 <div className="absolute right-0 top-12 w-56 overflow-hidden rounded-xl border border-yellow-600/20 bg-zinc-950 py-1 shadow-2xl">
