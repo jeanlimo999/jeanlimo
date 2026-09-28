@@ -1,0 +1,17 @@
+{
+  "name": "Jean Limo",
+  "short_name": "Jean Limo",
+  "description": "Houston black car, airport and private chauffeur booking",
+  "start_url": "/app",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#080808",
+  "theme_color": "#080808",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64",
+      "type": "image/x-icon"
+    }
+  ]
+}
