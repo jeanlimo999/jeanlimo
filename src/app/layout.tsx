@@ -10,6 +10,12 @@ export const metadata: Metadata = {
   title: "Houston Black Car, Airport & Private Chauffeur Service | Jean Limo",
   description:
     "Jean Limo offers private chauffeur, black car, airport and Sprinter service in Houston, including IAH, HOU, Sugar Land and Galveston transfers.",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    title: "Jean Limo",
+    statusBarStyle: "black-translucent",
+  },
 };
 
 export default function RootLayout({
