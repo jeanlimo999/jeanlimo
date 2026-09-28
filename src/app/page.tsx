@@ -1,42 +1,10 @@
 import QuoteWidget from "@/components/QuoteWidget";
+import SiteHeader from "@/components/SiteHeader";
 
 export default function Home() {
   return (
     <div className="bg-zinc-950 text-zinc-100 min-h-screen">
-      {/* NAV */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-zinc-950/90 backdrop-blur-md border-b border-yellow-600/20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 md:h-20">
-            <a href="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full border-2 border-yellow-500 flex items-center justify-center font-serif text-yellow-400 text-xl font-bold">
-                J
-              </div>
-              <div>
-                <div className="font-serif text-xl tracking-wide text-yellow-400">JEAN LIMO</div>
-                <div className="text-[10px] tracking-[0.2em] text-zinc-400 uppercase">LLC · Houston</div>
-              </div>
-            </a>
-            <div className="hidden md:flex items-center gap-8 text-sm font-medium">
-              <a href="#services" className="hover:text-yellow-400 transition">Services</a>
-              <a href="#fleet" className="hover:text-yellow-400 transition">Fleet & Pricing</a>
-              <a href="#quote" className="hover:text-yellow-400 transition">Get Quote</a>
-              <a href="#contact" className="hover:text-yellow-400 transition">Contact</a>
-              <a href="https://maps.app.goo.gl/aDG8UD4nBddGKKmk6" target="_blank" rel="noopener noreferrer" className="hover:text-yellow-400 transition">Reviews</a>
-            </div>
-            <div className="flex items-center gap-2 sm:gap-3">
-              <a href="/account" className="text-xs sm:text-sm text-zinc-300 hover:text-yellow-400 px-2 whitespace-nowrap">
-                My trips
-              </a>
-              <a
-                href="#quote"
-                className="px-3 sm:px-4 py-2 bg-yellow-500 hover:bg-yellow-400 text-zinc-900 font-semibold text-sm rounded transition"
-              >
-                Book Now
-              </a>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <SiteHeader />
 
       {/* HERO */}
       <section className="relative flex items-start pt-20 md:pt-24">
