@@ -33,6 +33,11 @@ function shrinkPhoto(file: File) {
   });
 }
 
+function isDone(j: any) {
+  const s = String(j.tripStatus || "").toLowerCase();
+  return s === "dropped_off" || s === "completed" || s === "done";
+}
+
 const inputCls = "w-full rounded-2xl border border-white/10 bg-[#1C1C20] px-4 py-4 outline-none";
 
 export default function DispatchPage() {
@@ -85,7 +90,8 @@ export default function DispatchPage() {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   })();
 
-  const openJobs = jobs.filter((j) => j.tripStatus !== "dropped_off");
+  const openJobs = jobs.filter((j) => !isDone(j));
+  const doneJobs = jobs.filter((j) => isDone(j)).slice().sort((a, b) => String(b.when).localeCompare(String(a.when)));
   const nToday = openJobs.filter((j) => (j.rideDate || "").slice(0, 10) === today).length;
   const nUp = openJobs.filter((j) => (j.rideDate || "") > today).length;
 
@@ -187,6 +193,33 @@ export default function DispatchPage() {
       setMsg("Photo saved");
       await load();
     }
+  }
+
+  function jobCard(j: any, completed: boolean) {
+    const d = drivers.find((x) => x.id === j.assignedDriverId);
+    return (
+      <div key={j.id} className={`rounded-2xl border border-white/10 bg-[#141416] p-4 ${completed ? "opacity-80" : ""}`}>
+        <div className="flex items-start justify-between gap-3">
+          <div className="text-lg font-medium">{j.guestName}</div>
+          <div className="text-[10px] tracking-widest text-[#C4A574]">{j.confirmation}</div>
+        </div>
+        <div className="mt-1 text-sm text-[#9A9388]">{j.when} · {shortAddr(j.pickup)}</div>
+        <div className="text-sm text-[#9A9388]">→ {shortAddr(j.dropoff)}</div>
+        <div className="mt-2 text-xs text-[#E8D3B0]">
+          {completed ? "Completed" : d ? `Driver ${d.name}` : "Unassigned"}
+          {d && completed ? ` · ${d.name}` : ""}
+          {j.amountCents ? ` · ${money(j.amountCents)}` : ""}
+        </div>
+        {!completed && (
+          <select className="mt-3 w-full rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" value={j.assignedDriverId || ""} onChange={(e) => assign(j, e.target.value)}>
+            <option value="">Unassigned</option>
+            {drivers.map((dr) => (
+              <option key={dr.id} value={dr.id}>{dr.name}</option>
+            ))}
+          </select>
+        )}
+      </div>
+    );
   }
 
   if (authed === null) {
@@ -302,31 +335,14 @@ export default function DispatchPage() {
           </div>
         )}
 
-        <div className="mt-5 space-y-3">
-          {jobs.length ? (
-            jobs.map((j) => {
-              const d = drivers.find((x) => x.id === j.assignedDriverId);
-              return (
-                <div key={j.id} className="rounded-2xl border border-white/10 bg-[#141416] p-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="text-lg font-medium">{j.guestName}</div>
-                    <div className="text-[10px] tracking-widest text-[#C4A574]">{j.confirmation}</div>
-                  </div>
-                  <div className="mt-1 text-sm text-[#9A9388]">{j.when} · {shortAddr(j.pickup)}</div>
-                  <div className="text-sm text-[#9A9388]">→ {shortAddr(j.dropoff)}</div>
-                  <div className="mt-2 text-xs text-[#E8D3B0]">{d ? `Driver ${d.name}` : "Unassigned"}{j.amountCents ? ` · ${money(j.amountCents)}` : ""}</div>
-                  <select className="mt-3 w-full rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" value={j.assignedDriverId || ""} onChange={(e) => assign(j, e.target.value)}>
-                    <option value="">Unassigned</option>
-                    {drivers.map((dr) => (
-                      <option key={dr.id} value={dr.id}>{dr.name}</option>
-                    ))}
-                  </select>
-                </div>
-              );
-            })
-          ) : (
-            <p className="text-sm text-[#9A9388]">No jobs</p>
-          )}
+        <div className="mt-6 text-[11px] uppercase tracking-widest text-[#C4A574]">Open ({openJobs.length})</div>
+        <div className="mt-3 space-y-3">
+          {openJobs.length ? openJobs.map((j) => jobCard(j, false)) : <p className="text-sm text-[#9A9388]">No open jobs</p>}
+        </div>
+
+        <div className="mt-8 text-[11px] uppercase tracking-widest text-[#C4A574]">Completed ({doneJobs.length})</div>
+        <div className="mt-3 space-y-3">
+          {doneJobs.length ? doneJobs.map((j) => jobCard(j, true)) : <p className="text-sm text-[#9A9388]">No completed jobs yet. They move here when the driver taps Dropped off.</p>}
         </div>
       </div>
     </div>
