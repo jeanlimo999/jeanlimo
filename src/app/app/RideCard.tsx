@@ -1,5 +1,7 @@
 "use client";
 
+import LiveMap from "./LiveMap";
+
 function prettyDate(d?: string) {
   if (!d) return { mon: "", day: "", wk: "" };
   const dt = new Date(d + "T12:00:00");
@@ -53,10 +55,11 @@ export default function RideCard({
   onAgain?: () => void;
 }) {
   const d = prettyDate(b.ride_date);
-  const status = String(b.status || "confirmed").replaceAll("_", " ");
+  const status = String(b.trip_status || b.status || "confirmed").replaceAll("_", " ");
   const chauffeur = String(b.driverName || "").trim();
   const photo = String(b.driverPhoto || "").trim();
   const initial = (chauffeur || "J").charAt(0).toUpperCase();
+  const live = ["on_the_way", "on_location", "onboard"].includes(String(b.trip_status || ""));
 
   const avatar = photo ? (
     <img src={photo} alt="" className="h-11 w-11 shrink-0 rounded-full object-cover" />
@@ -96,7 +99,7 @@ export default function RideCard({
     <div className="mt-3 rounded-[22px] border border-white/10 bg-[#121212] p-4">
       <div className="flex items-center justify-between">
         <div className="text-sm font-medium">Upcoming Ride</div>
-        <span className="rounded-full bg-[#1a3d32] px-2 py-1 text-[10px] tracking-widest text-[#7DCFB6]">
+        <span className={`rounded-full px-2 py-1 text-[10px] tracking-widest ${live ? "bg-[#1a3d32] text-[#7DCFB6]" : "bg-[#1a3d32] text-[#7DCFB6]"}`}>
           {status.toUpperCase()}
         </span>
       </div>
@@ -116,15 +119,17 @@ export default function RideCard({
         </div>
       </div>
 
+      <LiveMap confirmation={b.confirmation} tripStatus={b.trip_status} />
+
       <div className="mt-4 flex items-center justify-between gap-3 rounded-2xl bg-[#0d0d0d] p-3">
-        <div className="flex items-center gap-3 min-w-0">
+        <div className="flex min-w-0 items-center gap-3">
           {avatar}
           <div className="min-w-0">
             <div className="text-[11px] text-zinc-500">Your Chauffeur</div>
             <div className="truncate font-medium">{chauffeur || "Assigned at dispatch"}</div>
           </div>
         </div>
-        <div className="text-right shrink-0">
+        <div className="shrink-0 text-right">
           <img src={vehicleImg(b.vehicle)} alt="" className="h-10 w-16 rounded-lg object-cover" />
           <div className="mt-1 text-[10px] text-zinc-400">{vehicleLabel(b.vehicle)}</div>
         </div>
