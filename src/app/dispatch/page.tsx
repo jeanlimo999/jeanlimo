@@ -2,12 +2,30 @@
 
 import { useEffect, useState } from "react";
 
-function shortAddr(a?: string) {
-  return String(a || "").split(",")[0];
-}
-
 function money(cents: number) {
   return "$" + (Number(cents || 0) / 100).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+
+function ymdToday() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function formatDate(ymd?: string) {
+  const s = String(ymd || "").slice(0, 10);
+  const m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!m) return s || "—";
+  return `${m[2]}/${m[3]}/${m[1]}`;
+}
+
+function formatTime(when?: string) {
+  const t = String(when || "").split(/[ T]/)[1] || "";
+  const [hStr, mStr] = t.split(":");
+  const h = Number(hStr);
+  if (Number.isNaN(h)) return t;
+  const am = h < 12 ? "AM" : "PM";
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return `${h12}:${String(mStr || "00").slice(0, 2).padStart(2, "0")} ${am}`;
 }
 
 function shrinkPhoto(file: File) {
@@ -33,9 +51,11 @@ function shrinkPhoto(file: File) {
   });
 }
 
-function isDone(j: any) {
+function isDone(j: any, today: string) {
   const s = String(j.tripStatus || "").toLowerCase();
-  return s === "dropped_off" || s === "completed" || s === "done";
+  if (s === "dropped_off" || s === "completed" || s === "done") return true;
+  const day = String(j.rideDate || "").slice(0, 10);
+  return !!day && day < today;
 }
 
 const inputCls = "w-full rounded-2xl border border-white/10 bg-[#1C1C20] px-4 py-4 outline-none";
@@ -85,13 +105,9 @@ export default function DispatchPage() {
     check().catch(() => setAuthed(false));
   }, []);
 
-  const today = (() => {
-    const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-  })();
-
-  const openJobs = jobs.filter((j) => !isDone(j));
-  const doneJobs = jobs.filter((j) => isDone(j)).slice().sort((a, b) => String(b.when).localeCompare(String(a.when)));
+  const today = ymdToday();
+  const openJobs = jobs.filter((j) => !isDone(j, today));
+  const doneJobs = jobs.filter((j) => isDone(j, today)).slice().sort((a, b) => String(b.when).localeCompare(String(a.when)));
   const nToday = openJobs.filter((j) => (j.rideDate || "").slice(0, 10) === today).length;
   const nUp = openJobs.filter((j) => (j.rideDate || "") > today).length;
 
@@ -200,12 +216,15 @@ export default function DispatchPage() {
     return (
       <div key={j.id} className={`rounded-2xl border border-white/10 bg-[#141416] p-4 ${completed ? "opacity-80" : ""}`}>
         <div className="flex items-start justify-between gap-3">
-          <div className="text-lg font-medium">{j.guestName}</div>
+          <div className="text-sm text-[#C4A574]">{formatDate(j.rideDate)}{formatTime(j.when) ? ` · ${formatTime(j.when)}` : ""}</div>
           <div className="text-[10px] tracking-widest text-[#C4A574]">{j.confirmation}</div>
         </div>
-        <div className="mt-1 text-sm text-[#9A9388]">{j.when} · {shortAddr(j.pickup)}</div>
-        <div className="text-sm text-[#9A9388]">→ {shortAddr(j.dropoff)}</div>
-        <div className="mt-2 text-xs text-[#E8D3B0]">
+        <div className="mt-2 text-lg font-medium">{j.guestName || "Customer"}</div>
+        <div className="mt-3 text-[11px] uppercase tracking-widest text-[#9A9388]">Pickup</div>
+        <div className="text-sm leading-5">{j.pickup || "—"}</div>
+        <div className="mt-3 text-[11px] uppercase tracking-widest text-[#9A9388]">Drop off</div>
+        <div className="text-sm leading-5">{j.dropoff || "—"}</div>
+        <div className="mt-3 text-xs text-[#E8D3B0]">
           {completed ? "Completed" : d ? `Driver ${d.name}` : "Unassigned"}
           {d && completed ? ` · ${d.name}` : ""}
           {j.amountCents ? ` · ${money(j.amountCents)}` : ""}
@@ -342,7 +361,7 @@ export default function DispatchPage() {
 
         <div className="mt-8 text-[11px] uppercase tracking-widest text-[#C4A574]">Completed ({doneJobs.length})</div>
         <div className="mt-3 space-y-3">
-          {doneJobs.length ? doneJobs.map((j) => jobCard(j, true)) : <p className="text-sm text-[#9A9388]">No completed jobs yet. They move here when the driver taps Dropped off.</p>}
+          {doneJobs.length ? doneJobs.map((j) => jobCard(j, true)) : <p className="text-sm text-[#9A9388]">No completed jobs yet.</p>}
         </div>
       </div>
     </div>
