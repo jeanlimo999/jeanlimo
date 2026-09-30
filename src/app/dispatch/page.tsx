@@ -73,6 +73,7 @@ export default function DispatchPage() {
   const [err, setErr] = useState("");
   const [msg, setMsg] = useState("");
   const [rosterOpen, setRosterOpen] = useState(false);
+  const [tab, setTab] = useState<"open" | "done">("open");
   const [form, setForm] = useState({ name: "", phone: "", pin: "", vehicle: "sedan" });
   const [owner, setOwner] = useState({ name: "", email: "", password: "" });
 
@@ -187,8 +188,10 @@ export default function DispatchPage() {
       body: JSON.stringify(form),
     });
     const data = await res.json();
-    if (!res.ok) setErr(data.error || "Could not add driver");
-    else {
+    if (!res.ok) {
+      const raw = data.error || "Could not add driver";
+      setErr(/drivers_pin_idx|duplicate key/i.test(raw) ? "That PIN is already used. Give this driver a different PIN." : raw);
+    } else {
       setForm({ name: "", phone: "", pin: "", vehicle: "sedan" });
       setMsg((data.driver?.name || "Driver") + " added");
       await load();
@@ -357,14 +360,29 @@ export default function DispatchPage() {
           </div>
         )}
 
-        <div className="mt-6 text-[11px] uppercase tracking-widest text-[#C4A574]">Open ({openJobs.length})</div>
-        <div className="mt-3 space-y-3">
-          {openJobs.length ? openJobs.map((j) => jobCard(j, false)) : <p className="text-sm text-[#9A9388]">No open jobs</p>}
+        <div className="mt-6 grid grid-cols-2 gap-2 rounded-2xl border border-white/10 bg-[#141416] p-1">
+          <button
+            onClick={() => setTab("open")}
+            className={`rounded-xl py-3 text-sm font-semibold ${tab === "open" ? "bg-gradient-to-b from-[#E8D3B0] to-[#C4A574] text-[#16110a]" : "text-[#9A9388]"}`}
+          >
+            Open ({openJobs.length})
+          </button>
+          <button
+            onClick={() => setTab("done")}
+            className={`rounded-xl py-3 text-sm font-semibold ${tab === "done" ? "bg-gradient-to-b from-[#E8D3B0] to-[#C4A574] text-[#16110a]" : "text-[#9A9388]"}`}
+          >
+            Completed ({doneJobs.length})
+          </button>
         </div>
 
-        <div className="mt-8 text-[11px] uppercase tracking-widest text-[#C4A574]">Completed ({doneJobs.length})</div>
-        <div className="mt-3 space-y-3">
-          {doneJobs.length ? doneJobs.map((j) => jobCard(j, true)) : <p className="text-sm text-[#9A9388]">No completed jobs yet.</p>}
+        <div className="mt-4 space-y-3">
+          {tab === "open"
+            ? openJobs.length
+              ? openJobs.map((j) => jobCard(j, false))
+              : <p className="text-sm text-[#9A9388]">No open jobs</p>
+            : doneJobs.length
+              ? doneJobs.map((j) => jobCard(j, true))
+              : <p className="text-sm text-[#9A9388]">No completed jobs yet.</p>}
         </div>
       </div>
     </div>
