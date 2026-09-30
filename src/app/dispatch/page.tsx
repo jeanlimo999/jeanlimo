@@ -231,11 +231,7 @@ export default function DispatchPage() {
           {d ? `Driver ${d.name}` : completed ? "" : "Unassigned"}
           {j.amountCents ? `${d || completed ? " · " : ""}${money(j.amountCents)}` : ""}
         </div>
-        {completed ? (
-          <div className="mt-3 w-full rounded-xl bg-gradient-to-b from-[#E8D3B0] to-[#C4A574] py-3 text-center text-sm font-semibold text-[#16110a]">
-            Completed
-          </div>
-        ) : (
+        {!completed && (
           <select className="mt-3 w-full rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" value={j.assignedDriverId || ""} onChange={(e) => assign(j, e.target.value)}>
             <option value="">Unassigned</option>
             {drivers.map((dr) => (
