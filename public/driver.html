@@ -35,6 +35,7 @@
     .job { background:var(--bg2); border:1px solid var(--line); border-radius:16px; padding:14px; margin-bottom:10px; }
     .job.done { opacity:.85; }
     .sec { margin:18px 0 8px; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--gold); }
+    .tab-gold { display:inline-block; background:linear-gradient(180deg,var(--gold2),var(--gold)); color:#16110a; border:0; border-radius:999px; padding:8px 16px; font-size:13px; font-weight:700; margin:8px 0 10px; }
     .gps { font-size:12px; color:var(--muted); padding:0 18px 10px; }
     .gps.on { color:var(--ok); }
     .sheet { display:none; position:fixed; inset:0; background:rgba(0,0,0,.8); align-items:flex-end; z-index:50; }
@@ -105,7 +106,7 @@
     const show = id => { document.querySelectorAll(".screen").forEach(s=>s.classList.remove("on")); $(id).classList.add("on"); };
     let driver = null, jobs = [], current = null, pending = null, watchId = null;
     function esc(s) {
-      return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+      return String(s || "").replace(/&/g,"&").replace(/</g,"<").replace(/>/g,">").replace(/"/g,""");
     }
     function shortAddr(a) { return String(a || "").split(",")[0]; }
     function firstName(n) { return String(n || "there").trim().split(/\s+/)[0]; }
@@ -178,8 +179,8 @@
       jobs = all.filter(j => j.tripStatus !== "dropped_off");
       const done = all.filter(j => j.tripStatus === "dropped_off" && withinYear(j))
         .sort((a,b) => String(b.when).localeCompare(String(a.when)));
-      let html = "<div class=\"sec\">Open ("+jobs.length+")</div>";
-      html += jobs.length ? jobs.map(j => card(j,false)).join("") : "<p class=\"sub\">No open jobs assigned to you yet.</p>";
+      let html = "<div class=\"tab-gold\">Upcoming trips ("+jobs.length+")</div>";
+      html += jobs.length ? jobs.map(j => card(j,false)).join("") : "<p class=\"sub\">No upcoming trips assigned to you yet.</p>";
       html += "<div class=\"sec\">Completed · last 12 months ("+done.length+")</div>";
       html += done.length ? done.map(j => card(j,true)).join("") : "<p class=\"sub\">No completed jobs in the last year.</p>";
       $("joblist").innerHTML = html;
