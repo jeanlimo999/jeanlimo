@@ -7,13 +7,13 @@ export type Vehicle = "sedan" | "suv" | "sprinter";
 export const FLAT_RATES: Record<Vehicle, number[]> = {
   sedan: [110, 120, 130, 155, 165, 180, 195, 205, 220, 235],
   suv: [130, 145, 160, 180, 195, 215, 230, 255, 275, 285],
-  sprinter: [300, 340, 380, 420, 460, 500, 540, 580, 620, 660],
+  sprinter: [350, 450, 550, 600, 650, 700, 750, 800, 900, 900],
 };
 
 export const PER_MILE_OVER_100: Record<Vehicle, number> = {
   sedan: 2.5,
   suv: 3.2,
-  sprinter: 7.5,
+  sprinter: 10,
 };
 
 export const HOURLY_RATES: Record<Vehicle, number> = {
