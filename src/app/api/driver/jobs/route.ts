@@ -6,6 +6,7 @@ function toJobs(row: any, driverId: string) {
   const guest = row.clients || {};
   const assigned = row.assigned_driver_id === driverId;
   if (!assigned) return [];
+  const pax = row.passengers || row.passenger_count || row.pax || "";
   const base = {
     bookingId: row.id,
     guestName: guest.full_name || "Guest",
@@ -16,6 +17,7 @@ function toJobs(row: any, driverId: string) {
     confirmation: row.confirmation,
     last_lat: row.last_lat,
     last_lng: row.last_lng,
+    passengers: pax === 0 || pax ? String(pax) : "",
   };
   const jobs = [
     {
@@ -24,8 +26,10 @@ function toJobs(row: any, driverId: string) {
       live_leg: "outbound",
       when: [row.ride_date, row.ride_time].filter(Boolean).join(" "),
       rideDate: row.ride_date || "",
+      rideTime: row.ride_time || "",
       pickup: row.pickup,
       dropoff: row.dropoff,
+      flight: row.flight_number || "",
     },
   ];
   if (row.return_date || row.return_pickup) {
@@ -36,8 +40,10 @@ function toJobs(row: any, driverId: string) {
       live_leg: "return",
       when: [row.return_date, row.return_time].filter(Boolean).join(" "),
       rideDate: row.return_date || "",
+      rideTime: row.return_time || "",
       pickup: row.return_pickup || row.dropoff,
       dropoff: row.return_dropoff || row.pickup,
+      flight: row.return_flight_number || "",
     });
   }
   return jobs;
