@@ -11,9 +11,9 @@ export const FLAT_RATES: Record<Vehicle, number[]> = {
 };
 
 export const PER_MILE_OVER_100: Record<Vehicle, number> = {
-  sedan: 2.5,
-  suv: 3.2,
-  sprinter: 10,
+  sedan: 2.75,
+  suv: 3.5,
+  sprinter: 12,
 };
 
 export const HOURLY_RATES: Record<Vehicle, number> = {
@@ -45,7 +45,7 @@ export function calculateOneWay(vehicle: Vehicle, miles: number) {
 
   return {
     price,
-    breakdown: `100 mi base $${base} + ${extraMiles.toFixed(1)} mi × $${PER_MILE_OVER_100[vehicle]}/mi`,
+    breakdown: `100 mi base $${base} + ${extraMiles.toFixed(1)} extra mi × $${PER_MILE_OVER_100[vehicle]}/mi`,
   };
 }
 
