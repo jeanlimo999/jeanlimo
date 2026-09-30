@@ -34,7 +34,8 @@ function bookingText(b: any) {
       `Date / time: ${formatDateTime(b.returnDate, b.returnTime)}`,
       `Return flight: ${b.returnFlightNumber || ""}`,
       `Return pickup: ${b.returnPickup || ""}`,
-      `Return drop-off: ${b.returnDropoff || ""}`
+      `Return drop-off: ${b.returnDropoff || ""}`,
+      `Return note: ${b.returnNotes || ""}`
     );
   }
 

@@ -90,6 +90,7 @@ export async function saveWebsiteBooking(booking: {
   amount?: number | null;
   breakdown?: string;
   notes?: string;
+  returnNotes?: string;
   stripe_session_id?: string;
   status?: string;
 }) {
@@ -122,7 +123,7 @@ export async function saveWebsiteBooking(booking: {
     return_flight_number: booking.returnFlightNumber || "",
     amount_cents: Math.round(Number(booking.amount || 0) * 100),
     breakdown: booking.breakdown || "",
-    passenger_notes: booking.notes || "",
+    passenger_notes: [booking.notes, booking.returnNotes ? "Return: " + booking.returnNotes : ""].filter(Boolean).join(" | "),
     stripe_session_id: booking.stripe_session_id || null,
     updated_at: new Date().toISOString(),
   };
