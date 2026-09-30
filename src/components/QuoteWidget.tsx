@@ -50,6 +50,7 @@ export default function QuoteWidget() {
   const [passengers, setPassengers] = useState(1);
   const [luggage, setLuggage] = useState(1);
   const [notes, setNotes] = useState("");
+  const [returnNotes, setReturnNotes] = useState("");
   const resultsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -127,7 +128,7 @@ export default function QuoteWidget() {
         body: JSON.stringify({
           price: selectedQuote.price, tipAmount, tipPercent: usingCustomTip ? 0 : tipPct, vehicle, type: tripType,
           breakdown: selectedQuote.breakdown, passengerName: name, passengerPhone: phone, passengerEmail: email,
-          passengers, luggage, date, time, pickup, dropoff, flightNumber, notes,
+          passengers, luggage, date, time, pickup, dropoff, flightNumber, notes, returnNotes: wantReturn ? returnNotes : "",
           returnFlightNumber: wantReturn ? returnFlightNumber : "", returnDate: wantReturn ? returnDate : "",
           returnTime: wantReturn ? returnTime : "", returnPickup: wantReturn ? returnPickup || dropoff : "",
           returnDropoff: wantReturn ? returnDropoff || pickup : "",
@@ -162,9 +163,9 @@ export default function QuoteWidget() {
             <div><label className="block text-xs text-zinc-400 mb-1.5 uppercase tracking-wider">Pickup Location</label><AddressInput id="hourly-pickup" value={pickup} onChange={setPickup} placeholder="Starting address" /></div>
           </>
         )}
-        <div className="grid grid-cols-2 md:grid-cols-[7.6rem_minmax(7.5rem,1fr)_5.4rem_5.4rem] gap-2 items-end">
-          <div><label className={lab}>Date</label><input type="date" value={date} onChange={(e) => setDate(e.target.value)} required className="w-full min-w-0 bg-zinc-800 border border-zinc-700 rounded-lg px-1.5 py-2.5 text-[13px] focus:outline-none focus:border-yellow-500" /></div>
-          <div><label className={lab}>Time</label><select value={time} onChange={(e) => setTime(e.target.value)} required className={inp}><option value="">Time</option>{TIME_OPTIONS.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}</select></div>
+        <div className="grid grid-cols-2 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_5.5rem_5.5rem] gap-2 items-end">
+          <div className="min-w-0"><label className={lab}>Date</label><input type="date" value={date} onChange={(e) => setDate(e.target.value)} required className={inp} /></div>
+          <div className="min-w-0"><label className={lab}>Time</label><select value={time} onChange={(e) => setTime(e.target.value)} required className={inp}><option value="">Time</option>{TIME_OPTIONS.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}</select></div>
           <div><label className={lab}>Passengers</label><div className="flex items-center justify-between bg-zinc-800 border border-zinc-700 rounded-lg px-2 py-1.5"><button type="button" onClick={() => setPassengers((n) => Math.max(1, n - 1))} className="w-7 h-7 rounded-full border border-zinc-600 text-zinc-200">−</button><span className="text-sm font-medium w-6 text-center">{passengers}</span><button type="button" onClick={() => setPassengers((n) => Math.min(14, n + 1))} className="w-7 h-7 rounded-full border border-zinc-600 text-zinc-200">+</button></div></div>
           <div><label className={lab}>Luggage</label><div className="flex items-center justify-between bg-zinc-800 border border-zinc-700 rounded-lg px-2 py-1.5"><button type="button" onClick={() => setLuggage((n) => Math.max(0, n - 1))} className="w-7 h-7 rounded-full border border-zinc-600 text-zinc-200">−</button><span className="text-sm font-medium w-6 text-center">{luggage}</span><button type="button" onClick={() => setLuggage((n) => Math.min(20, n + 1))} className="w-7 h-7 rounded-full border border-zinc-600 text-zinc-200">+</button></div></div>
         </div>
@@ -175,11 +176,12 @@ export default function QuoteWidget() {
           <div className="p-3 bg-zinc-800/70 border border-yellow-600/20 rounded-xl space-y-3">
             <div><label className="block text-xs text-zinc-400 mb-1.5 uppercase tracking-wider">Return pickup</label><AddressInput id="return-pickup" value={returnPickup} onChange={setReturnPickup} placeholder="Return pickup address" /></div>
             <div><label className="block text-xs text-zinc-400 mb-1.5 uppercase tracking-wider">Return drop-off</label><AddressInput id="return-dropoff" value={returnDropoff} onChange={setReturnDropoff} placeholder="Return drop-off address" /></div>
-            <div className="grid grid-cols-2 gap-4">
-              <div><label className="block text-xs text-zinc-400 mb-1.5 uppercase tracking-wider">Return date</label><input type="date" value={returnDate} onChange={(e) => setReturnDate(e.target.value)} className={inp} /></div>
-              <div><label className="block text-xs text-zinc-400 mb-1.5 uppercase tracking-wider">Return time</label><select value={returnTime} onChange={(e) => setReturnTime(e.target.value)} className={inp}><option value="">Select time</option>{TIME_OPTIONS.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}</select></div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="min-w-0"><label className="block text-xs text-zinc-400 mb-1.5 uppercase tracking-wider">Return date</label><input type="date" value={returnDate} onChange={(e) => setReturnDate(e.target.value)} className={inp} /></div>
+              <div className="min-w-0"><label className="block text-xs text-zinc-400 mb-1.5 uppercase tracking-wider">Return time</label><select value={returnTime} onChange={(e) => setReturnTime(e.target.value)} className={inp}><option value="">Select time</option>{TIME_OPTIONS.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}</select></div>
             </div>
             <div><label className="block text-xs text-zinc-400 mb-1.5 uppercase tracking-wider">Return flight number</label><input type="text" value={returnFlightNumber} onChange={(e) => setReturnFlightNumber(e.target.value.toUpperCase())} placeholder="e.g. UA888" className={inp} /></div>
+            <div><label className="block text-xs text-zinc-400 mb-1.5 uppercase tracking-wider">Additional note</label><textarea value={returnNotes} onChange={(e) => setReturnNotes(e.target.value)} rows={3} placeholder="Gate code, building, special instructions…" className={inp + " resize-y min-h-[5.5rem]"} /></div>
           </div>
         )}
         <button type="submit" disabled={loading} className="w-full py-3.5 bg-yellow-500 hover:bg-yellow-400 disabled:opacity-60 text-zinc-900 font-semibold rounded-lg transition mt-2">{loading ? "Calculating…" : "See prices & vehicles"}</button>
