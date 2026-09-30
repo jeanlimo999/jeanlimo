@@ -17,6 +17,7 @@ export type BookingRow = {
   return_flight_number: string;
   amount_cents: number;
   breakdown: string;
+  passenger_notes?: string;
   stripe_session_id?: string | null;
 };
 
@@ -88,6 +89,7 @@ export async function saveWebsiteBooking(booking: {
   returnFlightNumber?: string;
   amount?: number | null;
   breakdown?: string;
+  notes?: string;
   stripe_session_id?: string;
   status?: string;
 }) {
@@ -120,6 +122,7 @@ export async function saveWebsiteBooking(booking: {
     return_flight_number: booking.returnFlightNumber || "",
     amount_cents: Math.round(Number(booking.amount || 0) * 100),
     breakdown: booking.breakdown || "",
+    passenger_notes: booking.notes || "",
     stripe_session_id: booking.stripe_session_id || null,
     updated_at: new Date().toISOString(),
   };
