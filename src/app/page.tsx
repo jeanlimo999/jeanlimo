@@ -5,46 +5,29 @@ export default function Home() {
   return (
     <div className="bg-zinc-950 text-zinc-100 min-h-screen">
       <SiteHeader />
-
       <section className="relative flex items-start pt-20 md:pt-24">
         <div className="absolute inset-0 bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950" />
         <div className="absolute inset-0 bg-gradient-to-r from-zinc-950 via-zinc-950/80 to-transparent" />
-
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-6 w-full">
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-start">
             <div>
-              <p className="text-yellow-500 tracking-[0.25em] text-xs uppercase mb-4">
-                Private Chauffeur Service · Houston, TX
-              </p>
-              <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl leading-tight mb-6">
-                Houston Black Car, Airport & Private Chauffeur Service
-              </h1>
-              <p className="text-zinc-300 text-lg max-w-lg mb-8">
-                Jean Limo LLC provides private chauffeur, black car, SUV and Sprinter transportation throughout Greater Houston. We serve IAH and Hobby Airport, Downtown Houston, Sugar Land, Galveston cruise terminals, corporate travel, hourly service and special events.
-              </p>
+              <p className="text-yellow-500 tracking-[0.25em] text-xs uppercase mb-4">Private Chauffeur Service · Houston, TX</p>
+              <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl leading-tight mb-6">Houston Black Car, Airport & Private Chauffeur Service</h1>
+              <p className="text-zinc-300 text-lg max-w-lg mb-8">Jean Limo LLC provides private chauffeur, black car, SUV and Sprinter transportation throughout Greater Houston. We serve IAH and Hobby Airport, Downtown Houston, Sugar Land, Galveston cruise terminals, corporate travel, hourly service and special events.</p>
               <div className="flex flex-wrap gap-4 mb-10">
-                <div className="flex items-center gap-2 text-sm text-zinc-300">
-                  <span className="text-yellow-500">✓</span> Licensed & Insured
-                </div>
-                <div className="flex items-center gap-2 text-sm text-zinc-300">
-                  <span className="text-yellow-500">✓</span> 24/7 Dispatch
-                </div>
-                <div className="flex items-center gap-2 text-sm text-zinc-300">
-                  <span className="text-yellow-500">✓</span> Flat Rates
-                </div>
+                <div className="flex items-center gap-2 text-sm text-zinc-300"><span className="text-yellow-500">✓</span> Licensed & Insured</div>
+                <div className="flex items-center gap-2 text-sm text-zinc-300"><span className="text-yellow-500">✓</span> 24/7 Dispatch</div>
+                <div className="flex items-center gap-2 text-sm text-zinc-300"><span className="text-yellow-500">✓</span> Flat Rates</div>
               </div>
               <div className="flex flex-wrap gap-4">
                 <a href="#quote" className="px-8 py-3.5 bg-yellow-500 hover:bg-yellow-400 text-zinc-900 font-semibold rounded transition">Get Instant Quote</a>
                 <a href="tel:+12819170929" className="px-8 py-3.5 border border-yellow-500/50 hover:border-yellow-400 text-yellow-400 font-semibold rounded transition">Call Jeannie</a>
               </div>
             </div>
-            <div id="quote" className="lg:-mt-2">
-              <QuoteWidget />
-            </div>
+            <div id="quote" className="lg:-mt-2"><QuoteWidget /></div>
           </div>
         </div>
       </section>
-
       <section className="border-y border-yellow-600/10 bg-zinc-900/50">
         <div className="max-w-7xl mx-auto px-4 py-8 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
           <div><div className="text-yellow-500 font-serif text-lg mb-1">On-time</div><div className="text-xs text-zinc-400">Confirmed itinerary</div></div>
@@ -53,7 +36,6 @@ export default function Home() {
           <div><div className="text-yellow-500 font-serif text-lg mb-1">Personal service</div><div className="text-xs text-zinc-400">Dispatch confirms every ride</div></div>
         </div>
       </section>
-
       <section id="services" className="py-20 md:py-28">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-14">
@@ -78,7 +60,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
       <section id="fleet" className="py-20 md:py-28 bg-zinc-900/40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-14">
@@ -99,15 +80,15 @@ export default function Home() {
               <tbody className="bg-zinc-900">
                 {[
                   ["0 – 10 mi", 110, 130, 350],
-                  ["10 – 20 mi", 120, 145, 450],
-                  ["20 – 30 mi", 130, 160, 550],
-                  ["30 – 40 mi", 155, 180, 600],
-                  ["40 – 50 mi", 165, 195, 650],
-                  ["50 – 60 mi", 180, 215, 700],
-                  ["60 – 70 mi", 195, 230, 750],
-                  ["70 – 80 mi", 205, 255, 800],
-                  ["80 – 90 mi", 220, 275, 900],
-                  ["90 – 100 mi", 235, 285, 900],
+                  ["11 – 20 mi", 120, 145, 450],
+                  ["21 – 30 mi", 130, 160, 550],
+                  ["31 – 40 mi", 155, 180, 600],
+                  ["41 – 50 mi", 165, 195, 650],
+                  ["51 – 60 mi", 180, 215, 700],
+                  ["61 – 70 mi", 195, 230, 750],
+                  ["71 – 80 mi", 205, 255, 800],
+                  ["81 – 90 mi", 220, 275, 875],
+                  ["91 – 100 mi", 235, 285, 950],
                 ].map(([dist, sedan, suv, sprinter]) => (
                   <tr key={dist as string} className="border-b border-zinc-800">
                     <td className="px-4 py-3">{dist}</td>
@@ -117,7 +98,7 @@ export default function Home() {
                   </tr>
                 ))}
                 <tr>
-                  <td className="px-4 py-3 font-medium">100+ mi · per mile</td>
+                  <td className="px-4 py-3 font-medium">101+ mi · per mile</td>
                   <td className="px-4 py-3 text-center text-yellow-500">$2.50</td>
                   <td className="px-4 py-3 text-center text-yellow-500">$3.20</td>
                   <td className="px-4 py-3 text-center text-yellow-500">$10.00</td>
@@ -158,7 +139,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
       <section id="contact" className="py-20 md:py-28">
         <div className="max-w-4xl mx-auto px-4 text-center">
           <p className="text-yellow-500 tracking-[0.2em] text-xs uppercase mb-3">Ready when you are</p>
@@ -177,7 +157,6 @@ export default function Home() {
           <p className="mt-6 text-sm text-zinc-500">Book online at <span className="text-yellow-500">jeanlimo.com</span></p>
         </div>
       </section>
-
       <footer className="border-t border-yellow-600/10 py-10">
         <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="font-serif text-yellow-500 text-lg">JEAN LIMO LLC</div>
