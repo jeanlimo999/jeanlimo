@@ -57,6 +57,10 @@ export default function SiteHeader() {
                     Reviews
                   </MenuLink>
                   <MenuLink href="/#contact" onClick={() => setOpen(false)}>Contact</MenuLink>
+                  <div className="my-1 border-t border-yellow-600/20" />
+                  <MenuLink href="/account" onClick={() => setOpen(false)}>Client portal</MenuLink>
+                  <MenuLink href="/driver.html" onClick={() => setOpen(false)}>Driver portal</MenuLink>
+                  <MenuLink href="/dispatch" onClick={() => setOpen(false)}>Dispatcher portal</MenuLink>
                 </div>
               )}
             </div>
