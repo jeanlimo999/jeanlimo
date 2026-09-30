@@ -34,6 +34,7 @@
     .status.done .dot { background:var(--ok); }
     .job { background:var(--bg2); border:1px solid var(--line); border-radius:16px; padding:14px; margin-bottom:10px; }
     .job.done { opacity:.85; }
+    .job .meta { color:var(--muted); font-size:14px; margin-top:4px; line-height:1.4; }
     .tabs { display:flex; gap:8px; padding:0 18px 12px; }
     .tab { flex:1; border:1px solid var(--line); background:var(--bg2); color:var(--muted); border-radius:999px; padding:10px 12px; font-size:13px; font-weight:700; }
     .tab.on { background:linear-gradient(180deg,var(--gold2),var(--gold)); color:#16110a; border-color:transparent; }
@@ -111,10 +112,26 @@
     const show = id => { document.querySelectorAll(".screen").forEach(s=>s.classList.remove("on")); $(id).classList.add("on"); };
     let driver = null, jobs = [], doneJobs = [], current = null, pending = null, watchId = null, tab = "open";
     function esc(s) {
-      return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+      return String(s || "").replace(/&/g,"&").replace(/</g,"<").replace(/>/g,">").replace(/"/g,""");
     }
     function shortAddr(a) { return String(a || "").split(",")[0]; }
     function firstName(n) { return String(n || "there").trim().split(/\s+/)[0]; }
+    function fmtDate(value) {
+      const m = String(value || "").match(/^(\d{4})-(\d{2})-(\d{2})/);
+      return m ? m[2] + "/" + m[3] + "/" + m[1] : (value || "");
+    }
+    function fmtTime(value) {
+      const m = String(value || "").match(/^(\d{1,2}):(\d{2})/);
+      if (!m) return value || "";
+      let hour = parseInt(m[1], 10);
+      const min = m[2];
+      const ampm = hour >= 12 ? "PM" : "AM";
+      hour = hour % 12 === 0 ? 12 : hour % 12;
+      return hour + ":" + min + " " + ampm;
+    }
+    function jobWhen(j) {
+      return [fmtDate(j.rideDate || String(j.when || "").slice(0,10)), fmtTime(j.rideTime || String(j.when || "").slice(11))].filter(Boolean).join("  ");
+    }
     function digits(p) {
       const d = String(p || "").replace(/\D/g, "");
       return d.length === 10 ? "1" + d : d;
@@ -157,7 +174,14 @@
       return d >= c;
     }
     function card(j, done) {
-      return "<div class=\"job"+(done?" done":"")+"\" data-open=\""+esc(j.id)+"\"><div style=\"font-size:17px;font-weight:560\">"+esc(j.guestName)+"</div><div class=\"sub\">"+esc(j.when)+" · "+esc(shortAddr(j.pickup))+"</div><div class=\"sub\">→ "+esc(shortAddr(j.dropoff))+"</div></div>";
+      const lines = [
+        jobWhen(j),
+        j.pickup ? "Pickup: " + j.pickup : "",
+        j.dropoff ? "Drop-off: " + j.dropoff : "",
+        j.flight ? "Flight: " + j.flight : "",
+        j.passengers ? "Passengers: " + j.passengers : ""
+      ].filter(Boolean).map(line => "<div class=\"meta\">"+esc(line)+"</div>").join("");
+      return "<div class=\"job"+(done?" done":"")+"\" data-open=\""+esc(j.id)+"\"><div style=\"font-size:17px;font-weight:560\">"+esc(j.guestName)+"</div>"+lines+"</div>";
     }
     function setTabs() {
       $("tab-open").classList.toggle("on", tab === "open");
@@ -167,12 +191,15 @@
     }
     function renderJobs() {
       setTabs();
-      if (tab === "done") {
-        $("joblist").innerHTML = doneJobs.length ? doneJobs.map(j => card(j,true)).join("") : "<p class=\"sub\">No completed jobs in the last year.</p>";
+      const list = tab === "done" ? doneJobs : jobs;
+      if (!list.length) {
+        $("joblist").innerHTML = tab === "done"
+          ? "<p class=\"sub\">No completed jobs in the last year.</p>"
+          : "<p class=\"sub\">No upcoming trips assigned to you yet.</p>";
         return;
       }
-      $("joblist").innerHTML = jobs.length ? jobs.map(j => card(j,false)).join("") : "<p class=\"sub\">No upcoming trips assigned to you yet.</p>";
-      $("joblist").querySelectorAll("[data-open]").forEach(el => el.onclick = () => openTrip(el.dataset.open));
+      $("joblist").innerHTML = list.map(j => card(j, tab === "done")).join("");
+      if (tab === "open") $("joblist").querySelectorAll("[data-open]").forEach(el => el.onclick = () => openTrip(el.dataset.open));
     }
     function setGpsLabel(text, on) {
       ["gps","gps2"].forEach(id => { $(id).textContent = text; $(id).className = "gps" + (on ? " on" : ""); });
@@ -203,12 +230,20 @@
       $("hello").textContent = ((driver && driver.name) || "DRIVER").toUpperCase();
       renderJobs();
     }
+    function tripDetails(j) {
+      return [
+        j.pickup ? "Pickup: " + j.pickup : "",
+        j.dropoff ? "Drop-off: " + j.dropoff : "",
+        j.flight ? "Flight: " + j.flight : "",
+        j.passengers ? "Passengers: " + j.passengers : ""
+      ].filter(Boolean).join("\n");
+    }
     function openTrip(id) {
       current = jobs.find(j => j.id === id) || current;
       if (!current) return;
-      $("trip-when").textContent = current.when || "Pickup";
+      $("trip-when").textContent = jobWhen(current) || "Pickup";
       $("trip-guest").textContent = current.guestName;
-      $("trip-route").textContent = [current.pickup, current.dropoff].filter(Boolean).join(" → ");
+      $("trip-route").textContent = tripDetails(current);
       paintStatus(); show("trip");
     }
     function paintStatus() {
