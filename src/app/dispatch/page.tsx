@@ -214,7 +214,7 @@ export default function DispatchPage() {
   function jobCard(j: any, completed: boolean) {
     const d = drivers.find((x) => x.id === j.assignedDriverId);
     return (
-      <div key={j.id} className={`rounded-2xl border border-white/10 bg-[#141416] p-4 ${completed ? "opacity-80" : ""}`}>
+      <div key={j.id} className="rounded-2xl border border-white/10 bg-[#141416] p-4">
         <div className="flex items-start justify-between gap-3">
           <div className="text-sm text-[#C4A574]">{formatDate(j.rideDate)}{formatTime(j.when) ? ` · ${formatTime(j.when)}` : ""}</div>
           <div className="text-[10px] tracking-widest text-[#C4A574]">{j.confirmation}</div>
@@ -225,11 +225,14 @@ export default function DispatchPage() {
         <div className="mt-3 text-[11px] uppercase tracking-widest text-[#9A9388]">Drop off</div>
         <div className="text-sm leading-5">{j.dropoff || "—"}</div>
         <div className="mt-3 text-xs text-[#E8D3B0]">
-          {completed ? "Completed" : d ? `Driver ${d.name}` : "Unassigned"}
-          {d && completed ? ` · ${d.name}` : ""}
-          {j.amountCents ? ` · ${money(j.amountCents)}` : ""}
+          {d ? `Driver ${d.name}` : completed ? "" : "Unassigned"}
+          {j.amountCents ? `${d || completed ? " · " : ""}${money(j.amountCents)}` : ""}
         </div>
-        {!completed && (
+        {completed ? (
+          <div className="mt-3 w-full rounded-xl bg-gradient-to-b from-[#E8D3B0] to-[#C4A574] py-3 text-center text-sm font-semibold text-[#16110a]">
+            Completed
+          </div>
+        ) : (
           <select className="mt-3 w-full rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" value={j.assignedDriverId || ""} onChange={(e) => assign(j, e.target.value)}>
             <option value="">Unassigned</option>
             {drivers.map((dr) => (
