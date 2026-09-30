@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json();
     const {
-      price,          // dollars
+      price,
       tipAmount = 0,
       tipPercent = 0,
       vehicle,
@@ -31,6 +31,7 @@ export async function POST(req: NextRequest) {
       pickup,
       dropoff,
       flightNumber,
+      notes,
       returnFlightNumber,
       returnDate,
       returnTime,
@@ -63,7 +64,7 @@ export async function POST(req: NextRequest) {
               })`,
               description: breakdown || "Private chauffeur service",
             },
-            unit_amount: Math.round(Number(price) * 100), // cents
+            unit_amount: Math.round(Number(price) * 100),
           },
           quantity: 1,
         },
@@ -96,6 +97,7 @@ export async function POST(req: NextRequest) {
         dropoff: dropoff || "",
         breakdown: breakdown || "",
         flightNumber: String(flightNumber || "").slice(0, 20),
+        notes: String(notes || "").slice(0, 400),
         returnFlightNumber: String(returnFlightNumber || "").slice(0, 20),
         returnDate: String(returnDate || "").slice(0, 20),
         returnTime: String(returnTime || "").slice(0, 10),

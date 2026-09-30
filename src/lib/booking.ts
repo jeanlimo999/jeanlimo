@@ -48,6 +48,7 @@ export function bookingFromSession(session: any) {
     pickup: meta.pickup || "",
     dropoff: meta.dropoff || "",
     flightNumber: meta.flightNumber || "",
+    notes: meta.notes || "",
     returnFlightNumber: meta.returnFlightNumber || "",
     returnDate: meta.returnDate || "",
     returnTime: meta.returnTime || "",
