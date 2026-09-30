@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 
 const COOKIE = "jl_session";
 const DISPATCH_COOKIE = "jl_dispatch";
+const DRIVER_COOKIE = "jl_driver";
 
 type SessionPayload = {
   clientId: string;
@@ -14,6 +15,14 @@ type DispatchPayload = {
   role: "dispatch";
   email: string;
   name: string;
+  exp: number;
+};
+
+type DriverPayload = {
+  role: "driver";
+  driverId: string;
+  name: string;
+  phone: string;
   exp: number;
 };
 
@@ -70,6 +79,16 @@ export function makeDispatchToken(email: string, name: string) {
   } satisfies DispatchPayload);
 }
 
+export function makeDriverToken(driverId: string, name: string, phone: string) {
+  return sign({
+    role: "driver",
+    driverId,
+    name,
+    phone,
+    exp: Date.now() + 1000 * 60 * 60 * 16,
+  } satisfies DriverPayload);
+}
+
 export function readSession(): SessionPayload | null {
   const token = cookies().get(COOKIE)?.value;
   if (!token) return null;
@@ -86,4 +105,12 @@ export function readDispatchSession(): DispatchPayload | null {
   return payload;
 }
 
-export { COOKIE, DISPATCH_COOKIE };
+export function readDriverSession(): DriverPayload | null {
+  const token = cookies().get(DRIVER_COOKIE)?.value;
+  if (!token) return null;
+  const payload = verify<DriverPayload>(token);
+  if (payload?.role !== "driver" || !payload.driverId) return null;
+  return payload;
+}
+
+export { COOKIE, DISPATCH_COOKIE, DRIVER_COOKIE };
