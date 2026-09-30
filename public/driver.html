@@ -21,8 +21,6 @@
     .sub { color:var(--muted); margin-top:6px; font-size:14px; line-height:1.45; }
     .pad { padding:0 18px calc(18px + var(--safe-b)); }
     input { width:100%; background:#1C1C20; border:1px solid var(--line); color:var(--text); border-radius:14px; padding:14px; font-size:16px; margin-top:10px; }
-    .pick { width:100%; text-align:left; background:#1C1C20; border:1px solid var(--line); color:var(--text); border-radius:14px; padding:14px; font-size:16px; margin-top:10px; }
-    .pick.on { border-color:rgba(196,165,116,.7); color:var(--gold2); }
     .primary, .status { width:100%; border:0; border-radius:16px; padding:16px; font-size:17px; font-weight:600; }
     .primary { background:linear-gradient(180deg,var(--gold2),var(--gold)); color:#16110a; margin-top:14px; }
     .status { text-align:left; background:var(--bg2); border:1px solid var(--line); color:var(--text); margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; min-height:84px; }
@@ -55,12 +53,12 @@
     <div class="top"><div class="brand">JEAN LIMO DRIVER</div></div>
     <div class="hero">
       <div class="eyebrow">Sign in</div>
-      <h1>Who is driving?</h1>
-      <p class="sub">Tap your name, then enter the dispatch PIN.</p>
+      <h1>Start shift</h1>
+      <p class="sub">Type your name and the dispatch PIN.</p>
     </div>
     <div class="pad">
-      <div id="who"></div>
-      <input id="pin" type="password" inputmode="numeric" placeholder="PIN" />
+      <input id="username" type="text" autocomplete="username" autocapitalize="words" placeholder="Username" />
+      <input id="pin" type="password" inputmode="numeric" autocomplete="current-password" placeholder="PIN" />
       <button class="primary" id="signin">Start shift</button>
     </div>
   </section>
@@ -105,9 +103,9 @@
     const $ = id => document.getElementById(id);
     const toast = m => { const t=$("toast"); t.textContent=m; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),2200); };
     const show = id => { document.querySelectorAll(".screen").forEach(s=>s.classList.remove("on")); $(id).classList.add("on"); };
-    let driver = null, jobs = [], current = null, pending = null, watchId = null, selectedId = "";
+    let driver = null, jobs = [], current = null, pending = null, watchId = null;
     function esc(s) {
-      return String(s || "").replace(/&/g,"&").replace(/</g,"<").replace(/>/g,">").replace(/\"/g,""");
+      return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
     }
     function shortAddr(a) { return String(a || "").split(",")[0]; }
     function firstName(n) { return String(n || "there").trim().split(/\s+/)[0]; }
@@ -205,33 +203,12 @@
         else if (idx + 1 === i || (idx < 0 && i === 0)) btn.classList.add("next");
       });
     }
-    async function fillLogin() {
-      try {
-        const data = await api("/api/driver/roster");
-        const list = data.drivers || [];
-        if (!list.length) $("who").innerHTML = "<p class=\"sub\">No drivers yet. Add them in Dispatch.</p>";
-        else {
-          $("who").innerHTML = list.map(d => "<button type=\"button\" class=\"pick\" data-id=\""+d.id+"\">"+esc(d.name)+"</button>").join("");
-          selectedId = list[0].id;
-          $("who").querySelectorAll(".pick").forEach(btn => {
-            if (btn.dataset.id === selectedId) btn.classList.add("on");
-            btn.onclick = () => {
-              selectedId = btn.dataset.id;
-              $("who").querySelectorAll(".pick").forEach(b => b.classList.toggle("on", b === btn));
-            };
-          });
-        }
-      } catch (e) {
-        $("who").innerHTML = "<p class=\"sub\">Could not load drivers. Pull to refresh.</p>";
-        toast(e.message || "Could not load drivers");
-      }
-    }
     $("signin").onclick = async () => {
       try {
         const data = await api("/api/driver/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id: selectedId, pin: $("pin").value.trim() })
+          body: JSON.stringify({ username: $("username").value.trim(), pin: $("pin").value.trim() })
         });
         driver = data.driver;
         $("hello").textContent = (driver.name || "DRIVER").toUpperCase();
@@ -246,8 +223,8 @@
       stopGps();
       await fetch("/api/driver/logout", { method: "POST", credentials: "same-origin" });
       driver = null; current = null;
+      $("pin").value = "";
       show("login");
-      fillLogin();
     };
     $("back").onclick = async () => { current = null; await loadJobs(); show("jobs"); };
     document.querySelectorAll(".status").forEach(btn => btn.onclick = () => {
@@ -285,7 +262,6 @@
       $("sheet").classList.remove("show");
     };
     $("skip").onclick = async () => { await apply(); $("sheet").classList.remove("show"); };
-    fillLogin();
   </script>
 </body>
 </html>
