@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
   const res = NextResponse.json({ ok: true, driver: { id: match.id, name: match.name, phone: match.phone || "" } });
   res.cookies.set(DRIVER_COOKIE, makeDriverToken(match.id, match.name, match.phone || ""), {
     ...sessionCookieOptions(),
-    maxAge: 60 * 60 * 16,
+    maxAge: 60 * 60 * 12,
   });
   return res;
 }

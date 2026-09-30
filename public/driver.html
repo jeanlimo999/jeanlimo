@@ -34,8 +34,9 @@
     .status.done .dot { background:var(--ok); }
     .job { background:var(--bg2); border:1px solid var(--line); border-radius:16px; padding:14px; margin-bottom:10px; }
     .job.done { opacity:.85; }
-    .sec { margin:18px 0 8px; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--gold); }
-    .tab-gold { display:inline-block; background:linear-gradient(180deg,var(--gold2),var(--gold)); color:#16110a; border:0; border-radius:999px; padding:8px 16px; font-size:13px; font-weight:700; margin:8px 0 10px; }
+    .tabs { display:flex; gap:8px; padding:0 18px 12px; }
+    .tab { flex:1; border:1px solid var(--line); background:var(--bg2); color:var(--muted); border-radius:999px; padding:10px 12px; font-size:13px; font-weight:700; }
+    .tab.on { background:linear-gradient(180deg,var(--gold2),var(--gold)); color:#16110a; border-color:transparent; }
     .gps { font-size:12px; color:var(--muted); padding:0 18px 10px; }
     .gps.on { color:var(--ok); }
     .sheet { display:none; position:fixed; inset:0; background:rgba(0,0,0,.8); align-items:flex-end; z-index:50; }
@@ -55,7 +56,7 @@
     <div class="hero">
       <div class="eyebrow">Sign in</div>
       <h1>Start shift</h1>
-      <p class="sub">Type your name and the dispatch PIN.</p>
+      <p class="sub">Type your name and the dispatch PIN. Stays signed in for 12 hours.</p>
     </div>
     <div class="pad">
       <input id="username" type="text" autocomplete="username" autocapitalize="words" placeholder="Username" />
@@ -73,6 +74,10 @@
       <h1>Assigned to you</h1>
     </div>
     <div class="gps" id="gps">GPS off</div>
+    <div class="tabs">
+      <button class="tab on" id="tab-open" type="button">Upcoming trips</button>
+      <button class="tab" id="tab-done" type="button">Completed</button>
+    </div>
     <div class="scroll pad" id="joblist"></div>
   </section>
   <section class="screen" id="trip">
@@ -104,9 +109,9 @@
     const $ = id => document.getElementById(id);
     const toast = m => { const t=$("toast"); t.textContent=m; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),2200); };
     const show = id => { document.querySelectorAll(".screen").forEach(s=>s.classList.remove("on")); $(id).classList.add("on"); };
-    let driver = null, jobs = [], current = null, pending = null, watchId = null;
+    let driver = null, jobs = [], doneJobs = [], current = null, pending = null, watchId = null, tab = "open";
     function esc(s) {
-      return String(s || "").replace(/&/g,"&").replace(/</g,"<").replace(/>/g,">").replace(/"/g,""");
+      return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
     }
     function shortAddr(a) { return String(a || "").split(",")[0]; }
     function firstName(n) { return String(n || "there").trim().split(/\s+/)[0]; }
@@ -154,11 +159,27 @@
     function card(j, done) {
       return "<div class=\"job"+(done?" done":"")+"\" data-open=\""+esc(j.id)+"\"><div style=\"font-size:17px;font-weight:560\">"+esc(j.guestName)+"</div><div class=\"sub\">"+esc(j.when)+" · "+esc(shortAddr(j.pickup))+"</div><div class=\"sub\">→ "+esc(shortAddr(j.dropoff))+"</div></div>";
     }
+    function setTabs() {
+      $("tab-open").classList.toggle("on", tab === "open");
+      $("tab-done").classList.toggle("on", tab === "done");
+      $("tab-open").textContent = "Upcoming trips ("+jobs.length+")";
+      $("tab-done").textContent = "Completed ("+doneJobs.length+")";
+    }
+    function renderJobs() {
+      setTabs();
+      if (tab === "done") {
+        $("joblist").innerHTML = doneJobs.length ? doneJobs.map(j => card(j,true)).join("") : "<p class=\"sub\">No completed jobs in the last year.</p>";
+        return;
+      }
+      $("joblist").innerHTML = jobs.length ? jobs.map(j => card(j,false)).join("") : "<p class=\"sub\">No upcoming trips assigned to you yet.</p>";
+      $("joblist").querySelectorAll("[data-open]").forEach(el => el.onclick = () => openTrip(el.dataset.open));
+    }
     function setGpsLabel(text, on) {
       ["gps","gps2"].forEach(id => { $(id).textContent = text; $(id).className = "gps" + (on ? " on" : ""); });
     }
     function startGps() {
       if (!navigator.geolocation) { setGpsLabel("GPS not available"); return; }
+      if (watchId != null) return;
       watchId = navigator.geolocation.watchPosition(async pos => {
         const { latitude, longitude } = pos.coords;
         setGpsLabel("GPS live · " + latitude.toFixed(5) + ", " + longitude.toFixed(5), true);
@@ -177,14 +198,10 @@
       driver = data.driver;
       const all = data.jobs || [];
       jobs = all.filter(j => j.tripStatus !== "dropped_off");
-      const done = all.filter(j => j.tripStatus === "dropped_off" && withinYear(j))
+      doneJobs = all.filter(j => j.tripStatus === "dropped_off" && withinYear(j))
         .sort((a,b) => String(b.when).localeCompare(String(a.when)));
-      let html = "<div class=\"tab-gold\">Upcoming trips ("+jobs.length+")</div>";
-      html += jobs.length ? jobs.map(j => card(j,false)).join("") : "<p class=\"sub\">No upcoming trips assigned to you yet.</p>";
-      html += "<div class=\"sec\">Completed · last 12 months ("+done.length+")</div>";
-      html += done.length ? done.map(j => card(j,true)).join("") : "<p class=\"sub\">No completed jobs in the last year.</p>";
-      $("joblist").innerHTML = html;
-      $("joblist").querySelectorAll("[data-open]").forEach(el => el.onclick = () => openTrip(el.dataset.open));
+      $("hello").textContent = ((driver && driver.name) || "DRIVER").toUpperCase();
+      renderJobs();
     }
     function openTrip(id) {
       current = jobs.find(j => j.id === id) || current;
@@ -204,6 +221,13 @@
         else if (idx + 1 === i || (idx < 0 && i === 0)) btn.classList.add("next");
       });
     }
+    async function enterJobs() {
+      startGps();
+      await loadJobs();
+      show("jobs");
+    }
+    $("tab-open").onclick = () => { tab = "open"; renderJobs(); };
+    $("tab-done").onclick = () => { tab = "done"; renderJobs(); };
     $("signin").onclick = async () => {
       try {
         const data = await api("/api/driver/login", {
@@ -212,10 +236,7 @@
           body: JSON.stringify({ username: $("username").value.trim(), pin: $("pin").value.trim() })
         });
         driver = data.driver;
-        $("hello").textContent = (driver.name || "DRIVER").toUpperCase();
-        startGps();
-        await loadJobs();
-        show("jobs");
+        await enterJobs();
       } catch (e) {
         toast(e.message || "Wrong PIN");
       }
@@ -223,7 +244,7 @@
     $("signout").onclick = async () => {
       stopGps();
       await fetch("/api/driver/logout", { method: "POST", credentials: "same-origin" });
-      driver = null; current = null;
+      driver = null; current = null; jobs = []; doneJobs = [];
       $("pin").value = "";
       show("login");
     };
@@ -263,6 +284,9 @@
       $("sheet").classList.remove("show");
     };
     $("skip").onclick = async () => { await apply(); $("sheet").classList.remove("show"); };
+    (async () => {
+      try { await enterJobs(); } catch {}
+    })();
   </script>
 </body>
 </html>

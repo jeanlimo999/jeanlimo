@@ -85,7 +85,7 @@ export function makeDriverToken(driverId: string, name: string, phone: string) {
     driverId,
     name,
     phone,
-    exp: Date.now() + 1000 * 60 * 60 * 16,
+    exp: Date.now() + 1000 * 60 * 60 * 12,
   } satisfies DriverPayload);
 }
 
