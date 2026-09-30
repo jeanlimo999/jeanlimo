@@ -49,6 +49,7 @@ export function bookingFromSession(session: any) {
     dropoff: meta.dropoff || "",
     flightNumber: meta.flightNumber || "",
     notes: meta.notes || "",
+    returnNotes: meta.returnNotes || "",
     returnFlightNumber: meta.returnFlightNumber || "",
     returnDate: meta.returnDate || "",
     returnTime: meta.returnTime || "",
