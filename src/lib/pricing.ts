@@ -11,9 +11,9 @@ export const FLAT_RATES: Record<Vehicle, number[]> = {
 };
 
 export const PER_MILE_OVER_100: Record<Vehicle, number> = {
-  sedan: 2.75,
-  suv: 3.5,
-  sprinter: 12,
+  sedan: 3.5,
+  suv: 4.25,
+  sprinter: 12.5,
 };
 
 export const HOURLY_RATES: Record<Vehicle, number> = {
