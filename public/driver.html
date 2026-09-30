@@ -46,16 +46,15 @@
     .toast { position:fixed; left:50%; bottom:calc(24px + var(--safe-b)); transform:translateX(-50%); background:#222; border:1px solid var(--line); padding:10px 14px; border-radius:999px; font-size:13px; opacity:0; z-index:60; }
     .toast.show { opacity:1; }
     .scroll { flex:1; overflow:auto; }
-    label { display:block; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:10px 0 6px; }
   </style>
 </head>
 <body>
   <section class="screen on" id="login">
-    <div class="top"><div class="brand">JEAN LIMO DRIVER</div><button class="ghost" id="open-setup">Connect</button></div>
+    <div class="top"><div class="brand">JEAN LIMO DRIVER</div></div>
     <div class="hero">
       <div class="eyebrow">Sign in</div>
       <h1>Who is driving?</h1>
-      <p class="sub" id="conn-note">Connect this phone to Supabase first, same key as the laptop.</p>
+      <p class="sub">Use the same PIN from dispatch. No Supabase key on this phone.</p>
     </div>
     <div class="pad">
       <select id="who"></select>
@@ -89,18 +88,6 @@
       <button class="status" data-status="dropped_off"><div><div class="kicker">Step 3 · texts dispatch</div><div class="title">Dropped off</div></div><div class="dot"></div></button>
     </div>
   </section>
-  <div class="sheet" id="setup">
-    <div class="panel">
-      <div class="eyebrow">Supabase</div>
-      <h1 style="font-size:22px;margin-top:6px">Connect this phone</h1>
-      <label>Project URL</label>
-      <input id="sb-url" />
-      <label>Anon public key</label>
-      <input id="sb-key" placeholder="same key as laptop Setup" />
-      <button class="act gold" id="save-sb">Save</button>
-      <button class="act" id="close-setup">Close</button>
-    </div>
-  </div>
   <div class="sheet" id="sheet">
     <div class="panel">
       <div class="eyebrow" id="sheet-kicker">Notify</div>
@@ -112,17 +99,49 @@
     </div>
   </div>
   <div class="toast" id="toast"></div>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="config.js"></script>
-  <script src="jl.js"></script>
   <script>
     const $ = id => document.getElementById(id);
     const toast = m => { const t=$("toast"); t.textContent=m; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),2200); };
     const show = id => { document.querySelectorAll(".screen").forEach(s=>s.classList.remove("on")); $(id).classList.add("on"); };
     let driver = null, jobs = [], current = null, pending = null, watchId = null;
-    function hasKey() { return !!(localStorage.getItem("jl_supabase_key") || (JL.cfg().supabaseAnonKey)); }
-    function note() {
-      $("conn-note").textContent = hasKey() ? "Connected. Sign in with your PIN." : "This phone is not connected. Tap Connect and paste the same anon key as the laptop.";
+
+    function esc(s) {
+      return String(s || "").replace(/[&<>"']/g, c => ({ "&":"&","<":"<",">":">","\"":""","'":"&#39;" }[c]));
+    }
+    function shortAddr(a) { return String(a || "").split(",")[0]; }
+    function firstName(n) { return String(n || "there").trim().split(/\s+/)[0]; }
+    function digits(p) {
+      const d = String(p || "").replace(/\D/g, "");
+      return d.length === 10 ? "1" + d : d;
+    }
+    function prettyPhone(p) {
+      const d = String(p || "").replace(/\D/g, "");
+      const x = d.length === 11 && d[0] === "1" ? d.slice(1) : d;
+      return x.length === 10 ? "(" + x.slice(0,3) + ") " + x.slice(3,6) + "-" + x.slice(6) : (p || "");
+    }
+    function smsUrl(phone, body) {
+      const num = digits(phone);
+      const q = encodeURIComponent(body);
+      const ios = /iPhone|iPad|Mac/.test(navigator.userAgent);
+      if (!num) return ios ? "sms:&body=" + q : "sms:?body=" + q;
+      return ios ? "sms:+" + num + "&body=" + q : "sms:+" + num + "?body=" + q;
+    }
+    function messages(job) {
+      const guest = firstName(job.guestName);
+      const dname = driver.name;
+      const pu = job.pickup ? " (" + shortAddr(job.pickup) + ")" : "";
+      const dphone = driver.phone ? " My number is " + prettyPhone(driver.phone) + "." : "";
+      return {
+        on_the_way: "Hi " + guest + ", this is " + dname + " with Jean Limo. I'm on the way to you now" + pu + "." + dphone,
+        on_location: "Hi " + guest + ", this is " + dname + " with Jean Limo. I'm on location and ready for you" + pu + ".",
+        dropped_off_owner: ("DONE: " + job.guestName + " dropped off by " + dname + ". " + (job.confirmation || "")).replace(/\s+/g," ").trim()
+      };
+    }
+    async function api(url, opts) {
+      const res = await fetch(url, Object.assign({ credentials: "same-origin" }, opts || {}));
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Request failed");
+      return data;
     }
     function jobDate(j) { return j.rideDate || String(j.when || "").slice(0,10); }
     function withinYear(j) {
@@ -133,12 +152,7 @@
       return d >= c;
     }
     function card(j, done) {
-      return "<div class=\"job"+(done?" done":"")+"\" data-open=\""+JL.esc(j.id)+"\"><div style=\"font-size:17px;font-weight:560\">"+JL.esc(j.guestName)+"</div><div class=\"sub\">"+JL.esc(j.when)+" · "+JL.esc(JL.shortAddr(j.pickup))+"</div><div class=\"sub\">→ "+JL.esc(JL.shortAddr(j.dropoff))+"</div></div>";
-    }
-    async function fillLogin() {
-      const drivers = await JL.listDrivers();
-      $("who").innerHTML = drivers.map(d => "<option value=\""+d.id+"\">"+JL.esc(d.name)+"</option>").join("");
-      note();
+      return "<div class=\"job"+(done?" done":"")+"\" data-open=\""+esc(j.id)+"\"><div style=\"font-size:17px;font-weight:560\">"+esc(j.guestName)+"</div><div class=\"sub\">"+esc(j.when)+" · "+esc(shortAddr(j.pickup))+"</div><div class=\"sub\">→ "+esc(shortAddr(j.dropoff))+"</div></div>";
     }
     function setGpsLabel(text, on) {
       ["gps","gps2"].forEach(id => { $(id).textContent = text; $(id).className = "gps" + (on ? " on" : ""); });
@@ -148,20 +162,22 @@
       watchId = navigator.geolocation.watchPosition(async pos => {
         const { latitude, longitude } = pos.coords;
         setGpsLabel("GPS live · " + latitude.toFixed(5) + ", " + longitude.toFixed(5), true);
-        if (driver) await JL.pingGps(driver, current, latitude, longitude);
+        try {
+          await api("/api/driver/gps", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ lat: latitude, lng: longitude, bookingId: current && current.bookingId })
+          });
+        } catch {}
       }, err => setGpsLabel("GPS permission needed — " + err.message), { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 });
     }
     function stopGps() { if (watchId != null) navigator.geolocation.clearWatch(watchId); watchId = null; }
-    function mine(j) {
-      if (!driver) return false;
-      if (j.assignedDriverId && j.assignedDriverId === driver.id) return true;
-      const n = (driver.name || "").toLowerCase();
-      return n && String(j.assignedDriverName || "").toLowerCase() === n;
-    }
     async function loadJobs() {
-      const all = await JL.listJobs();
-      jobs = all.filter(j => mine(j) && j.tripStatus !== "dropped_off");
-      const done = all.filter(j => mine(j) && j.tripStatus === "dropped_off" && withinYear(j))
+      const data = await api("/api/driver/jobs");
+      driver = data.driver;
+      const all = data.jobs || [];
+      jobs = all.filter(j => j.tripStatus !== "dropped_off");
+      const done = all.filter(j => j.tripStatus === "dropped_off" && withinYear(j))
         .sort((a,b) => String(b.when).localeCompare(String(a.when)));
       let html = "<div class=\"sec\">Open ("+jobs.length+")</div>";
       html += jobs.length ? jobs.map(j => card(j,false)).join("") : "<p class=\"sub\">No open jobs assigned to you yet.</p>";
@@ -188,52 +204,79 @@
         else if (idx + 1 === i || (idx < 0 && i === 0)) btn.classList.add("next");
       });
     }
-    $("open-setup").onclick = () => {
-      $("sb-url").value = localStorage.getItem("jl_supabase_url") || "https://zfsthgozqowubpmscibd.supabase.co";
-      $("sb-key").value = localStorage.getItem("jl_supabase_key") || "";
-      $("setup").classList.add("show");
-    };
-    $("close-setup").onclick = () => $("setup").classList.remove("show");
-    $("save-sb").onclick = async () => {
-      localStorage.setItem("jl_supabase_url", $("sb-url").value.trim());
-      localStorage.setItem("jl_supabase_key", $("sb-key").value.trim());
-      location.reload();
-    };
+    async function fillLogin() {
+      try {
+        const data = await api("/api/driver/roster");
+        $("who").innerHTML = (data.drivers || []).map(d => "<option value=\""+d.id+"\">"+esc(d.name)+"</option>").join("");
+      } catch (e) {
+        toast(e.message || "Could not load drivers");
+      }
+      try {
+        const me = await fetch("/api/driver/jobs", { credentials: "same-origin" });
+        if (me.ok) {
+          const data = await me.json();
+          driver = data.driver;
+          $("hello").textContent = (driver.name || "DRIVER").toUpperCase();
+          startGps();
+          await loadJobs();
+          show("jobs");
+        }
+      } catch {}
+    }
     $("signin").onclick = async () => {
-      if (!hasKey()) { toast("Tap Connect first"); return; }
-      const drivers = await JL.listDrivers();
-      const pick = drivers.find(d => d.id === $("who").value);
-      if (!pick) return;
-      if (String(pick.pin || "") && $("pin").value.trim() !== String(pick.pin)) { toast("Wrong PIN"); return; }
-      driver = pick;
-      $("hello").textContent = pick.name.toUpperCase();
-      startGps(); await loadJobs(); show("jobs");
+      try {
+        const data = await api("/api/driver/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: $("who").value, pin: $("pin").value.trim() })
+        });
+        driver = data.driver;
+        $("hello").textContent = (driver.name || "DRIVER").toUpperCase();
+        startGps();
+        await loadJobs();
+        show("jobs");
+      } catch (e) {
+        toast(e.message || "Wrong PIN");
+      }
     };
-    $("signout").onclick = () => { stopGps(); driver=null; current=null; show("login"); };
-    $("back").onclick = async () => { current=null; await loadJobs(); show("jobs"); };
+    $("signout").onclick = async () => {
+      stopGps();
+      await fetch("/api/driver/logout", { method: "POST", credentials: "same-origin" });
+      driver = null; current = null;
+      show("login");
+    };
+    $("back").onclick = async () => { current = null; await loadJobs(); show("jobs"); };
     document.querySelectorAll(".status").forEach(btn => btn.onclick = () => {
       if (!current) return;
       const status = btn.dataset.status;
-      const msgs = JL.messages(current, driver);
+      const msgs = messages(current);
       pending = { status, msgs };
       $("sheet-kicker").textContent = status === "dropped_off" ? "Text dispatch" : "Text guest";
       $("sheet-title").textContent = status.replaceAll("_"," ");
       $("sheet-preview").textContent = status === "dropped_off" ? msgs.dropped_off_owner : msgs[status];
       $("sheet").classList.add("show");
     });
-    async function apply() { await JL.setTripStatus(current, pending.status); current.tripStatus = pending.status; paintStatus(); }
+    async function apply() {
+      await api("/api/driver/status", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bookingId: current.bookingId, status: pending.status, live_leg: current.live_leg || "outbound" })
+      });
+      current.tripStatus = pending.status;
+      paintStatus();
+    }
     $("send-sms").onclick = async () => {
       await apply();
-      const cfg = JL.cfg();
-      location.href = pending.status === "dropped_off" ? JL.smsUrl(cfg.ownerPhone, pending.msgs.dropped_off_owner) : JL.smsUrl(current.guestPhone, pending.msgs[pending.status]);
+      const phone = pending.status === "dropped_off" ? "2819170085" : current.guestPhone;
+      const body = pending.status === "dropped_off" ? pending.msgs.dropped_off_owner : pending.msgs[pending.status];
+      location.href = smsUrl(phone, body);
       $("sheet").classList.remove("show");
     };
     $("send-wa").onclick = async () => {
       await apply();
-      const cfg = JL.cfg();
-      const phone = pending.status === "dropped_off" ? cfg.ownerPhone : current.guestPhone;
+      const phone = pending.status === "dropped_off" ? "2819170085" : current.guestPhone;
       const body = pending.status === "dropped_off" ? pending.msgs.dropped_off_owner : pending.msgs[pending.status];
-      const num = JL.digits(phone);
+      const num = digits(phone);
       location.href = num ? "https://wa.me/"+num+"?text="+encodeURIComponent(body) : "https://wa.me/?text="+encodeURIComponent(body);
       $("sheet").classList.remove("show");
     };
