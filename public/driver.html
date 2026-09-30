@@ -107,7 +107,7 @@
     const show = id => { document.querySelectorAll(".screen").forEach(s=>s.classList.remove("on")); $(id).classList.add("on"); };
     let driver = null, jobs = [], current = null, pending = null, watchId = null, selectedId = "";
     function esc(s) {
-      return String(s || "").replace(/[&<>"']/g, c => ({ "&":"&","<":"<",">":">","\"":""","'":"&#39;" }[c]));
+      return String(s || "").replace(/&/g,"&").replace(/</g,"<").replace(/>/g,">").replace(/\"/g,""");
     }
     function shortAddr(a) { return String(a || "").split(",")[0]; }
     function firstName(n) { return String(n || "there").trim().split(/\s+/)[0]; }
@@ -222,19 +222,9 @@
           });
         }
       } catch (e) {
+        $("who").innerHTML = "<p class=\"sub\">Could not load drivers. Pull to refresh.</p>";
         toast(e.message || "Could not load drivers");
       }
-      try {
-        const me = await fetch("/api/driver/jobs", { credentials: "same-origin" });
-        if (me.ok) {
-          const data = await me.json();
-          driver = data.driver;
-          $("hello").textContent = (driver.name || "DRIVER").toUpperCase();
-          startGps();
-          await loadJobs();
-          show("jobs");
-        }
-      } catch {}
     }
     $("signin").onclick = async () => {
       try {
@@ -257,6 +247,7 @@
       await fetch("/api/driver/logout", { method: "POST", credentials: "same-origin" });
       driver = null; current = null;
       show("login");
+      fillLogin();
     };
     $("back").onclick = async () => { current = null; await loadJobs(); show("jobs"); };
     document.querySelectorAll(".status").forEach(btn => btn.onclick = () => {
