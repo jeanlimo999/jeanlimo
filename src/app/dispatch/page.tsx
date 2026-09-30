@@ -227,6 +227,24 @@ export default function DispatchPage() {
         <div className="text-sm leading-5">{j.pickup || "—"}</div>
         <div className="mt-3 text-[11px] uppercase tracking-widest text-[#9A9388]">Drop off</div>
         <div className="text-sm leading-5">{j.dropoff || "—"}</div>
+        {String(j.flight || "").trim() && (
+          <>
+            <div className="mt-3 text-[11px] uppercase tracking-widest text-[#9A9388]">Flight number</div>
+            <div className="text-sm leading-5">{j.flight}</div>
+          </>
+        )}
+        {String(j.passengers || "").trim() && (
+          <>
+            <div className="mt-3 text-[11px] uppercase tracking-widest text-[#9A9388]">Passengers</div>
+            <div className="text-sm leading-5">{j.passengers}</div>
+          </>
+        )}
+        {String(j.notes || "").trim() && (
+          <>
+            <div className="mt-3 text-[11px] uppercase tracking-widest text-[#9A9388]">Additional note</div>
+            <div className="text-sm leading-5 whitespace-pre-wrap">{j.notes}</div>
+          </>
+        )}
         <div className="mt-3 text-xs text-[#E8D3B0]">
           {d ? `Driver ${d.name}` : completed ? "" : "Unassigned"}
           {j.amountCents ? `${d || completed ? " · " : ""}${money(j.amountCents)}` : ""}
