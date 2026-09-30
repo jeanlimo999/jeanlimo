@@ -56,13 +56,13 @@
     <div class="top"><div class="brand">JEAN LIMO DRIVER</div></div>
     <div class="hero">
       <div class="eyebrow">Sign in</div>
-      <h1>Start shift</h1>
+      <h1>Login</h1>
       <p class="sub">Type your name and the dispatch PIN. Stays signed in for 12 hours.</p>
     </div>
     <div class="pad">
       <input id="username" type="text" autocomplete="username" autocapitalize="words" placeholder="Username" />
       <input id="pin" type="password" inputmode="numeric" autocomplete="current-password" placeholder="PIN" />
-      <button class="primary" id="signin">Start shift</button>
+      <button class="primary" type="button" id="signin">Login</button>
     </div>
   </section>
   <section class="screen" id="jobs">
@@ -112,7 +112,7 @@
     const show = id => { document.querySelectorAll(".screen").forEach(s=>s.classList.remove("on")); $(id).classList.add("on"); };
     let driver = null, jobs = [], doneJobs = [], current = null, pending = null, watchId = null, tab = "open";
     function esc(s) {
-      return String(s || "").replace(/&/g,"&").replace(/</g,"<").replace(/>/g,">").replace(/"/g,""");
+      return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
     }
     function shortAddr(a) { return String(a || "").split(",")[0]; }
     function firstName(n) { return String(n || "there").trim().split(/\s+/)[0]; }
