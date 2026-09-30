@@ -19,7 +19,7 @@ function bookingDay(row: any) {
 function cents(row: any) {
   const n = Number(row.amount_cents || row.amount || 0);
   if (!Number.isFinite(n)) return 0;
-  return n > 100000 ? n : n; // already cents in this app
+  return n > 100000 ? n : n;
 }
 
 export async function GET() {
@@ -62,6 +62,11 @@ export async function GET() {
       confirmation: row.confirmation,
       amountCents: cents(row),
     };
+    const rawNotes = String(row.passenger_notes || row.notes || "");
+    const split = rawNotes.indexOf("Return:");
+    const outboundNotes = (split >= 0 ? rawNotes.slice(0, split) : rawNotes).replace(/\s*\|\s*$/, "").trim();
+    const returnNotes = split >= 0 ? rawNotes.slice(split + 7).trim() : "";
+    const pax = row.passengers || row.passenger_count || row.pax || "";
     const list = [
       {
         ...base,
@@ -70,6 +75,9 @@ export async function GET() {
         rideDate: row.ride_date || "",
         pickup: row.pickup,
         dropoff: row.dropoff,
+        flight: row.flight_number || "",
+        passengers: pax === 0 || pax ? String(pax) : "",
+        notes: outboundNotes,
       },
     ];
     if (row.return_date || row.return_pickup) {
@@ -82,6 +90,9 @@ export async function GET() {
         rideDate: row.return_date || "",
         pickup: row.return_pickup || row.dropoff,
         dropoff: row.return_dropoff || row.pickup,
+        flight: row.return_flight_number || "",
+        passengers: pax === 0 || pax ? String(pax) : "",
+        notes: returnNotes,
       });
     }
     return list;
