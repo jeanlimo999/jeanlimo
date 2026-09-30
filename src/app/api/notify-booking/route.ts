@@ -22,6 +22,7 @@ function bookingText(b: any) {
     "",
     `Date / time: ${formatDateTime(b.date, b.time)}`,
     `Flight: ${b.flightNumber || ""}`,
+    `Additional note: ${b.notes || ""}`,
     `Pickup address: ${b.pickup || ""}`,
     `Drop-off address: ${b.dropoff || ""}`,
   ];
