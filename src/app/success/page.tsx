@@ -4,11 +4,29 @@ import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { formatDateTime } from "@/lib/booking";
 
+declare global {
+  interface Window {
+    gtag?: (...args: unknown[]) => void;
+  }
+}
+
 function SuccessInner() {
   const params = useSearchParams();
   const sessionId = params.get("session_id") || "";
   const [booking, setBooking] = useState<any>(null);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!booking?.confirmation) return;
+    const key = `ads-purchase-${booking.confirmation}`;
+    if (sessionStorage.getItem(key)) return;
+    sessionStorage.setItem(key, "1");
+    window.gtag?.("event", "ads_conversion_Purchase_1", {
+      value: booking.amount ?? undefined,
+      currency: "USD",
+      transaction_id: booking.confirmation,
+    });
+  }, [booking]);
 
   useEffect(() => {
     if (!sessionId) return;
