@@ -76,6 +76,8 @@ export default function DispatchPage() {
   const [tab, setTab] = useState<"open" | "done">("open");
   const [form, setForm] = useState({ name: "", phone: "", pin: "", vehicle: "sedan" });
   const [owner, setOwner] = useState({ name: "", email: "", password: "" });
+  const [manualOpen, setManualOpen] = useState(false);
+  const [trip, setTrip] = useState({ name: "", phone: "", date: "", time: "", pickup: "", dropoff: "", flight: "", passengers: "", notes: "", vehicle: "sedan", amount: "" });
 
   async function check() {
     const res = await fetch("/api/dispatch/me");
@@ -149,6 +151,25 @@ export default function DispatchPage() {
     setWho(data.name || data.email || "");
     setAuthed(true);
     await load();
+  }
+
+
+  async function addTrip(e: React.FormEvent) {
+    e.preventDefault();
+    setErr("");
+    const res = await fetch("/api/dispatch/manual", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(trip),
+    });
+    const data = await res.json();
+    if (!res.ok) setErr(data.error || "Could not add trip");
+    else {
+      setMsg("Manual trip added " + data.confirmation);
+      setTrip({ name: "", phone: "", date: "", time: "", pickup: "", dropoff: "", flight: "", passengers: "", notes: "", vehicle: "sedan", amount: "" });
+      setManualOpen(false);
+      await load();
+    }
   }
 
   async function addOwner(e: React.FormEvent) {
@@ -298,6 +319,7 @@ export default function DispatchPage() {
         <div className="flex items-center justify-between">
           <div className="text-[13px] tracking-[0.16em] text-[#E8D3B0]">JEAN LIMO DISPATCH</div>
           <div className="flex gap-2">
+            <button onClick={() => setManualOpen(!manualOpen)} className="rounded-full border border-[#C4A574]/40 px-3 py-1 text-xs text-[#E8D3B0]">Add trip</button>
             <button onClick={() => load()} className="rounded-full border border-white/10 px-3 py-1 text-xs text-[#9A9388]">Refresh</button>
             <button onClick={() => setRosterOpen(!rosterOpen)} className="rounded-full border border-white/10 px-3 py-1 text-xs text-[#9A9388]">Drivers</button>
             <button
@@ -341,6 +363,35 @@ export default function DispatchPage() {
             <div className="mt-1 text-2xl font-semibold">{money(revenue.lifetime)}</div>
           </div>
         </div>
+        
+        {manualOpen && (
+          <form onSubmit={addTrip} className="mt-4 rounded-2xl border border-white/10 bg-[#141416] p-4 grid gap-2">
+            <div className="text-[11px] uppercase tracking-widest text-[#C4A574]">In-house trip</div>
+            <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" placeholder="Customer name" value={trip.name} onChange={(e) => setTrip({ ...trip, name: e.target.value })} required />
+            <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" placeholder="Phone" value={trip.phone} onChange={(e) => setTrip({ ...trip, phone: e.target.value })} />
+            <div className="grid grid-cols-2 gap-2">
+              <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" type="date" value={trip.date} onChange={(e) => setTrip({ ...trip, date: e.target.value })} required />
+              <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" type="time" value={trip.time} onChange={(e) => setTrip({ ...trip, time: e.target.value })} required />
+            </div>
+            <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" placeholder="Pickup address" value={trip.pickup} onChange={(e) => setTrip({ ...trip, pickup: e.target.value })} required />
+            <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" placeholder="Drop-off address" value={trip.dropoff} onChange={(e) => setTrip({ ...trip, dropoff: e.target.value })} required />
+            <div className="grid grid-cols-2 gap-2">
+              <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" placeholder="Flight" value={trip.flight} onChange={(e) => setTrip({ ...trip, flight: e.target.value })} />
+              <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" placeholder="Passengers" value={trip.passengers} onChange={(e) => setTrip({ ...trip, passengers: e.target.value })} />
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <select className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" value={trip.vehicle} onChange={(e) => setTrip({ ...trip, vehicle: e.target.value })}>
+                <option value="sedan">Sedan</option>
+                <option value="suv">SUV</option>
+                <option value="sprinter">Sprinter</option>
+              </select>
+              <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" placeholder="Fare $" value={trip.amount} onChange={(e) => setTrip({ ...trip, amount: e.target.value })} />
+            </div>
+            <textarea className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" placeholder="Notes, gate code, who to bill" value={trip.notes} onChange={(e) => setTrip({ ...trip, notes: e.target.value })} />
+            <button className="rounded-xl bg-gradient-to-b from-[#E8D3B0] to-[#C4A574] py-3 font-semibold text-[#16110a]">Save trip</button>
+          </form>
+        )}
+
         {msg && <p className="mt-3 text-sm text-[#7DCFB6]">{msg}</p>}
         {err && <p className="mt-3 text-sm text-red-400">{err}</p>}
 
