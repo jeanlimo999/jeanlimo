@@ -79,16 +79,16 @@ export default function Home() {
               </thead>
               <tbody className="bg-zinc-900">
                 {[
-                  ["0 – 10 mi", 110, 130, 350],
-                  ["11 – 20 mi", 120, 145, 450],
-                  ["21 – 30 mi", 130, 160, 550],
-                  ["31 – 40 mi", 155, 180, 600],
-                  ["41 – 50 mi", 165, 195, 650],
-                  ["51 – 60 mi", 180, 215, 700],
-                  ["61 – 70 mi", 195, 230, 750],
-                  ["71 – 80 mi", 205, 255, 800],
-                  ["81 – 90 mi", 220, 275, 875],
-                  ["91 – 100 mi", 235, 285, 950],
+                  ["0 – 10 mi", 110, 130, 250],
+                  ["11 – 20 mi", 120, 145, 325],
+                  ["21 – 30 mi", 130, 160, 400],
+                  ["31 – 40 mi", 155, 180, 475],
+                  ["41 – 50 mi", 165, 195, 525],
+                  ["51 – 60 mi", 180, 215, 600],
+                  ["61 – 70 mi", 195, 230, 675],
+                  ["71 – 80 mi", 205, 255, 750],
+                  ["81 – 90 mi", 220, 275, 825],
+                  ["91 – 100 mi", 235, 285, 900],
                 ].map(([dist, sedan, suv, sprinter]) => (
                   <tr key={dist as string} className="border-b border-zinc-800">
                     <td className="px-4 py-3">{dist}</td>
@@ -110,7 +110,7 @@ export default function Home() {
             {[
               { img: "/fleet/sedan.jpg", name: "Business Sedan", aka: "Standard Class", models: "Mercedes E-Class, BMW 5 Series, Cadillac XTS or similar", seats: "3 passengers", bags: "3 luggage", from: "$110" },
               { img: "/fleet/suv.jpg", name: "Business SUV", aka: "Most booked", models: "Chevrolet Suburban · GMC Yukon XL or similar", seats: "6 passengers", bags: "6 luggage", from: "$130" },
-              { img: "/fleet/sprinter.jpg", name: "Sprinter Van", aka: "Group travel", models: "Mercedes-Benz Sprinter 2500", seats: "14 passengers", bags: "10 luggage", from: "$350" },
+              { img: "/fleet/sprinter.jpg", name: "Sprinter Van", aka: "Group travel", models: "Mercedes-Benz Sprinter 2500", seats: "14 passengers", bags: "10 luggage", from: "$250" },
             ].map((v) => (
               <div key={v.name} className="bg-zinc-950 border border-yellow-600/20 rounded-2xl overflow-hidden">
                 <div className="aspect-[4/3] overflow-hidden"><img src={v.img} alt={v.name} className="w-full h-full object-cover" /></div>
