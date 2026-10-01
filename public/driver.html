@@ -207,9 +207,11 @@
         j.pickup ? "Pickup: " + j.pickup : "",
         j.dropoff ? "Drop-off: " + j.dropoff : "",
         j.flight ? "Flight: " + j.flight : "",
-        j.passengers ? "Passengers: " + j.passengers : ""
+        j.passengers ? "Passengers: " + j.passengers : "",
+        j.notes ? "Note: " + j.notes : ""
       ].filter(Boolean).map(line => "<div class=\"meta\">"+esc(line)+"</div>").join("");
-      return "<div class=\"job"+(done?" done":"")+"\" data-open=\""+esc(j.id)+"\"><div style=\"font-size:17px;font-weight:560\">"+esc(j.guestName)+"</div>"+lines+"</div>";
+      const phone = j.guestPhone ? "<a class=\"meta\" href=\"tel:"+esc(String(j.guestPhone).replace(/[^0-9+]/g,""))+"\" style=\"display:block;color:#E8D3B0;margin-top:6px\" onclick=\"event.stopPropagation()\">Call "+esc(j.guestPhone)+"</a>" : "";
+      return "<div class=\"job"+(done?" done":"")+"\" data-open=\""+esc(j.id)+"\"><div style=\"font-size:17px;font-weight:560\">"+esc(j.guestName)+"</div>"+phone+lines+"</div>";
     }
     function setTabs() {
       $("tab-open").classList.toggle("on", tab === "open");
@@ -263,7 +265,9 @@
         j.pickup ? "Pickup: " + j.pickup : "",
         j.dropoff ? "Drop-off: " + j.dropoff : "",
         j.flight ? "Flight: " + j.flight : "",
-        j.passengers ? "Passengers: " + j.passengers : ""
+        j.passengers ? "Passengers: " + j.passengers : "",
+        j.guestPhone ? "Phone: " + j.guestPhone : "",
+        j.notes ? "Note: " + j.notes : ""
       ].filter(Boolean).join("\n");
     }
     function openTrip(id) {
