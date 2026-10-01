@@ -21,6 +21,10 @@ function SuccessInner() {
     const key = `ads-purchase-${booking.confirmation}`;
     if (sessionStorage.getItem(key)) return;
     sessionStorage.setItem(key, "1");
+    const email = String(booking.email || "").trim().toLowerCase();
+    if (email) {
+      window.gtag?.("set", "user_data", { email });
+    }
     window.gtag?.("event", "ads_conversion_Purchase_1", {
       value: booking.amount ?? undefined,
       currency: "USD",
