@@ -22,11 +22,52 @@ function cents(row: any) {
   return n > 100000 ? n : n;
 }
 
+async function ensureHannahTrip(db: any, drivers: any[]) {
+  const confirmation = "INH-UA1872";
+  const { data: existing } = await db.from("bookings").select("id").eq("confirmation", confirmation).maybeSingle();
+  if (existing) return;
+  const email = "hannah.ua1872@jeanlimo.local";
+  const { data: found } = await db.from("clients").select("id").eq("email", email).maybeSingle();
+  let clientId = found?.id;
+  if (!clientId) {
+    const { data: client, error } = await db
+      .from("clients")
+      .insert({ email, phone: "(832) 851-7259", full_name: "Hannah" })
+      .select("id")
+      .single();
+    if (error || !client) return;
+    clientId = client.id;
+  }
+  const tien = (drivers || []).find((d) => /tien/i.test(String(d.name || "")));
+  await db.from("bookings").insert({
+    confirmation,
+    client_id: clientId,
+    status: "confirmed",
+    trip_status: "confirmed",
+    vehicle: "suv",
+    trip_type: "oneway",
+    ride_date: "2026-10-01",
+    ride_time: "18:30",
+    pickup: "George Bush Intercontinental Airport (IAH)",
+    dropoff: "13411 Ambler Springs Dr, Tomball, TX 77377",
+    flight_number: "UA1872",
+    passengers: 1,
+    amount_cents: 0,
+    passenger_notes: "Paid. Driver pay $120. Airline United. Driver Tien Lam.",
+    breakdown: "Manual in-house. $120 is driver pay, not customer fare.",
+    assigned_driver_id: tien?.id || null,
+    updated_at: new Date().toISOString(),
+  });
+}
+
 export async function GET() {
   const session = readDispatchSession();
   if (!session) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
   const db = supabaseAdmin();
   if (!db) return NextResponse.json({ error: "Supabase is not configured" }, { status: 500 });
+
+  const { data: driverRows } = await db.from("drivers").select("id, name").eq("active", true);
+  await ensureHannahTrip(db, driverRows || []);
 
   const [{ data: drivers, error: dErr }, { data: bookings, error: bErr }] = await Promise.all([
     db.from("drivers").select("id, name, phone, pin, vehicle, photo_url, active, last_lat, last_lng").eq("active", true).order("name"),
