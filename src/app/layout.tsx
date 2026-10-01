@@ -26,6 +26,15 @@ export default function RootLayout({
   const mapsKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
   return (
     <html lang="en">
+      <head>
+        <Script async src="https://www.googletagmanager.com/gtag/js?id=G-FSWPQKE7D9" strategy="afterInteractive" />
+        <Script id="ga4" strategy="afterInteractive">
+          {`window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-FSWPQKE7D9');`}
+        </Script>
+      </head>
       <body className={`${inter.variable} ${playfair.variable} font-sans antialiased`}>
         {mapsKey ? (
           <Script
