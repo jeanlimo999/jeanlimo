@@ -99,9 +99,9 @@ export default function Home() {
                 ))}
                 <tr>
                   <td className="px-4 py-3 font-medium">Extra per mile after 100</td>
-                  <td className="px-4 py-3 text-center text-yellow-500">$3.50</td>
-                  <td className="px-4 py-3 text-center text-yellow-500">$3.85</td>
-                  <td className="px-4 py-3 text-center text-yellow-500">$9.80</td>
+                  <td className="px-4 py-3 text-center text-yellow-500">$3.60</td>
+                  <td className="px-4 py-3 text-center text-yellow-500">$3.95</td>
+                  <td className="px-4 py-3 text-center text-yellow-500">$9.50</td>
                 </tr>
               </tbody>
             </table>
