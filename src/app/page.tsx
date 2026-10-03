@@ -74,21 +74,21 @@ export default function Home() {
                   <th className="px-4 py-4 text-left font-semibold">Trip Distance</th>
                   <th className="px-4 py-4 text-center font-semibold">Business Sedan</th>
                   <th className="px-4 py-4 text-center font-semibold">SUV</th>
-                  <th className="px-4 py-4 text-center font-semibold">Sprinter</th>
+                  <th className="px-4 py-4 text-center font-semibold">Sprinter at tier</th>
                 </tr>
               </thead>
               <tbody className="bg-zinc-900">
                 {[
                   ["0 – 10 mi", 110, 130, 250],
-                  ["11 – 20 mi", 120, 145, 300],
-                  ["21 – 30 mi", 130, 160, 375],
-                  ["31 – 40 mi", 155, 180, 450],
-                  ["41 – 50 mi", 165, 195, 500],
-                  ["51 – 60 mi", 180, 215, 575],
-                  ["61 – 70 mi", 195, 230, 650],
-                  ["71 – 80 mi", 205, 255, 725],
-                  ["81 – 90 mi", 220, 275, 800],
-                  ["91 – 100 mi", 235, 285, 875],
+                  ["20 mi", 120, 145, 300],
+                  ["30 mi", 130, 160, 375],
+                  ["40 mi", 155, 180, 450],
+                  ["50 mi", 165, 195, 500],
+                  ["60 mi", 180, 215, 575],
+                  ["70 mi", 195, 230, 650],
+                  ["80 mi", 205, 255, 725],
+                  ["90 mi", 220, 275, 800],
+                  ["100 mi", 235, 285, 875],
                 ].map(([dist, sedan, suv, sprinter]) => (
                   <tr key={dist as string} className="border-b border-zinc-800">
                     <td className="px-4 py-3">{dist}</td>
@@ -106,6 +106,7 @@ export default function Home() {
               </tbody>
             </table>
           </div>
+          <p className="text-xs text-zinc-500 mt-3">Sedan and SUV are flat for the mile band. Sprinter is $250 for 0–10 miles, then $5 per mile. The Sprinter column is the price at 20, 30, 40 and so on. Example: 23 miles is $315.</p>
           <div className="mt-14 grid md:grid-cols-3 gap-6">
             {[
               { img: "/fleet/sedan.jpg", name: "Business Sedan", aka: "Standard Class", models: "Mercedes E-Class, BMW 5 Series, Cadillac XTS or similar", seats: "3 passengers", bags: "3 luggage", from: "$110" },
