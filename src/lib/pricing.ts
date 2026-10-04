@@ -12,9 +12,9 @@ export const FLAT_RATES: Record<Vehicle, number[]> = {
 };
 
 export const NY_FLAT_RATES: Record<Vehicle, number[]> = {
-  sedan: [150, 175, 200, 230, 255, 280, 305, 330, 355, 380],
-  suv: [185, 215, 245, 280, 315, 350, 385, 420, 455, 490],
-  sprinter: [325, 375, 450, 525, 600, 675, 750, 825, 900, 975],
+  sedan: [125, 150, 175, 205, 230, 255, 280, 305, 330, 355],
+  suv: [160, 190, 220, 255, 290, 325, 360, 395, 430, 465],
+  sprinter: [300, 350, 425, 500, 575, 650, 725, 800, 875, 950],
 };
 
 export const NY_PER_MILE_OVER_100: Record<Vehicle, number> = {
@@ -35,7 +35,6 @@ export const NY_HOURLY_MIN: Record<Vehicle, number> = {
   sprinter: 4,
 };
 
-/** Sprinter price charged only when the trip lands on that mile. */
 export const SPRINTER_TIER_ENDS: Record<number, number> = {
   20: 300,
   30: 375,
@@ -81,73 +80,41 @@ export function cityLabel(city: RateCity) {
 
 export function sprinterOneWay(miles: number) {
   const rounded = Math.round(miles * 100) / 100;
-
-  if (rounded <= 10) {
-    return {
-      price: SPRINTER_FIRST_10,
-      breakdown: `${rounded.toFixed(1)} mi · sprinter flat $250 (0–10)`,
-    };
-  }
-
+  if (rounded <= 10) return { price: SPRINTER_FIRST_10, breakdown: `${rounded.toFixed(1)} mi · sprinter flat $250 (0–10)` };
   if (rounded <= 100) {
     const milestone = Math.floor(rounded / 10) * 10;
-    if (rounded === milestone && SPRINTER_TIER_ENDS[milestone]) {
-      return {
-        price: SPRINTER_TIER_ENDS[milestone],
-        breakdown: `${rounded.toFixed(1)} mi · sprinter tier end $${SPRINTER_TIER_ENDS[milestone]}`,
-      };
-    }
+    if (rounded === milestone && SPRINTER_TIER_ENDS[milestone]) return { price: SPRINTER_TIER_ENDS[milestone], breakdown: `${rounded.toFixed(1)} mi · sprinter tier end $${SPRINTER_TIER_ENDS[milestone]}` };
     const anchor = milestone === rounded ? milestone - 10 : milestone;
     const anchorPrice = anchor <= 10 ? SPRINTER_FIRST_10 : SPRINTER_TIER_ENDS[anchor];
     const extra = rounded - anchor;
     const price = Math.round((anchorPrice + extra * SPRINTER_STEP) * 100) / 100;
-    return {
-      price,
-      breakdown: `${anchor} mi base $${anchorPrice} + ${extra.toFixed(1)} mi × $${SPRINTER_STEP}`,
-    };
+    return { price, breakdown: `${anchor} mi base $${anchorPrice} + ${extra.toFixed(1)} mi × $${SPRINTER_STEP}` };
   }
-
   const base = SPRINTER_TIER_ENDS[100];
   const extraMiles = rounded - 100;
   const price = Math.round((base + extraMiles * PER_MILE_OVER_100.sprinter) * 100) / 100;
-  return {
-    price,
-    breakdown: `100 mi base $${base} + ${extraMiles.toFixed(1)} extra mi × $${PER_MILE_OVER_100.sprinter}/mi`,
-  };
+  return { price, breakdown: `100 mi base $${base} + ${extraMiles.toFixed(1)} extra mi × $${PER_MILE_OVER_100.sprinter}/mi` };
 }
 
 export function calculateOneWay(vehicle: Vehicle, miles: number, city: RateCity = "houston") {
   if (miles <= 0) throw new Error("Invalid distance");
   if (city === "new-york") return calculateNewYork(vehicle, miles);
-
   if (vehicle === "sprinter") return sprinterOneWay(miles);
-
   if (miles <= 100) {
     const band = Math.min(Math.floor((miles - 0.0001) / 10), 9);
     const price = FLAT_RATES[vehicle][band];
-    return {
-      price,
-      breakdown: `${miles.toFixed(1)} mi · ${vehicle} flat rate (band ${band * 10}–${(band + 1) * 10})`,
-    };
+    return { price, breakdown: `${miles.toFixed(1)} mi · ${vehicle} flat rate` };
   }
-
   const base = FLAT_RATES[vehicle][9];
   const extraMiles = miles - 100;
-  const extraCost = extraMiles * PER_MILE_OVER_100[vehicle];
-  const price = Math.round((base + extraCost) * 100) / 100;
-
-  return {
-    price,
-    breakdown: `100 mi base $${base} + ${extraMiles.toFixed(1)} extra mi × $${PER_MILE_OVER_100[vehicle]}/mi`,
-  };
+  const price = Math.round((base + extraMiles * PER_MILE_OVER_100[vehicle]) * 100) / 100;
+  return { price, breakdown: `100 mi base $${base} + ${extraMiles.toFixed(1)} extra mi × $${PER_MILE_OVER_100[vehicle]}/mi` };
 }
 
 export function calculateNewYork(vehicle: Vehicle, miles: number) {
   const rounded = Math.round(miles * 100) / 100;
   if (vehicle === "sprinter") {
-    if (rounded <= 10) {
-      return { price: 325, breakdown: `${rounded.toFixed(1)} mi · NY sprinter flat $325 (0–10)` };
-    }
+    if (rounded <= 10) return { price: 300, breakdown: `${rounded.toFixed(1)} mi · NY sprinter flat $300 (0–10)` };
     if (rounded <= 100) {
       const band = Math.min(Math.floor((rounded - 0.0001) / 10), 9);
       const start = NY_FLAT_RATES.sprinter[band];
@@ -161,7 +128,6 @@ export function calculateNewYork(vehicle: Vehicle, miles: number) {
     const price = Math.round((base + extraMiles * NY_PER_MILE_OVER_100.sprinter) * 100) / 100;
     return { price, breakdown: `100 mi base $${base} + ${extraMiles.toFixed(1)} × $${NY_PER_MILE_OVER_100.sprinter}` };
   }
-
   if (rounded <= 100) {
     const band = Math.min(Math.floor((rounded - 0.0001) / 10), 9);
     const price = NY_FLAT_RATES[vehicle][band];
@@ -178,17 +144,10 @@ export function calculateHourly(vehicle: Vehicle, hours: number, city: RateCity 
     const minHours = NY_HOURLY_MIN[vehicle];
     const billableHours = Math.max(hours, minHours);
     const price = billableHours * NY_HOURLY_RATES[vehicle];
-    return {
-      price,
-      breakdown: `${billableHours} hr × $${NY_HOURLY_RATES[vehicle]}/hr (${minHours}-hr min)`,
-    };
+    return { price, breakdown: `${billableHours} hr × $${NY_HOURLY_RATES[vehicle]}/hr (${minHours}-hr min)` };
   }
   const billableHours = Math.max(hours, HOURLY_MIN_HOURS);
   const price = billableHours * HOURLY_RATES[vehicle];
   const includedMiles = billableHours * HOURLY_INCLUDED_MILES_PER_HOUR;
-
-  return {
-    price,
-    breakdown: `${billableHours} hr × $${HOURLY_RATES[vehicle]}/hr (${HOURLY_MIN_HOURS}-hr min) · includes ${includedMiles} mi`,
-  };
+  return { price, breakdown: `${billableHours} hr × $${HOURLY_RATES[vehicle]}/hr (${HOURLY_MIN_HOURS}-hr min) · includes ${includedMiles} mi` };
 }
