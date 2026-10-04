@@ -23,6 +23,18 @@ export const NY_PER_MILE_OVER_100: Record<Vehicle, number> = {
   sprinter: 10.5,
 };
 
+export const NY_HOURLY_RATES: Record<Vehicle, number> = {
+  sedan: 140,
+  suv: 175,
+  sprinter: 225,
+};
+
+export const NY_HOURLY_MIN: Record<Vehicle, number> = {
+  sedan: 3,
+  suv: 3,
+  sprinter: 4,
+};
+
 /** Sprinter price charged only when the trip lands on that mile. */
 export const SPRINTER_TIER_ENDS: Record<number, number> = {
   20: 300,
@@ -54,6 +66,18 @@ export const HOURLY_RATES: Record<Vehicle, number> = {
 export const HOURLY_MIN_HOURS = 2;
 export const HOURLY_INCLUDED_MILES_PER_HOUR = 20;
 export const HOURLY_OVERAGE_PER_MILE = 2.5;
+
+export function rateCityFromAddress(address: string): RateCity {
+  const s = String(address || "").toLowerCase();
+  if (/\b(new york|new jersey|nyc|manhattan|brooklyn|queens|bronx|staten island|newark|jersey city|hoboken|jfk|lga|ewr)\b/.test(s) || /,\s*ny\b|,\s*nj\b/.test(s)) {
+    return "new-york";
+  }
+  return "houston";
+}
+
+export function cityLabel(city: RateCity) {
+  return city === "new-york" ? "New York / New Jersey" : "Houston";
+}
 
 export function sprinterOneWay(miles: number) {
   const rounded = Math.round(miles * 100) / 100;
@@ -149,7 +173,16 @@ export function calculateNewYork(vehicle: Vehicle, miles: number) {
   return { price, breakdown: `100 mi base $${base} + ${extraMiles.toFixed(1)} × $${NY_PER_MILE_OVER_100[vehicle]}` };
 }
 
-export function calculateHourly(vehicle: Vehicle, hours: number) {
+export function calculateHourly(vehicle: Vehicle, hours: number, city: RateCity = "houston") {
+  if (city === "new-york") {
+    const minHours = NY_HOURLY_MIN[vehicle];
+    const billableHours = Math.max(hours, minHours);
+    const price = billableHours * NY_HOURLY_RATES[vehicle];
+    return {
+      price,
+      breakdown: `${billableHours} hr × $${NY_HOURLY_RATES[vehicle]}/hr (${minHours}-hr min)`,
+    };
+  }
   const billableHours = Math.max(hours, HOURLY_MIN_HOURS);
   const price = billableHours * HOURLY_RATES[vehicle];
   const includedMiles = billableHours * HOURLY_INCLUDED_MILES_PER_HOUR;
