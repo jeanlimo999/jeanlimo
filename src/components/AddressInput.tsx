@@ -55,6 +55,7 @@ export default function AddressInput({
   className?: string;
 }) {
   const boxRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLUListElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
   const [ready, setReady] = useState(false);
@@ -77,7 +78,9 @@ export default function AddressInput({
 
   useEffect(() => {
     const close = (e: MouseEvent) => {
-      if (!boxRef.current?.contains(e.target as Node)) setHints([]);
+      const target = e.target as Node;
+      if (boxRef.current?.contains(target) || menuRef.current?.contains(target)) return;
+      setHints([]);
     };
     document.addEventListener("mousedown", close);
     return () => document.removeEventListener("mousedown", close);
@@ -93,7 +96,6 @@ export default function AddressInput({
   function choose(description: string) {
     onChange(description);
     setHints([]);
-    inputRef.current?.blur();
   }
 
   function suggest(text: string) {
@@ -120,6 +122,7 @@ export default function AddressInput({
     hints.length > 0 && typeof document !== "undefined"
       ? createPortal(
           <ul
+            ref={menuRef}
             className="fixed z-[99999] max-h-56 overflow-auto rounded-xl border border-white/10 bg-[#1a1a1a] text-sm shadow-xl"
             style={{ top: menu.top, left: menu.left, width: menu.width }}
           >
@@ -128,8 +131,10 @@ export default function AddressInput({
                 <button
                   type="button"
                   className="w-full px-3 py-3 text-left text-zinc-100 hover:bg-white/10"
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={() => choose(h.description)}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    choose(h.description);
+                  }}
                 >
                   {h.description}
                 </button>
