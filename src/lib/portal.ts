@@ -19,6 +19,7 @@ export type BookingRow = {
   breakdown: string;
   passenger_notes?: string;
   stripe_session_id?: string | null;
+  city?: string;
 };
 
 export async function upsertClient(input: {
@@ -93,6 +94,7 @@ export async function saveWebsiteBooking(booking: {
   returnNotes?: string;
   stripe_session_id?: string;
   status?: string;
+  city?: string;
 }) {
   const db = supabaseAdmin();
   if (!db) return { saved: false, reason: "supabase_missing" };
@@ -125,6 +127,7 @@ export async function saveWebsiteBooking(booking: {
     breakdown: booking.breakdown || "",
     passenger_notes: [booking.notes, booking.returnNotes ? "Return: " + booking.returnNotes : ""].filter(Boolean).join(" | "),
     stripe_session_id: booking.stripe_session_id || null,
+    city: booking.city || "Houston",
     updated_at: new Date().toISOString(),
   };
 
