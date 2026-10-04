@@ -80,13 +80,9 @@ export default function AddressInput({
   useEffect(() => {
     if (!ready || !inputRef.current || !window.google?.maps?.places?.Autocomplete) return;
     const ac = new window.google.maps.places.Autocomplete(inputRef.current, {
-      fields: ["formatted_address", "name"],
+      fields: ["formatted_address", "name", "address_components"],
       componentRestrictions: { country: "us" },
     });
-    try {
-      const houston = new window.google.maps.LatLng(29.7604, -95.3698);
-      ac.setBounds(new window.google.maps.Circle({ center: houston, radius: 90000 }).getBounds());
-    } catch {}
     const listener = ac.addListener("place_changed", () => {
       const place = ac.getPlace();
       const next = place?.formatted_address || place?.name || inputRef.current?.value || "";
@@ -126,8 +122,6 @@ export default function AddressInput({
       {
         input: text,
         componentRestrictions: { country: "us" },
-        location: new window.google.maps.LatLng(29.7604, -95.3698),
-        radius: 90000,
       },
       (preds: any[] | null) => {
         setHints((preds || []).slice(0, 6).map((p) => ({ description: p.description })));
