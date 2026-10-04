@@ -56,6 +56,7 @@ export async function POST(req: Request) {
     amount_cents: Math.round((Number.isFinite(amount) ? amount : 0) * 100),
     passenger_notes: notes,
     breakdown: "Manual in-house",
+    city: String(body.city || "Houston").slice(0, 40) || "Houston",
     updated_at: new Date().toISOString(),
   };
 
