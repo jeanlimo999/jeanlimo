@@ -47,16 +47,19 @@ export default function AddressInput({
   onChange,
   placeholder,
   className,
+  bias,
 }: {
   id: string;
   value: string;
   onChange: (value: string) => void;
   placeholder: string;
   className?: string;
+  bias?: string;
 }) {
   const boxRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLUListElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const biasPoint = useRef<any>(null);
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
   const [ready, setReady] = useState(false);
   const [hints, setHints] = useState<{ description: string }[]>([]);
@@ -75,6 +78,17 @@ export default function AddressInput({
       cancelled = true;
     };
   }, [apiKey]);
+
+  useEffect(() => {
+    if (!ready || !bias || bias.trim().length < 4 || !window.google?.maps) {
+      biasPoint.current = null;
+      return;
+    }
+    const geocoder = new window.google.maps.Geocoder();
+    geocoder.geocode({ address: bias }, (results: any[] | null, status: string) => {
+      if (status === "OK" && results?.[0]?.geometry?.location) biasPoint.current = results[0].geometry.location;
+    });
+  }, [ready, bias]);
 
   useEffect(() => {
     const close = (e: MouseEvent) => {
@@ -106,16 +120,18 @@ export default function AddressInput({
       return;
     }
     const svc = new window.google.maps.places.AutocompleteService();
-    svc.getPlacePredictions(
-      {
-        input: text,
-        componentRestrictions: { country: "us" },
-      },
-      (preds: any[] | null) => {
-        setHints((preds || []).slice(0, 6).map((p) => ({ description: p.description })));
-        placeMenu();
-      }
-    );
+    const req: any = {
+      input: text,
+      componentRestrictions: { country: "us" },
+    };
+    if (biasPoint.current) {
+      req.location = biasPoint.current;
+      req.radius = 80000;
+    }
+    svc.getPlacePredictions(req, (preds: any[] | null) => {
+      setHints((preds || []).slice(0, 6).map((p) => ({ description: p.description })));
+      placeMenu();
+    });
   }
 
   const list =
