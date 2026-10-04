@@ -56,6 +56,7 @@ async function ensureHannahTrip(db: any, drivers: any[]) {
     passenger_notes: "Paid. Driver pay $120. Airline United. Driver Tien Lam.",
     breakdown: "Manual in-house. $120 is driver pay, not customer fare.",
     assigned_driver_id: tien?.id || null,
+    city: "Houston",
     updated_at: new Date().toISOString(),
   });
 }
@@ -68,6 +69,7 @@ export async function GET() {
 
   const { data: driverRows } = await db.from("drivers").select("id, name").eq("active", true);
   await ensureHannahTrip(db, driverRows || []);
+  await db.from("bookings").update({ city: "Houston" }).or("city.is.null,city.eq.");
 
   const [{ data: drivers, error: dErr }, { data: bookings, error: bErr }] = await Promise.all([
     db.from("drivers").select("id, name, phone, pin, vehicle, photo_url, active, last_lat, last_lng").eq("active", true).order("name"),
@@ -102,6 +104,7 @@ export async function GET() {
       tripStatus: row.trip_status || row.status || "confirmed",
       confirmation: row.confirmation,
       amountCents: cents(row),
+      city: row.city || "Houston",
     };
     const rawNotes = String(row.passenger_notes || row.notes || "");
     const split = rawNotes.indexOf("Return:");
