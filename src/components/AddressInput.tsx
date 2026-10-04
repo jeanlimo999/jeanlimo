@@ -56,8 +56,6 @@ export default function AddressInput({
 }) {
   const boxRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const onChangeRef = useRef(onChange);
-  onChangeRef.current = onChange;
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
   const [ready, setReady] = useState(false);
   const [hints, setHints] = useState<{ description: string }[]>([]);
@@ -78,24 +76,6 @@ export default function AddressInput({
   }, [apiKey]);
 
   useEffect(() => {
-    if (!ready || !inputRef.current || !window.google?.maps?.places?.Autocomplete) return;
-    const ac = new window.google.maps.places.Autocomplete(inputRef.current, {
-      fields: ["formatted_address", "name", "address_components"],
-      componentRestrictions: { country: "us" },
-    });
-    const listener = ac.addListener("place_changed", () => {
-      const place = ac.getPlace();
-      const next = place?.formatted_address || place?.name || inputRef.current?.value || "";
-      if (next) onChangeRef.current(next);
-      setHints([]);
-    });
-    return () => {
-      if (window.google?.maps?.event) window.google.maps.event.clearInstanceListeners(ac);
-      else listener?.remove?.();
-    };
-  }, [ready]);
-
-  useEffect(() => {
     const close = (e: MouseEvent) => {
       if (!boxRef.current?.contains(e.target as Node)) setHints([]);
     };
@@ -110,10 +90,16 @@ export default function AddressInput({
     setMenu({ top: r.bottom + 4, left: r.left, width: r.width });
   }
 
+  function choose(description: string) {
+    onChange(description);
+    setHints([]);
+    inputRef.current?.blur();
+  }
+
   function suggest(text: string) {
     onChange(text);
     placeMenu();
-    if (!window.google?.maps?.places || text.trim().length < 3) {
+    if (!ready || !window.google?.maps?.places || text.trim().length < 3) {
       setHints([]);
       return;
     }
@@ -143,10 +129,7 @@ export default function AddressInput({
                   type="button"
                   className="w-full px-3 py-3 text-left text-zinc-100 hover:bg-white/10"
                   onMouseDown={(e) => e.preventDefault()}
-                  onClick={() => {
-                    onChange(h.description);
-                    setHints([]);
-                  }}
+                  onClick={() => choose(h.description)}
                 >
                   {h.description}
                 </button>
