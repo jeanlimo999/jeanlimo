@@ -50,6 +50,16 @@ export default function NewYorkRates() {
           </table>
         </div>
         <p className="text-xs text-zinc-500 mt-3">Sprinter pricing increases $5 per additional mile within each tier.</p>
+        <p className="text-sm text-zinc-300 mt-3">Rates exclude tolls, parking, airport fees, and meet-and-greet charges. Additional waiting time may apply.</p>
+        <div className="mt-10 max-w-2xl bg-zinc-900 border border-yellow-600/20 rounded-xl p-6">
+          <h2 className="font-serif text-2xl text-yellow-500 mb-4">Hourly rates · as directed</h2>
+          <div className="space-y-3">
+            <div className="flex justify-between py-2 border-b border-zinc-800"><span>Business Sedan</span><span className="text-yellow-500">$140 / hr</span></div>
+            <div className="flex justify-between py-2 border-b border-zinc-800"><span>Business SUV</span><span className="text-yellow-500">$175 / hr</span></div>
+            <div className="flex justify-between py-2"><span>Sprinter Van</span><span className="text-yellow-500">$225 / hr</span></div>
+          </div>
+          <p className="text-xs text-zinc-500 mt-4">3-hour minimum for sedan and SUV. 4-hour minimum for Sprinter.</p>
+        </div>
       </main>
     </div>
   );
