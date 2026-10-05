@@ -18,9 +18,9 @@ export const NY_FLAT_RATES: Record<Vehicle, number[]> = {
 };
 
 export const NY_PER_MILE_OVER_100: Record<Vehicle, number> = {
-  sedan: 4.25,
-  suv: 5.25,
-  sprinter: 10.5,
+  sedan: 6.5,
+  suv: 7.5,
+  sprinter: 9.5,
 };
 
 export const NY_HOURLY_RATES: Record<Vehicle, number> = {
@@ -91,7 +91,7 @@ export function calculateNewYork(vehicle: Vehicle, miles: number) {
   }
   const base = NY_FLAT_RATES[vehicle][9];
   const extraMiles = rounded - 100;
-  return { price: Math.round((base + extraMiles * NY_PER_MILE_OVER_100[vehicle]) * 100) / 100, breakdown: `100 mi base $${base} + extra` };
+  return { price: Math.round((base + extraMiles * NY_PER_MILE_OVER_100[vehicle]) * 100) / 100, breakdown: `100 mi base $${base} + ${extraMiles.toFixed(1)} × $${NY_PER_MILE_OVER_100[vehicle]}` };
 }
 
 export function calculateHourly(vehicle: Vehicle, hours: number, city: RateCity = "houston") {
