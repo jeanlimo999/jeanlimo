@@ -20,7 +20,7 @@ export default function NewYorkRates() {
       <main className="max-w-5xl mx-auto px-4 pt-28 pb-16">
         <p className="text-yellow-500 tracking-[0.2em] text-xs uppercase mb-3">New York and New Jersey</p>
         <h1 className="font-serif text-4xl mb-4">New York and New Jersey rate card</h1>
-        <p className="text-zinc-400 mb-8">Same card for New York and New Jersey. Prices are flat for the mile band. Houston rates are unchanged.</p>
+        <p className="text-zinc-400 mb-8">Same card for New York and New Jersey. Prices are flat for the mile band. Miles over 100 are added to the 100-mile price. Houston rates are unchanged.</p>
         <div className="overflow-x-auto rounded-xl border border-yellow-600/20">
           <table className="w-full text-sm">
             <thead>
@@ -42,14 +42,14 @@ export default function NewYorkRates() {
               ))}
               <tr>
                 <td className="px-4 py-3 font-medium">Over 100 mi</td>
-                <td className="px-4 py-3 text-center text-yellow-500">$4.25/mi</td>
-                <td className="px-4 py-3 text-center text-yellow-500">$5.25/mi</td>
-                <td className="px-4 py-3 text-center text-yellow-500">$10.50/mi</td>
+                <td className="px-4 py-3 text-center text-yellow-500">$6.50/mi</td>
+                <td className="px-4 py-3 text-center text-yellow-500">$7.50/mi</td>
+                <td className="px-4 py-3 text-center text-yellow-500">$9.50/mi</td>
               </tr>
             </tbody>
           </table>
         </div>
-        <p className="text-sm text-zinc-300 mt-3">Rates exclude tolls, parking, airport fees, and meet-and-greet charges. Additional waiting time may apply.</p>
+        <p className="text-sm text-zinc-300 mt-3">A 110-mile Sprinter is $800 + 10 × $9.50 = $895. Rates exclude tolls, parking, airport fees, and meet-and-greet charges.</p>
         <div className="mt-10 max-w-2xl bg-zinc-900 border border-yellow-600/20 rounded-xl p-6">
           <h2 className="font-serif text-2xl text-yellow-500 mb-4">Hourly rates</h2>
           <div className="space-y-3">
