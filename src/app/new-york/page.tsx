@@ -1,16 +1,16 @@
 import SiteHeader from "@/components/SiteHeader";
 
 const rows = [
-  ["0 – 10 mi", "$125", "$160", "$300"],
-  ["11 – 20 mi", "$150", "$190", "$350 and up"],
-  ["21 – 30 mi", "$175", "$220", "$425 and up"],
-  ["31 – 40 mi", "$205", "$255", "$500 and up"],
-  ["41 – 50 mi", "$230", "$290", "$575 and up"],
-  ["51 – 60 mi", "$255", "$325", "$650 and up"],
-  ["61 – 70 mi", "$280", "$360", "$725 and up"],
-  ["71 – 80 mi", "$305", "$395", "$800 and up"],
-  ["81 – 90 mi", "$330", "$430", "$875 and up"],
-  ["91 – 100 mi", "$355", "$465", "$950 and up"],
+  ["0 – 10 mi", "$140", "$175", "$265"],
+  ["11 – 20 mi", "$180", "$225", "$325"],
+  ["21 – 30 mi", "$220", "$275", "$385"],
+  ["31 – 40 mi", "$260", "$325", "$445"],
+  ["41 – 50 mi", "$300", "$375", "$505"],
+  ["51 – 60 mi", "$340", "$425", "$565"],
+  ["61 – 70 mi", "$380", "$475", "$625"],
+  ["71 – 80 mi", "$420", "$525", "$685"],
+  ["81 – 90 mi", "$460", "$575", "$745"],
+  ["91 – 100 mi", "$500", "$625", "$805"],
 ];
 
 export default function NewYorkRates() {
@@ -20,7 +20,7 @@ export default function NewYorkRates() {
       <main className="max-w-5xl mx-auto px-4 pt-28 pb-16">
         <p className="text-yellow-500 tracking-[0.2em] text-xs uppercase mb-3">New York and New Jersey</p>
         <h1 className="font-serif text-4xl mb-4">New York and New Jersey rate card</h1>
-        <p className="text-zinc-400 mb-8">Same card for New York and New Jersey. Sedan and SUV are flat for the mile band. Sprinter increases $5 per additional mile within each tier. Houston rates are unchanged.</p>
+        <p className="text-zinc-400 mb-8">Same card for New York and New Jersey. Prices are flat for the mile band. Houston rates are unchanged.</p>
         <div className="overflow-x-auto rounded-xl border border-yellow-600/20">
           <table className="w-full text-sm">
             <thead>
@@ -49,16 +49,15 @@ export default function NewYorkRates() {
             </tbody>
           </table>
         </div>
-        <p className="text-xs text-zinc-500 mt-3">Sprinter pricing increases $5 per additional mile within each tier.</p>
         <p className="text-sm text-zinc-300 mt-3">Rates exclude tolls, parking, airport fees, and meet-and-greet charges. Additional waiting time may apply.</p>
         <div className="mt-10 max-w-2xl bg-zinc-900 border border-yellow-600/20 rounded-xl p-6">
-          <h2 className="font-serif text-2xl text-yellow-500 mb-4">Hourly rates · as directed</h2>
+          <h2 className="font-serif text-2xl text-yellow-500 mb-4">Hourly rates</h2>
           <div className="space-y-3">
-            <div className="flex justify-between py-2 border-b border-zinc-800"><span>Business Sedan</span><span className="text-yellow-500">$140 / hr</span></div>
-            <div className="flex justify-between py-2 border-b border-zinc-800"><span>Business SUV</span><span className="text-yellow-500">$175 / hr</span></div>
+            <div className="flex justify-between py-2 border-b border-zinc-800"><span>Business Sedan</span><span className="text-yellow-500">$125 / hr</span></div>
+            <div className="flex justify-between py-2 border-b border-zinc-800"><span>Business SUV</span><span className="text-yellow-500">$155 / hr</span></div>
             <div className="flex justify-between py-2"><span>Sprinter Van</span><span className="text-yellow-500">$225 / hr</span></div>
           </div>
-          <p className="text-xs text-zinc-500 mt-4">3-hour minimum for sedan and SUV. 4-hour minimum for Sprinter.</p>
+          <p className="text-xs text-zinc-500 mt-4">3-hour minimum.</p>
         </div>
       </main>
     </div>
