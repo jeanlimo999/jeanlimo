@@ -14,16 +14,10 @@ function loadGoogleMaps(apiKey: string): Promise<void> {
   if (typeof window === "undefined") return Promise.resolve();
   if (window.google?.maps?.places) return Promise.resolve();
   if (window.__jeanLimoMapsLoading) return window.__jeanLimoMapsLoading;
-
   window.__jeanLimoMapsLoading = new Promise((resolve, reject) => {
-    const existing =
-      document.querySelector("script[data-jean-limo-maps]") ||
-      document.querySelector('script[src*="maps.googleapis.com"]');
+    const existing = document.querySelector("script[data-jean-limo-maps]") || document.querySelector('script[src*="maps.googleapis.com"]');
     if (existing) {
-      const wait = () => {
-        if (window.google?.maps?.places) resolve();
-        else setTimeout(wait, 80);
-      };
+      const wait = () => (window.google?.maps?.places ? resolve() : setTimeout(wait, 80));
       existing.addEventListener("load", () => wait());
       existing.addEventListener("error", () => reject(new Error("Google Maps failed to load")));
       wait();
@@ -41,13 +35,19 @@ function loadGoogleMaps(apiKey: string): Promise<void> {
   return window.__jeanLimoMapsLoading;
 }
 
+function biasCenter(bias?: string) {
+  const s = String(bias || "").toLowerCase();
+  if (/\b(ewr|newark|jfk|lga|laguardia|new york|new jersey|nyc|manhattan|brooklyn|queens)\b/.test(s) || /,\s*ny\b|,\s*nj\b/.test(s)) {
+    return { lat: 40.6895, lng: -74.1745, label: "New York" };
+  }
+  if (/\b(iah|hobby|houston|galveston)\b/.test(s) || /,\s*tx\b/.test(s)) {
+    return { lat: 29.7604, lng: -95.3698, label: "Houston" };
+  }
+  return null;
+}
+
 export default function AddressInput({
-  id,
-  value,
-  onChange,
-  placeholder,
-  className,
-  bias,
+  id, value, onChange, placeholder, className, bias,
 }: {
   id: string;
   value: string;
@@ -59,7 +59,6 @@ export default function AddressInput({
   const boxRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLUListElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const biasPoint = useRef<any>(null);
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
   const [ready, setReady] = useState(false);
   const [hints, setHints] = useState<{ description: string }[]>([]);
@@ -68,27 +67,9 @@ export default function AddressInput({
   useEffect(() => {
     if (!apiKey) return;
     let cancelled = false;
-    loadGoogleMaps(apiKey)
-      .then(() => {
-        if (cancelled) return;
-        setReady(!!window.google?.maps?.places);
-      })
-      .catch((err) => console.error(err));
-    return () => {
-      cancelled = true;
-    };
+    loadGoogleMaps(apiKey).then(() => { if (!cancelled) setReady(!!window.google?.maps?.places); }).catch((err) => console.error(err));
+    return () => { cancelled = true; };
   }, [apiKey]);
-
-  useEffect(() => {
-    if (!ready || !bias || bias.trim().length < 4 || !window.google?.maps) {
-      biasPoint.current = null;
-      return;
-    }
-    const geocoder = new window.google.maps.Geocoder();
-    geocoder.geocode({ address: bias }, (results: any[] | null, status: string) => {
-      if (status === "OK" && results?.[0]?.geometry?.location) biasPoint.current = results[0].geometry.location;
-    });
-  }, [ready, bias]);
 
   useEffect(() => {
     const close = (e: MouseEvent) => {
@@ -119,13 +100,12 @@ export default function AddressInput({
       setHints([]);
       return;
     }
+    const center = biasCenter(bias);
     const svc = new window.google.maps.places.AutocompleteService();
-    const req: any = {
-      input: text,
-      componentRestrictions: { country: "us" },
-    };
-    if (biasPoint.current) {
-      req.location = biasPoint.current;
+    const input = center && !text.toLowerCase().includes(center.label.toLowerCase()) ? `${text} ${center.label}` : text;
+    const req: any = { input, componentRestrictions: { country: "us" } };
+    if (center) {
+      req.location = new window.google.maps.LatLng(center.lat, center.lng);
       req.radius = 80000;
     }
     svc.getPlacePredictions(req, (preds: any[] | null) => {
@@ -134,51 +114,22 @@ export default function AddressInput({
     });
   }
 
-  const list =
-    hints.length > 0 && typeof document !== "undefined"
-      ? createPortal(
-          <ul
-            ref={menuRef}
-            className="fixed z-[99999] max-h-56 overflow-auto rounded-xl border border-white/10 bg-[#1a1a1a] text-sm shadow-xl"
-            style={{ top: menu.top, left: menu.left, width: menu.width }}
-          >
-            {hints.map((h) => (
-              <li key={h.description}>
-                <button
-                  type="button"
-                  className="w-full px-3 py-3 text-left text-zinc-100 hover:bg-white/10"
-                  onMouseDown={(e) => {
-                    e.preventDefault();
-                    choose(h.description);
-                  }}
-                >
-                  {h.description}
-                </button>
-              </li>
-            ))}
-          </ul>,
-          document.body
-        )
-      : null;
+  const list = hints.length > 0 && typeof document !== "undefined" ? createPortal(
+    <ul ref={menuRef} className="fixed z-[99999] max-h-56 overflow-auto rounded-xl border border-white/10 bg-[#1a1a1a] text-sm shadow-xl" style={{ top: menu.top, left: menu.left, width: menu.width }}>
+      {hints.map((h) => (
+        <li key={h.description}>
+          <button type="button" className="w-full px-3 py-3 text-left text-zinc-100 hover:bg-white/10" onMouseDown={(e) => { e.preventDefault(); choose(h.description); }}>{h.description}</button>
+        </li>
+      ))}
+    </ul>,
+    document.body
+  ) : null;
 
   return (
     <div ref={boxRef} className="relative">
-      <input
-        ref={inputRef}
-        id={id}
-        type="text"
-        value={value}
-        onChange={(e) => suggest(e.target.value)}
-        onFocus={() => placeMenu()}
-        placeholder={placeholder}
-        autoComplete="off"
-        autoCorrect="off"
-        className={className || "w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-yellow-500"}
-      />
+      <input ref={inputRef} id={id} type="text" value={value} onChange={(e) => suggest(e.target.value)} onFocus={() => placeMenu()} placeholder={placeholder} autoComplete="off" autoCorrect="off" className={className || "w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-yellow-500"} />
       {list}
-      {!apiKey && (
-        <p className="mt-1 text-[11px] text-zinc-500">Address suggestions need the Google Maps key on Netlify.</p>
-      )}
+      {!apiKey && <p className="mt-1 text-[11px] text-zinc-500">Address suggestions need the Google Maps key on Netlify.</p>}
     </div>
   );
 }
