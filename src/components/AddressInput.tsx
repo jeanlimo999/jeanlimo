@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 
 declare global {
   interface Window {
@@ -56,13 +55,12 @@ export default function AddressInput({
   className?: string;
   bias?: string;
 }) {
-  const boxRef = useRef<HTMLDivElement>(null);
-  const menuRef = useRef<HTMLUListElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
+  const searchRef = useRef<HTMLInputElement>(null);
   const [ready, setReady] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState(value);
   const [hints, setHints] = useState<{ description: string }[]>([]);
-  const [menu, setMenu] = useState({ top: 0, left: 0, width: 0 });
 
   useEffect(() => {
     if (!apiKey) return;
@@ -71,65 +69,60 @@ export default function AddressInput({
     return () => { cancelled = true; };
   }, [apiKey]);
 
+  useEffect(() => { if (!open) setQuery(value); }, [value, open]);
+
   useEffect(() => {
-    const close = (e: MouseEvent) => {
-      const target = e.target as Node;
-      if (boxRef.current?.contains(target) || menuRef.current?.contains(target)) return;
-      setHints([]);
-    };
-    document.addEventListener("mousedown", close);
-    return () => document.removeEventListener("mousedown", close);
-  }, []);
+    if (!open) return;
+    const t = setTimeout(() => searchRef.current?.focus(), 60);
+    return () => clearTimeout(t);
+  }, [open]);
 
-  function placeMenu() {
-    const el = inputRef.current;
-    if (!el) return;
-    const r = el.getBoundingClientRect();
-    setMenu({ top: r.bottom + 4, left: r.left, width: r.width });
-  }
-
-  function choose(description: string) {
-    onChange(description);
-    setHints([]);
-  }
-
-  function suggest(text: string) {
-    onChange(text);
-    placeMenu();
-    if (!ready || !window.google?.maps?.places || text.trim().length < 3) {
+  function search(text: string) {
+    setQuery(text);
+    if (!ready || !window.google?.maps?.places || text.trim().length < 2) {
       setHints([]);
       return;
     }
     const center = biasCenter(bias);
-    const svc = new window.google.maps.places.AutocompleteService();
     const input = center && !text.toLowerCase().includes(center.label.toLowerCase()) ? `${text} ${center.label}` : text;
     const req: any = { input, componentRestrictions: { country: "us" } };
     if (center) {
       req.location = new window.google.maps.LatLng(center.lat, center.lng);
       req.radius = 80000;
     }
-    svc.getPlacePredictions(req, (preds: any[] | null) => {
-      setHints((preds || []).slice(0, 6).map((p) => ({ description: p.description })));
-      placeMenu();
+    new window.google.maps.places.AutocompleteService().getPlacePredictions(req, (preds: any[] | null) => {
+      setHints((preds || []).slice(0, 8).map((p) => ({ description: p.description })));
     });
   }
 
-  const list = hints.length > 0 && typeof document !== "undefined" ? createPortal(
-    <ul ref={menuRef} className="fixed z-[99999] max-h-56 overflow-auto rounded-xl border border-white/10 bg-[#1a1a1a] text-sm shadow-xl" style={{ top: menu.top, left: menu.left, width: menu.width }}>
-      {hints.map((h) => (
-        <li key={h.description}>
-          <button type="button" className="w-full px-3 py-3 text-left text-zinc-100 hover:bg-white/10" onMouseDown={(e) => { e.preventDefault(); choose(h.description); }}>{h.description}</button>
-        </li>
-      ))}
-    </ul>,
-    document.body
-  ) : null;
+  function choose(description: string) {
+    onChange(description);
+    setQuery(description);
+    setHints([]);
+    setOpen(false);
+  }
 
   return (
-    <div ref={boxRef} className="relative">
-      <input ref={inputRef} id={id} type="text" value={value} onChange={(e) => suggest(e.target.value)} onFocus={() => placeMenu()} placeholder={placeholder} autoComplete="off" autoCorrect="off" className={className || "w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-yellow-500"} />
-      {list}
-      {!apiKey && <p className="mt-1 text-[11px] text-zinc-500">Address suggestions need the Google Maps key on Netlify.</p>}
-    </div>
+    <>
+      <button type="button" id={id} onClick={() => { setQuery(value); setOpen(true); }} className={(className || "w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-sm") + " text-left"}>
+        {value ? <span className="text-zinc-100">{value}</span> : <span className="text-zinc-500">{placeholder}</span>}
+      </button>
+      {open && (
+        <div className="fixed inset-0 z-[100000] bg-zinc-950 text-zinc-100 flex flex-col">
+          <div className="flex items-center gap-2 px-3 pt-4 pb-3 border-b border-white/10">
+            <button type="button" onClick={() => setOpen(false)} className="h-11 w-11 rounded-full bg-zinc-800 text-xl" aria-label="Back">‹</button>
+            <input ref={searchRef} value={query} onChange={(e) => search(e.target.value)} placeholder={placeholder} autoComplete="off" autoCorrect="off" className="flex-1 bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-base focus:outline-none focus:border-yellow-500" />
+          </div>
+          <div className="flex-1 overflow-auto">
+            {hints.map((h) => (
+              <button key={h.description} type="button" onClick={() => choose(h.description)} className="w-full px-5 py-4 text-left text-base border-b border-white/10 hover:bg-white/5">
+                {h.description}
+              </button>
+            ))}
+            {query.trim().length >= 2 && hints.length === 0 && <p className="px-5 py-6 text-sm text-zinc-500">Keep typing an airport, hotel, or address.</p>}
+          </div>
+        </div>
+      )}
+    </>
   );
 }
