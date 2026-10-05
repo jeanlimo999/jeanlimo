@@ -12,9 +12,9 @@ export const FLAT_RATES: Record<Vehicle, number[]> = {
 };
 
 export const NY_FLAT_RATES: Record<Vehicle, number[]> = {
-  sedan: [140, 180, 220, 260, 300, 340, 380, 420, 460, 500],
-  suv: [175, 225, 275, 325, 375, 425, 475, 525, 575, 625],
-  sprinter: [265, 325, 385, 445, 505, 565, 625, 685, 745, 805],
+  sedan: [135, 175, 215, 255, 295, 335, 375, 415, 455, 495],
+  suv: [170, 220, 270, 320, 370, 420, 470, 520, 570, 620],
+  sprinter: [260, 320, 380, 440, 500, 560, 620, 680, 740, 800],
 };
 
 export const NY_PER_MILE_OVER_100: Record<Vehicle, number> = {
