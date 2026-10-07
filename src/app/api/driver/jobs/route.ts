@@ -7,6 +7,10 @@ function toJobs(row: any, driverId: string) {
   const assigned = row.assigned_driver_id === driverId;
   if (!assigned) return [];
   const pax = row.passengers || row.passenger_count || row.pax || "";
+  const rawNotes = String(row.passenger_notes || row.notes || "");
+  const split = rawNotes.indexOf("Return:");
+  const outboundNotes = (split >= 0 ? rawNotes.slice(0, split) : rawNotes).replace(/\s*\|\s*$/, "").trim();
+  const returnNotes = split >= 0 ? rawNotes.slice(split + 7).trim() : "";
   const base = {
     bookingId: row.id,
     guestName: guest.full_name || "Guest",
@@ -30,6 +34,7 @@ function toJobs(row: any, driverId: string) {
       pickup: row.pickup,
       dropoff: row.dropoff,
       flight: row.flight_number || "",
+      notes: outboundNotes,
     },
   ];
   if (row.return_date || row.return_pickup) {
@@ -44,6 +49,7 @@ function toJobs(row: any, driverId: string) {
       pickup: row.return_pickup || row.dropoff,
       dropoff: row.return_dropoff || row.pickup,
       flight: row.return_flight_number || "",
+      notes: returnNotes,
     });
   }
   return jobs;
