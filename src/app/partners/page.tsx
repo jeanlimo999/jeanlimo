@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import type { Metadata } from "next";
 
 export default function PartnersPage() {
   const [form, setForm] = useState({
