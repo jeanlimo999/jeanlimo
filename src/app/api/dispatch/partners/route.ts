@@ -33,3 +33,17 @@ export async function POST(req: NextRequest) {
   if (error) return NextResponse.json({ error: "Run supabase/partners.sql in Supabase first. " + error.message }, { status: 500 });
   return NextResponse.json({ partner: data });
 }
+
+export async function PATCH(req: NextRequest) {
+  const session = readDispatchSession();
+  if (!session) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
+  const db = supabaseAdmin();
+  if (!db) return NextResponse.json({ error: "Supabase is not configured" }, { status: 500 });
+  const body = await req.json();
+  const id = String(body.id || "");
+  const pin = String(body.pin || "").trim();
+  if (!id || pin.length < 4) return NextResponse.json({ error: "Pick a partner and a PIN of at least 4 digits" }, { status: 400 });
+  const { error } = await db.from("partners").update({ pin }).eq("id", id);
+  if (error) return NextResponse.json({ error: "Run the partner PIN script in Supabase. " + error.message }, { status: 500 });
+  return NextResponse.json({ ok: true });
+}
