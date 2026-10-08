@@ -47,13 +47,17 @@ export async function POST(req: NextRequest) {
   const id = String(body.id || "");
   const driver = String(body.driver || "").trim();
   const driverPhone = String(body.driverPhone || "").trim();
-  if (!id || !driver) return NextResponse.json({ error: "Driver name is required" }, { status: 400 });
+  const driverPin = String(body.driverPin || "").trim();
+  if (!id || !driver || !driverPhone || driverPin.length < 4) {
+    return NextResponse.json({ error: "Driver name, phone, and a 4-digit PIN are required" }, { status: 400 });
+  }
   const { error } = await db.from("farm_outs").update({
     driver_name: driver,
     driver_phone: driverPhone,
+    driver_pin: driverPin,
     status: "accepted",
     updated_at: new Date().toISOString(),
   }).eq("id", id).eq("partner_id", session.partnerId);
-  if (error) return NextResponse.json({ error: "Run the partner driver script in Supabase. " + error.message }, { status: 500 });
+  if (error) return NextResponse.json({ error: "Run the driver PIN script in Supabase. " + error.message }, { status: 500 });
   return NextResponse.json({ ok: true });
 }
