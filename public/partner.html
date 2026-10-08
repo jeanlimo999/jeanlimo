@@ -21,7 +21,7 @@
   <div class="wrap">
     <div class="gold">PARTNER PORTAL</div>
     <h1>Your Jean Limo jobs</h1>
-    <p class="muted">Approved companies only. Jean Limo sends the job. You assign your own driver. Do not charge the passenger.</p>
+    <p class="muted">Assign your driver and a PIN. They open jeanlimo.com/pdriver.html and tap On the way, Onboard, or Dropped off.</p>
     <form id="login">
       <input name="email" type="email" placeholder="Company email" required />
       <input name="pin" placeholder="PIN" required />
@@ -46,11 +46,11 @@
           <div class="muted">${job.phone || ''}</div>
           <div style="margin-top:8px">${job.pickup || ''}</div>
           <div>${job.dropoff || ''}</div>
-          <div class="muted">${job.flight ? 'Flight ' + job.flight : ''} ${job.passengers ? '· ' + job.passengers + ' pax' : ''}</div>
           <form data-id="${job.id}">
             <input name="driver" placeholder="Your driver name" value="${job.driver || ''}" required />
-            <input name="driverPhone" placeholder="Driver phone" value="${job.driverPhone || ''}" />
-            <button type="submit">Assign driver</button>
+            <input name="driverPhone" placeholder="Driver phone" value="${job.driverPhone || ''}" required />
+            <input name="driverPin" placeholder="Driver PIN, 4 digits" required />
+            <button type="submit">Save driver</button>
           </form>
         </div>`).join('') || '<p>No jobs yet.</p>';
       board.querySelectorAll('form').forEach(form => form.onsubmit = async (e) => {
@@ -60,7 +60,7 @@
         const res = await fetch('/api/partner/jobs', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
         const data = await res.json();
         if (!res.ok) err.textContent = data.error || 'Could not save';
-        else load();
+        else { err.textContent = 'Driver saved. They sign in at jeanlimo.com/pdriver.html'; load(); }
       });
     }
     document.getElementById('login').onsubmit = async (e) => {
