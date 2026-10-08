@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Jean Limo partner</title>
+  <style>
+    body { margin:0; font-family:-apple-system,BlinkMacSystemFont,sans-serif; background:#0B0B0C; color:#F6F1E8; }
+    .wrap { max-width:560px; margin:0 auto; padding:28px 16px 60px; }
+    h1 { font-size:30px; margin:8px 0; }
+    .gold { color:#C4A574; letter-spacing:.16em; font-size:12px; }
+    input, button { width:100%; margin-top:10px; border-radius:12px; padding:12px; font-size:16px; box-sizing:border-box; }
+    input { background:#1C1C20; color:#F6F1E8; border:1px solid rgba(255,255,255,.1); }
+    button { border:0; font-weight:700; background:linear-gradient(180deg,#E8D3B0,#C4A574); color:#16110a; }
+    .card { margin-top:14px; border:1px solid rgba(255,255,255,.1); border-radius:16px; padding:14px; background:#141416; }
+    .muted { color:#9A9388; font-size:14px; }
+    .err { color:#f87171; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="gold">PARTNER PORTAL</div>
+    <h1>Your Jean Limo jobs</h1>
+    <p class="muted">Approved companies only. Jean Limo sends the job. You assign your own driver. Do not charge the passenger.</p>
+    <form id="login">
+      <input name="email" type="email" placeholder="Company email" required />
+      <input name="pin" placeholder="PIN" required />
+      <button type="submit">Sign in</button>
+      <p class="err" id="err"></p>
+    </form>
+    <div id="board" hidden></div>
+  </div>
+  <script>
+    const err = document.getElementById('err');
+    const board = document.getElementById('board');
+    async function load() {
+      const res = await fetch('/api/partner/jobs');
+      const data = await res.json();
+      if (!res.ok) return;
+      document.getElementById('login').hidden = true;
+      board.hidden = false;
+      board.innerHTML = '<p class="muted">' + (data.company || '') + '</p>' + (data.jobs || []).map(job => `
+        <div class="card">
+          <div class="gold">${job.date || ''} ${job.time || ''} · $${job.pay} · ${job.status}</div>
+          <div style="font-size:20px;margin-top:6px">${job.guest}</div>
+          <div class="muted">${job.phone || ''}</div>
+          <div style="margin-top:8px">${job.pickup || ''}</div>
+          <div>${job.dropoff || ''}</div>
+          <div class="muted">${job.flight ? 'Flight ' + job.flight : ''} ${job.passengers ? '· ' + job.passengers + ' pax' : ''}</div>
+          <form data-id="${job.id}">
+            <input name="driver" placeholder="Your driver name" value="${job.driver || ''}" required />
+            <input name="driverPhone" placeholder="Driver phone" value="${job.driverPhone || ''}" />
+            <button type="submit">Assign driver</button>
+          </form>
+        </div>`).join('') || '<p>No jobs yet.</p>';
+      board.querySelectorAll('form').forEach(form => form.onsubmit = async (e) => {
+        e.preventDefault();
+        const body = Object.fromEntries(new FormData(form).entries());
+        body.id = form.dataset.id;
+        const res = await fetch('/api/partner/jobs', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+        const data = await res.json();
+        if (!res.ok) err.textContent = data.error || 'Could not save';
+        else load();
+      });
+    }
+    document.getElementById('login').onsubmit = async (e) => {
+      e.preventDefault();
+      const body = Object.fromEntries(new FormData(e.target).entries());
+      const res = await fetch('/api/partner/login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+      const data = await res.json();
+      if (!res.ok) { err.textContent = data.error || 'Could not sign in'; return; }
+      load();
+    };
+    load();
+  </script>
+</body>
+</html>
