@@ -18,8 +18,10 @@ export default function SiteHeader() {
     <nav className="fixed top-0 left-0 right-0 z-50 border-b border-yellow-600/20 bg-zinc-950/90 backdrop-blur-md">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between md:h-20">
-          <a href="/" className="flex items-center gap-2">
-            <img src="/logo.jpg" alt="Jean Limo" className="h-12 w-auto md:h-14" />
+          <a href="/" className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-yellow-500 font-serif text-xl font-bold text-yellow-400">
+              J
+            </div>
             <div>
               <div className="font-serif text-xl tracking-wide text-yellow-400">JEAN LIMO</div>
               <div className="text-[10px] uppercase tracking-[0.2em] text-zinc-400">LLC · Houston</div>
