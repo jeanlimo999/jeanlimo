@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Jean Limo job</title>
+  <style>
+    body { margin:0; font-family:-apple-system,BlinkMacSystemFont,sans-serif; background:#0B0B0C; color:#F6F1E8; }
+    .wrap { max-width:520px; margin:0 auto; padding:24px 16px 40px; }
+    h1 { font-size:28px; margin:8px 0; }
+    .gold { color:#C4A574; letter-spacing:.16em; font-size:12px; }
+    .card { background:#141416; border:1px solid rgba(255,255,255,.08); border-radius:16px; padding:14px; margin-top:14px; }
+    .label { color:#9A9388; font-size:11px; letter-spacing:.14em; text-transform:uppercase; margin-top:10px; }
+    a { color:#C4A574; }
+    button { width:100%; margin-top:10px; border:0; border-radius:14px; padding:14px; font-weight:700; background:linear-gradient(180deg,#E8D3B0,#C4A574); color:#16110a; }
+    button.ghost { background:#1C1C20; color:#F6F1E8; border:1px solid rgba(255,255,255,.1); }
+    .err { color:#f87171; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="gold">JEAN LIMO FARM-OUT</div>
+    <h1 id="title">Loading job</h1>
+    <p id="sub"></p>
+    <div class="card" id="card"></div>
+    <div id="actions"></div>
+  </div>
+  <script>
+    const token = new URLSearchParams(location.search).get('t') || '';
+    const $ = id => document.getElementById(id);
+    function esc(s){ return String(s||'').replace(/&/g,'&').replace(/</g,'<'); }
+    function maps(addr){
+      if(!addr) return '';
+      const q = encodeURIComponent(addr);
+      return '<div>'+esc(addr)+'</div><div><a href="https://maps.apple.com/?daddr='+q+'">Apple Maps</a> · <a href="https://www.google.com/maps/dir/?api=1&destination='+q+'">Google Maps</a></div>';
+    }
+    async function load(){
+      const res = await fetch('/api/farm?t='+encodeURIComponent(token));
+      const data = await res.json();
+      if(!res.ok){ $('title').textContent = 'Link not valid'; $('sub').textContent = data.error || ''; return; }
+      $('title').textContent = data.guest || 'Job';
+      $('sub').textContent = (data.partner || '') + (data.pay ? ' · your pay $' + data.pay : '') + ' · ' + (data.status || '');
+      const phone = String(data.phone||'').replace(/[^\d+]/g,'');
+      $('card').innerHTML = '<div class="label">When</div><div>'+esc(data.when)+'</div><div class="label">Pickup</div>'+maps(data.pickup)+'<div class="label">Drop-off</div>'+maps(data.dropoff)+(data.flight?'<div class="label">Flight</div><div>'+esc(data.flight)+'</div>':'')+(data.notes?'<div class="label">Note</div><div>'+esc(data.notes)+'</div>':'')+(phone?'<div class="label">Passenger</div><div><a href="tel:'+phone+'">'+esc(data.phone)+'</a> <a href="sms:'+phone+'">Text</a></div>':'');
+      const steps = [['accepted','Accept'],['on_the_way','On the way'],['on_location','On location'],['completed','Completed']];
+      $('actions').innerHTML = steps.map(([s,label]) => '<button class="'+(data.status===s?'ghost':'')+'" data-s="'+s+'">'+label+'</button>').join('');
+      $('actions').querySelectorAll('button').forEach(btn => btn.onclick = () => update(btn.dataset.s));
+    }
+    async function update(status){
+      const res = await fetch('/api/farm', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ token, status }) });
+      const data = await res.json();
+      if(!res.ok){ alert(data.error || 'Could not update'); return; }
+      load();
+    }
+    load();
+  </script>
+</body>
+</html>
