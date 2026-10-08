@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Jean Limo driver</title>
+  <style>
+    body { margin:0; font-family:-apple-system,BlinkMacSystemFont,sans-serif; background:#0B0B0C; color:#F6F1E8; }
+    .wrap { max-width:520px; margin:0 auto; padding:28px 16px 60px; }
+    h1 { font-size:30px; margin:8px 0; }
+    .gold { color:#C4A574; letter-spacing:.16em; font-size:12px; }
+    input, button { width:100%; margin-top:10px; border-radius:12px; padding:12px; font-size:16px; box-sizing:border-box; }
+    input { background:#1C1C20; color:#F6F1E8; border:1px solid rgba(255,255,255,.1); }
+    button { border:0; font-weight:700; background:linear-gradient(180deg,#E8D3B0,#C4A574); color:#16110a; }
+    .card { margin-top:14px; border:1px solid rgba(255,255,255,.1); border-radius:16px; padding:14px; background:#141416; }
+    .muted { color:#9A9388; font-size:14px; }
+    .err { color:#f87171; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="gold">PARTNER DRIVER</div>
+    <h1>Your job</h1>
+    <form id="login">
+      <input name="phone" placeholder="Your phone" required />
+      <input name="pin" placeholder="PIN from your company" required />
+      <button type="submit">Open job</button>
+      <p class="err" id="err"></p>
+    </form>
+    <div id="board"></div>
+  </div>
+  <script>
+    let creds = null;
+    const err = document.getElementById('err');
+    const board = document.getElementById('board');
+    async function load() {
+      const res = await fetch('/api/partner/driver', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(creds) });
+      const data = await res.json();
+      if (!res.ok) { err.textContent = data.error || 'Could not open'; return; }
+      document.getElementById('login').hidden = true;
+      board.innerHTML = (data.jobs || []).map(job => `
+        <div class="card">
+          <div class="gold">${job.date || ''} ${job.time || ''} · ${job.status || ''}</div>
+          <div style="font-size:20px;margin-top:6px">${job.guest}</div>
+          <div class="muted">${job.phone || ''}</div>
+          <div style="margin-top:8px">${job.pickup || ''}</div>
+          <div>${job.dropoff || ''}</div>
+          <button data-id="${job.id}" data-status="on_the_way">On the way</button>
+          <button data-id="${job.id}" data-status="onboard">Onboard</button>
+          <button data-id="${job.id}" data-status="dropped_off">Dropped off</button>
+        </div>`).join('') || '<p>No job assigned.</p>';
+      board.querySelectorAll('button').forEach(btn => btn.onclick = async () => {
+        const res = await fetch('/api/partner/driver', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ ...creds, id: btn.dataset.id, status: btn.dataset.status }) });
+        const data = await res.json();
+        if (!res.ok) err.textContent = data.error || 'Could not update';
+        else load();
+      });
+    }
+    document.getElementById('login').onsubmit = (e) => {
+      e.preventDefault();
+      creds = Object.fromEntries(new FormData(e.target).entries());
+      load();
+    };
+  </script>
+</body>
+</html>
