@@ -9,6 +9,8 @@ const pages = [
   "/houston-sprinter-van-service",
   "/houston-chauffeur-service",
   "/pricing",
+  "/partners",
+  "/new-york",
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {
