@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Send a job to Jean Limo</title>
+  <style>
+    body { margin:0; font-family:-apple-system,BlinkMacSystemFont,sans-serif; background:#0B0B0C; color:#F6F1E8; }
+    .wrap { max-width:520px; margin:0 auto; padding:28px 16px 48px; }
+    h1 { font-size:30px; margin:8px 0; }
+    .gold { color:#C4A574; letter-spacing:.16em; font-size:12px; }
+    p { color:#9A9388; line-height:1.5; }
+    input, select, textarea { width:100%; margin-top:10px; background:#1C1C20; color:#F6F1E8; border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:12px; font-size:16px; }
+    button { width:100%; margin-top:14px; border:0; border-radius:14px; padding:14px; font-weight:700; background:linear-gradient(180deg,#E8D3B0,#C4A574); color:#16110a; }
+    .err { color:#f87171; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="gold">FARM IN · HOUSTON</div>
+    <h1>Send a job to Jean Limo</h1>
+    <p>Approved partners only. You pay Jean Limo the amount you enter. Do not send your customer to pay us. We accept or decline before the trip is confirmed.</p>
+    <form id="f">
+      <input name="email" type="email" placeholder="Your approved partner email" required />
+      <input name="passenger" placeholder="Passenger name" required />
+      <input name="phone" placeholder="Passenger phone" />
+      <input name="date" type="date" required />
+      <input name="time" type="time" required />
+      <input name="pickup" placeholder="Pickup in Houston" required />
+      <input name="dropoff" placeholder="Drop-off" required />
+      <input name="flight" placeholder="Flight number" />
+      <input name="passengers" placeholder="Passengers" />
+      <select name="vehicle"><option value="sedan">Sedan</option><option value="suv">SUV</option><option value="sprinter">Sprinter</option></select>
+      <input name="pay" type="number" min="1" step="1" placeholder="Price you pay Jean Limo $" required />
+      <textarea name="notes" rows="3" placeholder="Notes"></textarea>
+      <button type="submit">Send offer</button>
+      <p class="err" id="err"></p>
+    </form>
+  </div>
+  <script>
+    document.getElementById('f').onsubmit = async (e) => {
+      e.preventDefault();
+      const body = Object.fromEntries(new FormData(e.target).entries());
+      const res = await fetch('/api/farmin', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+      const data = await res.json();
+      if (!res.ok) { document.getElementById('err').textContent = data.error || 'Could not send'; return; }
+      e.target.outerHTML = '<p>Offer sent. Jean Limo will accept or decline. The passenger is not confirmed until you hear back.</p>';
+    };
+  </script>
+</body>
+</html>
