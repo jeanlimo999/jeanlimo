@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 const COOKIE = "jl_session";
 const DISPATCH_COOKIE = "jl_dispatch";
 const DRIVER_COOKIE = "jl_driver";
+const PARTNER_COOKIE = "jl_partner";
 
 type SessionPayload = {
   clientId: string;
@@ -23,6 +24,14 @@ type DriverPayload = {
   driverId: string;
   name: string;
   phone: string;
+  exp: number;
+};
+
+type PartnerPayload = {
+  role: "partner";
+  partnerId: string;
+  company: string;
+  email: string;
   exp: number;
 };
 
@@ -63,30 +72,19 @@ export function sessionCookieOptions() {
 }
 
 export function makeSessionToken(clientId: string, email: string) {
-  return sign({
-    clientId,
-    email,
-    exp: Date.now() + 1000 * 60 * 60 * 24 * 30,
-  });
+  return sign({ clientId, email, exp: Date.now() + 1000 * 60 * 60 * 24 * 30 });
 }
 
 export function makeDispatchToken(email: string, name: string) {
-  return sign({
-    role: "dispatch",
-    email,
-    name,
-    exp: Date.now() + 1000 * 60 * 60 * 12,
-  } satisfies DispatchPayload);
+  return sign({ role: "dispatch", email, name, exp: Date.now() + 1000 * 60 * 60 * 12 } satisfies DispatchPayload);
 }
 
 export function makeDriverToken(driverId: string, name: string, phone: string) {
-  return sign({
-    role: "driver",
-    driverId,
-    name,
-    phone,
-    exp: Date.now() + 1000 * 60 * 60 * 12,
-  } satisfies DriverPayload);
+  return sign({ role: "driver", driverId, name, phone, exp: Date.now() + 1000 * 60 * 60 * 12 } satisfies DriverPayload);
+}
+
+export function makePartnerToken(partnerId: string, company: string, email: string) {
+  return sign({ role: "partner", partnerId, company, email, exp: Date.now() + 1000 * 60 * 60 * 12 } satisfies PartnerPayload);
 }
 
 export function readSession(): SessionPayload | null {
@@ -113,4 +111,12 @@ export function readDriverSession(): DriverPayload | null {
   return payload;
 }
 
-export { COOKIE, DISPATCH_COOKIE, DRIVER_COOKIE };
+export function readPartnerSession(): PartnerPayload | null {
+  const token = cookies().get(PARTNER_COOKIE)?.value;
+  if (!token) return null;
+  const payload = verify<PartnerPayload>(token);
+  if (payload?.role !== "partner" || !payload.partnerId) return null;
+  return payload;
+}
+
+export { COOKIE, DISPATCH_COOKIE, DRIVER_COOKIE, PARTNER_COOKIE };
