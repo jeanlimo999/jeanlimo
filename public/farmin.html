@@ -10,9 +10,16 @@
     h1 { font-size:30px; margin:8px 0; }
     .gold { color:#C4A574; letter-spacing:.16em; font-size:12px; }
     p { color:#9A9388; line-height:1.5; }
-    input, select, textarea { width:100%; margin-top:10px; background:#1C1C20; color:#F6F1E8; border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:12px; font-size:16px; }
-    button { width:100%; margin-top:14px; border:0; border-radius:14px; padding:14px; font-weight:700; background:linear-gradient(180deg,#E8D3B0,#C4A574); color:#16110a; }
+    input, select, textarea, .addr { width:100%; margin-top:10px; background:#1C1C20; color:#F6F1E8; border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:12px; font-size:16px; box-sizing:border-box; }
+    .addr { text-align:left; }
+    .addr.empty { color:#9A9388; }
+    button.send { width:100%; margin-top:14px; border:0; border-radius:14px; padding:14px; font-weight:700; background:linear-gradient(180deg,#E8D3B0,#C4A574); color:#16110a; }
     .err { color:#f87171; }
+    .sheet { display:none; position:fixed; inset:0; background:#0B0B0C; z-index:20; padding:16px; }
+    .sheet.on { display:block; }
+    .row { display:flex; gap:8px; align-items:center; }
+    .back { width:44px; height:44px; border:0; background:transparent; color:#F6F1E8; font-size:28px; }
+    .hint { display:block; width:100%; text-align:left; background:transparent; color:#F6F1E8; border:0; border-bottom:1px solid rgba(255,255,255,.08); padding:14px 4px; font-size:16px; }
   </style>
 </head>
 <body>
@@ -26,20 +33,66 @@
       <input name="phone" placeholder="Passenger phone" />
       <input name="date" type="date" required />
       <input name="time" type="time" required />
-      <input name="pickup" placeholder="Pickup in Houston" required />
-      <input name="dropoff" placeholder="Drop-off" required />
+      <button type="button" class="addr empty" id="pickup-btn">Pickup in Houston</button>
+      <input type="hidden" name="pickup" id="pickup" required />
+      <button type="button" class="addr empty" id="dropoff-btn">Drop-off</button>
+      <input type="hidden" name="dropoff" id="dropoff" required />
       <input name="flight" placeholder="Flight number" />
       <input name="passengers" placeholder="Passengers" />
       <select name="vehicle"><option value="sedan">Sedan</option><option value="suv">SUV</option><option value="sprinter">Sprinter</option></select>
       <input name="pay" type="number" min="1" step="1" placeholder="Price you pay Jean Limo $" required />
       <textarea name="notes" rows="3" placeholder="Notes"></textarea>
-      <button type="submit">Send offer</button>
+      <button class="send" type="submit">Send offer</button>
       <p class="err" id="err"></p>
     </form>
   </div>
+  <div class="sheet" id="sheet">
+    <div class="row">
+      <button type="button" class="back" id="close">‹</button>
+      <input id="q" placeholder="Airport, hotel, or address" autocomplete="off" />
+    </div>
+    <div id="hints"></div>
+  </div>
   <script>
+    let target = null;
+    let timer = null;
+    const sheet = document.getElementById('sheet');
+    const q = document.getElementById('q');
+    function openSearch(name) {
+      target = name;
+      q.value = document.getElementById(name).value || '';
+      document.getElementById('hints').innerHTML = '';
+      sheet.classList.add('on');
+      setTimeout(() => q.focus(), 50);
+      search();
+    }
+    document.getElementById('pickup-btn').onclick = () => openSearch('pickup');
+    document.getElementById('dropoff-btn').onclick = () => openSearch('dropoff');
+    document.getElementById('close').onclick = () => sheet.classList.remove('on');
+    function choose(text) {
+      document.getElementById(target).value = text;
+      const btn = document.getElementById(target + '-btn');
+      btn.textContent = text;
+      btn.classList.remove('empty');
+      sheet.classList.remove('on');
+    }
+    async function search() {
+      const text = q.value.trim();
+      const box = document.getElementById('hints');
+      if (text.length < 2) { box.innerHTML = ''; return; }
+      const res = await fetch('/api/places?q=' + encodeURIComponent(text + ' Houston'));
+      const data = await res.json().catch(() => ({}));
+      const list = data.predictions || [];
+      box.innerHTML = list.map((p) => '<button type="button" class="hint">' + p.replace(/</g,'') + '</button>').join('') || '<p>Keep typing an airport, hotel, or address.</p>';
+      box.querySelectorAll('button').forEach((b) => b.onclick = () => choose(b.textContent));
+    }
+    q.oninput = () => { clearTimeout(timer); timer = setTimeout(search, 250); };
     document.getElementById('f').onsubmit = async (e) => {
       e.preventDefault();
+      if (!document.getElementById('pickup').value || !document.getElementById('dropoff').value) {
+        document.getElementById('err').textContent = 'Choose a pickup and drop-off from the list.';
+        return;
+      }
       const body = Object.fromEntries(new FormData(e.target).entries());
       const res = await fetch('/api/farmin', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
       const data = await res.json();
