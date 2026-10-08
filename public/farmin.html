@@ -56,15 +56,29 @@
   <script>
     let target = null;
     let timer = null;
+    let ready = false;
     const sheet = document.getElementById('sheet');
     const q = document.getElementById('q');
+    function loadMaps() {
+      if (window.google && window.google.maps && window.google.maps.places) { ready = true; return Promise.resolve(); }
+      return fetch('/api/maps-key').then(r => r.json()).then(data => {
+        if (!data.key) throw new Error('Maps key missing');
+        return new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src = 'https://maps.googleapis.com/maps/api/js?key=' + encodeURIComponent(data.key) + '&libraries=places&loading=async';
+          script.onload = () => { ready = true; resolve(); };
+          script.onerror = () => reject(new Error('Google Maps failed to load'));
+          document.head.appendChild(script);
+        });
+      });
+    }
     function openSearch(name) {
       target = name;
       q.value = document.getElementById(name).value || '';
       document.getElementById('hints').innerHTML = '';
       sheet.classList.add('on');
       setTimeout(() => q.focus(), 50);
-      search();
+      loadMaps().then(search).catch(err => { document.getElementById('hints').textContent = err.message; });
     }
     document.getElementById('pickup-btn').onclick = () => openSearch('pickup');
     document.getElementById('dropoff-btn').onclick = () => openSearch('dropoff');
@@ -76,17 +90,24 @@
       btn.classList.remove('empty');
       sheet.classList.remove('on');
     }
-    async function search() {
+    function search() {
       const text = q.value.trim();
       const box = document.getElementById('hints');
-      if (text.length < 2) { box.innerHTML = ''; return; }
-      const res = await fetch('/api/places?q=' + encodeURIComponent(text + ' Houston'));
-      const data = await res.json().catch(() => ({}));
-      const list = data.predictions || [];
-      box.innerHTML = list.map((p) => '<button type="button" class="hint">' + p.replace(/</g,'') + '</button>').join('') || '<p>Keep typing an airport, hotel, or address.</p>';
-      box.querySelectorAll('button').forEach((b) => b.onclick = () => choose(b.textContent));
+      if (text.length < 2 || !ready || !window.google) { box.innerHTML = ''; return; }
+      const input = /houston/i.test(text) ? text : text + ' Houston';
+      new window.google.maps.places.AutocompleteService().getPlacePredictions({
+        input,
+        componentRestrictions: { country: 'us' },
+        location: new window.google.maps.LatLng(29.7604, -95.3698),
+        radius: 80000
+      }, (preds, status) => {
+        const list = preds || [];
+        if (!list.length) { box.textContent = status && status !== 'ZERO_RESULTS' ? status : 'Keep typing an airport, hotel, or address.'; return; }
+        box.innerHTML = list.slice(0, 8).map(p => '<button type="button" class="hint">' + p.description.replace(/</g,'') + '</button>').join('');
+        box.querySelectorAll('button').forEach(b => b.onclick = () => choose(b.textContent));
+      });
     }
-    q.oninput = () => { clearTimeout(timer); timer = setTimeout(search, 250); };
+    q.oninput = () => { clearTimeout(timer); timer = setTimeout(search, 200); };
     document.getElementById('f').onsubmit = async (e) => {
       e.preventDefault();
       if (!document.getElementById('pickup').value || !document.getElementById('dropoff').value) {
