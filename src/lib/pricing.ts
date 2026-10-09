@@ -60,7 +60,7 @@ export const HOURLY_OVERAGE_PER_MILE = 2.5;
 
 export function rateCityFromAddress(address: string): RateCity {
   const s = String(address || "").toLowerCase();
-  if (/\b(los angeles|lax|sna|john wayne|santa ana|burbank|hollywood|beverly hills|santa monica|pasadena|long beach|inglewood|culver city|west hollywood|glendale|torrance|el segundo|manhattan beach)\b/.test(s)) return "los-angeles";
+  if (/\b(los angeles|lax|sna|john wayne|santa ana|anaheim|disneyland|burbank|hollywood|beverly hills|santa monica|pasadena|long beach|inglewood|culver city|west hollywood|glendale|torrance|el segundo|manhattan beach)\b/.test(s)) return "los-angeles";
   if (/\b(new york|new jersey|nyc|manhattan|brooklyn|queens|bronx|staten island|newark|jersey city|hoboken|jfk|lga|ewr)\b/.test(s) || /,\s*ny\b|,\s*nj\b/.test(s)) return "new-york";
   return "houston";
 }
