@@ -3,7 +3,7 @@
  */
 
 export type Vehicle = "sedan" | "suv" | "sprinter";
-export type RateCity = "houston" | "new-york";
+export type RateCity = "houston" | "new-york" | "los-angeles";
 
 export const FLAT_RATES: Record<Vehicle, number[]> = {
   sedan: [110, 120, 130, 155, 165, 180, 195, 205, 220, 235],
@@ -17,10 +17,22 @@ export const NY_FLAT_RATES: Record<Vehicle, number[]> = {
   sprinter: [260, 320, 380, 440, 500, 560, 620, 680, 740, 800],
 };
 
+export const LA_FLAT_RATES: Record<Vehicle, number[]> = {
+  sedan: [135, 155, 175, 200, 220, 240, 260, 280, 300, 320],
+  suv: [165, 185, 210, 240, 265, 295, 325, 355, 385, 410],
+  sprinter: [295, 330, 395, 465, 540, 605, 680, 760, 830, 905],
+};
+
 export const NY_PER_MILE_OVER_100: Record<Vehicle, number> = {
   sedan: 6.5,
   suv: 7.5,
   sprinter: 9.5,
+};
+
+export const LA_PER_MILE_OVER_100: Record<Vehicle, number> = {
+  sedan: 3.95,
+  suv: 4.65,
+  sprinter: 10,
 };
 
 export const NY_HOURLY_RATES: Record<Vehicle, number> = {
@@ -48,10 +60,15 @@ export const HOURLY_OVERAGE_PER_MILE = 2.5;
 
 export function rateCityFromAddress(address: string): RateCity {
   const s = String(address || "").toLowerCase();
+  if (/\b(los angeles|california|lax|bur|sna|lgb|ont|hollywood|beverly hills|santa monica|pasadena|long beach|anaheim|irvine|orange county)\b/.test(s) || /,\s*ca\b/.test(s)) return "los-angeles";
   if (/\b(new york|new jersey|nyc|manhattan|brooklyn|queens|bronx|staten island|newark|jersey city|hoboken|jfk|lga|ewr)\b/.test(s) || /,\s*ny\b|,\s*nj\b/.test(s)) return "new-york";
   return "houston";
 }
-export function cityLabel(city: RateCity) { return city === "new-york" ? "New York / New Jersey" : "Houston"; }
+export function cityLabel(city: RateCity) {
+  if (city === "new-york") return "New York / New Jersey";
+  if (city === "los-angeles") return "Los Angeles";
+  return "Houston";
+}
 
 export function sprinterOneWay(miles: number) {
   const rounded = Math.round(miles * 100) / 100;
@@ -70,9 +87,21 @@ export function sprinterOneWay(miles: number) {
   return { price: Math.round((base + extraMiles * PER_MILE_OVER_100.sprinter) * 100) / 100, breakdown: `100 mi base $${base} + extra` };
 }
 
+function flatCity(vehicle: Vehicle, miles: number, rates: Record<Vehicle, number[]>, extra: Record<Vehicle, number>, label: string) {
+  const rounded = Math.round(miles * 100) / 100;
+  if (rounded <= 100) {
+    const band = Math.min(Math.floor((rounded - 0.0001) / 10), 9);
+    return { price: rates[vehicle][band], breakdown: `${rounded.toFixed(1)} mi · ${label} ${vehicle} flat` };
+  }
+  const base = rates[vehicle][9];
+  const extraMiles = rounded - 100;
+  return { price: Math.round((base + extraMiles * extra[vehicle]) * 100) / 100, breakdown: `100 mi base $${base} + ${extraMiles.toFixed(1)} × $${extra[vehicle]}` };
+}
+
 export function calculateOneWay(vehicle: Vehicle, miles: number, city: RateCity = "houston") {
   if (miles <= 0) throw new Error("Invalid distance");
-  if (city === "new-york") return calculateNewYork(vehicle, miles);
+  if (city === "new-york") return flatCity(vehicle, miles, NY_FLAT_RATES, NY_PER_MILE_OVER_100, "NY");
+  if (city === "los-angeles") return flatCity(vehicle, miles, LA_FLAT_RATES, LA_PER_MILE_OVER_100, "LA");
   if (vehicle === "sprinter") return sprinterOneWay(miles);
   if (miles <= 100) {
     const band = Math.min(Math.floor((miles - 0.0001) / 10), 9);
@@ -81,17 +110,6 @@ export function calculateOneWay(vehicle: Vehicle, miles: number, city: RateCity 
   const base = FLAT_RATES[vehicle][9];
   const extraMiles = miles - 100;
   return { price: Math.round((base + extraMiles * PER_MILE_OVER_100[vehicle]) * 100) / 100, breakdown: `100 mi base $${base} + extra` };
-}
-
-export function calculateNewYork(vehicle: Vehicle, miles: number) {
-  const rounded = Math.round(miles * 100) / 100;
-  if (rounded <= 100) {
-    const band = Math.min(Math.floor((rounded - 0.0001) / 10), 9);
-    return { price: NY_FLAT_RATES[vehicle][band], breakdown: `${rounded.toFixed(1)} mi · NY ${vehicle} flat` };
-  }
-  const base = NY_FLAT_RATES[vehicle][9];
-  const extraMiles = rounded - 100;
-  return { price: Math.round((base + extraMiles * NY_PER_MILE_OVER_100[vehicle]) * 100) / 100, breakdown: `100 mi base $${base} + ${extraMiles.toFixed(1)} × $${NY_PER_MILE_OVER_100[vehicle]}` };
 }
 
 export function calculateHourly(vehicle: Vehicle, hours: number, city: RateCity = "houston") {
