@@ -20,7 +20,7 @@ export default function LosAngelesRates() {
       <main className="max-w-5xl mx-auto px-4 pt-28 pb-16">
         <p className="text-yellow-500 tracking-[0.2em] text-xs uppercase mb-3">Los Angeles</p>
         <h1 className="font-serif text-4xl mb-4">Los Angeles rate card</h1>
-        <p className="text-zinc-400 mb-8">Used for Los Angeles and California pickups, including LAX. Prices are flat for the mile band. Miles over 100 are added to the 100-mile price. Houston and New York rates are unchanged.</p>
+        <p className="text-zinc-400 mb-8">Los Angeles area only, including LAX, Burbank, Long Beach, Santa Monica, Beverly Hills, and Pasadena. San Francisco and San Diego are separate cards. Prices are flat for the mile band. Miles over 100 are added to the 100-mile price.</p>
         <div className="overflow-x-auto rounded-xl border border-yellow-600/20">
           <table className="w-full text-sm">
             <thead>
