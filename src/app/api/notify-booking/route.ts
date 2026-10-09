@@ -4,6 +4,7 @@ import { formatDateTime } from "@/lib/booking";
 import { saveWebsiteBooking } from "@/lib/portal";
 
 const OWNER_EMAIL = process.env.BOOKING_NOTIFY_EMAIL || "cashtienlam@gmail.com";
+const SITE = "https://jeanlimo.com";
 
 function bookingText(b: any) {
   const lines = [
@@ -46,8 +47,8 @@ function bookingText(b: any) {
     "",
     "Jean Limo LLC",
     "Jeannie 281-917-0929 · Cash 281-917-0085",
-    "My trips: https://delicate-nougat-e223ef.netlify.app/account",
-    "Manage booking: https://delicate-nougat-e223ef.netlify.app/manage"
+    `My trips: ${SITE}/account`,
+    `Manage booking: ${SITE}/manage`
   );
 
   return lines.join("\n");
