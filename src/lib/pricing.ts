@@ -60,7 +60,7 @@ export const HOURLY_OVERAGE_PER_MILE = 2.5;
 
 export function rateCityFromAddress(address: string): RateCity {
   const s = String(address || "").toLowerCase();
-  if (/\b(los angeles|lax|sna|john wayne|santa ana|anaheim|disneyland|costa mesa|huntington beach|newport beach|laguna niguel|aliso viejo|dana point|san clemente|rancho mission viejo|irvine|lake forest|burbank|hollywood|beverly hills|santa monica|pasadena|long beach|inglewood|culver city|west hollywood|glendale|torrance|el segundo|manhattan beach)\b/.test(s)) return "los-angeles";
+  if (/\b(los angeles|lax|sna|john wayne|santa ana|anaheim|disneyland|costa mesa|huntington beach|newport beach|laguna niguel|laguna hills|laguna beach|aliso viejo|dana point|san clemente|rancho mission viejo|rancho santa margarita|mission viejo|coto de caza|ladera ranch|san juan capistrano|orange|orange park acres|irvine|lake forest|burbank|hollywood|beverly hills|santa monica|pasadena|long beach|inglewood|culver city|west hollywood|glendale|torrance|el segundo|manhattan beach|calabasas|compton|lakewood|rancho palos verdes|santa catalina|avalon)\b/.test(s)) return "los-angeles";
   if (/\b(new york|new jersey|nyc|manhattan|brooklyn|queens|bronx|staten island|newark|jersey city|hoboken|jfk|lga|ewr)\b/.test(s) || /,\s*ny\b|,\s*nj\b/.test(s)) return "new-york";
   return "houston";
 }
