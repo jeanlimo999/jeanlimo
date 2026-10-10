@@ -53,6 +53,10 @@ export default function SiteHeader() {
                 <div className="absolute right-0 top-12 w-56 overflow-hidden rounded-xl border border-yellow-600/20 bg-zinc-950 py-1 shadow-2xl">
                   <MenuLink href="/#services" onClick={() => setOpen(false)}>Services</MenuLink>
                   <MenuLink href="/#fleet" onClick={() => setOpen(false)}>Fleet & Pricing</MenuLink>
+                  <div className="px-4 pb-1 pt-3 text-[11px] uppercase tracking-[0.16em] text-[#C4A574]">Rate cards</div>
+                  <MenuLink href="/new-york" onClick={() => setOpen(false)}>New York</MenuLink>
+                  <MenuLink href="/los-angeles" onClick={() => setOpen(false)}>Los Angeles</MenuLink>
+                  <MenuLink href="/dallas" onClick={() => setOpen(false)}>Dallas</MenuLink>
                   <MenuLink href="https://maps.app.goo.gl/aDG8UD4nBddGKKmk6" onClick={() => setOpen(false)} external>
                     Reviews
                   </MenuLink>
