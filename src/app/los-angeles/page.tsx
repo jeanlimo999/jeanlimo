@@ -1,16 +1,16 @@
 import SiteHeader from "@/components/SiteHeader";
 
 const rows = [
-  ["0 – 10 mi", "$135", "$165", "$295"],
-  ["11 – 20 mi", "$155", "$185", "$330 and up"],
-  ["21 – 30 mi", "$175", "$210", "$395 and up"],
-  ["31 – 40 mi", "$200", "$240", "$465 and up"],
-  ["41 – 50 mi", "$220", "$265", "$540 and up"],
-  ["51 – 60 mi", "$240", "$295", "$605 and up"],
-  ["61 – 70 mi", "$260", "$325", "$680 and up"],
-  ["71 – 80 mi", "$280", "$355", "$760 and up"],
-  ["81 – 90 mi", "$300", "$385", "$830 and up"],
-  ["91 – 100 mi", "$320", "$410", "$905 and up"],
+  ["0 – 10 mi", "$130", "$165", "$295"],
+  ["11 – 20 mi", "$150", "$185", "$330 and up"],
+  ["21 – 30 mi", "$170", "$210", "$395 and up"],
+  ["31 – 40 mi", "$195", "$240", "$465 and up"],
+  ["41 – 50 mi", "$215", "$265", "$540 and up"],
+  ["51 – 60 mi", "$235", "$295", "$605 and up"],
+  ["61 – 70 mi", "$255", "$325", "$680 and up"],
+  ["71 – 80 mi", "$275", "$355", "$760 and up"],
+  ["81 – 90 mi", "$295", "$385", "$830 and up"],
+  ["91 – 100 mi", "$315", "$410", "$905 and up"],
 ];
 
 export default function LosAngelesRates() {
@@ -49,7 +49,7 @@ export default function LosAngelesRates() {
             </tbody>
           </table>
         </div>
-        <p className="text-sm text-zinc-300 mt-3">A 110-mile sedan is $320 + 10 × $3.95 = $359.50. Rates exclude tolls, parking, airport fees, and meet-and-greet charges.</p>
+        <p className="text-sm text-zinc-300 mt-3">A 110-mile sedan is $315 + 10 × $3.95 = $354.50. Rates exclude tolls, parking, airport fees, and meet-and-greet charges.</p>
       </main>
     </div>
   );
