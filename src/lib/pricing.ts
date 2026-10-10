@@ -3,7 +3,7 @@
  */
 
 export type Vehicle = "sedan" | "suv" | "sprinter";
-export type RateCity = "houston" | "new-york" | "los-angeles";
+export type RateCity = "houston" | "new-york" | "los-angeles" | "dallas";
 
 export const FLAT_RATES: Record<Vehicle, number[]> = {
   sedan: [110, 120, 130, 155, 165, 180, 195, 205, 220, 235],
@@ -23,6 +23,12 @@ export const LA_FLAT_RATES: Record<Vehicle, number[]> = {
   sprinter: [295, 330, 395, 465, 540, 605, 680, 760, 830, 905],
 };
 
+export const DALLAS_FLAT_RATES: Record<Vehicle, number[]> = {
+  sedan: [120, 130, 145, 170, 180, 195, 210, 220, 235, 250],
+  suv: [145, 160, 175, 200, 215, 235, 250, 275, 295, 305],
+  sprinter: [270, 280, 330, 410, 490, 545, 625, 715, 785, 865],
+};
+
 export const NY_PER_MILE_OVER_100: Record<Vehicle, number> = {
   sedan: 6.5,
   suv: 7.5,
@@ -35,6 +41,12 @@ export const LA_PER_MILE_OVER_100: Record<Vehicle, number> = {
   sprinter: 10,
 };
 
+export const DALLAS_PER_MILE_OVER_100: Record<Vehicle, number> = {
+  sedan: 3.65,
+  suv: 4,
+  sprinter: 9.75,
+};
+
 export const NY_HOURLY_RATES: Record<Vehicle, number> = {
   sedan: 125,
   suv: 155,
@@ -45,6 +57,18 @@ export const NY_HOURLY_MIN: Record<Vehicle, number> = {
   sedan: 3,
   suv: 3,
   sprinter: 3,
+};
+
+export const DALLAS_HOURLY_RATES: Record<Vehicle, number> = {
+  sedan: 100,
+  suv: 130,
+  sprinter: 200,
+};
+
+export const DALLAS_HOURLY_MIN: Record<Vehicle, number> = {
+  sedan: 3,
+  suv: 3,
+  sprinter: 4,
 };
 
 export const SPRINTER_TIER_ENDS: Record<number, number> = {
@@ -62,11 +86,13 @@ export function rateCityFromAddress(address: string): RateCity {
   const s = String(address || "").toLowerCase();
   if (/\b(los angeles|lax|sna|john wayne|santa ana|anaheim|disneyland|costa mesa|huntington beach|newport beach|laguna niguel|laguna hills|laguna beach|aliso viejo|dana point|san clemente|rancho mission viejo|rancho santa margarita|mission viejo|coto de caza|ladera ranch|san juan capistrano|orange|orange park acres|irvine|lake forest|burbank|hollywood|beverly hills|santa monica|pasadena|long beach|inglewood|culver city|west hollywood|glendale|torrance|el segundo|manhattan beach|calabasas|compton|lakewood|rancho palos verdes|santa catalina|avalon)\b/.test(s)) return "los-angeles";
   if (/\b(new york|new jersey|nyc|manhattan|brooklyn|queens|bronx|staten island|newark|jersey city|hoboken|jfk|lga|ewr)\b/.test(s) || /,\s*ny\b|,\s*nj\b/.test(s)) return "new-york";
+  if (/\b(dallas|fort worth|dfw|love field|plano|frisco|irving|arlington|grapevine|southlake|mckinney|allen|richardson|garland|carrollton|addison|las colinas|highland park|university park|flower mound|lewisville|denton|rockwall|coppell|euless|bedford|colleyville|keller|mansfield|grand prairie|desoto|duncanville|cedar hill|wylie|prosper|celina|the colony|little elm|farmers branch)\b/.test(s) || /\bdal\b/.test(s)) return "dallas";
   return "houston";
 }
 export function cityLabel(city: RateCity) {
   if (city === "new-york") return "New York / New Jersey";
   if (city === "los-angeles") return "Los Angeles";
+  if (city === "dallas") return "Dallas";
   return "Houston";
 }
 
@@ -102,6 +128,7 @@ export function calculateOneWay(vehicle: Vehicle, miles: number, city: RateCity 
   if (miles <= 0) throw new Error("Invalid distance");
   if (city === "new-york") return flatCity(vehicle, miles, NY_FLAT_RATES, NY_PER_MILE_OVER_100, "NY");
   if (city === "los-angeles") return flatCity(vehicle, miles, LA_FLAT_RATES, LA_PER_MILE_OVER_100, "LA");
+  if (city === "dallas") return flatCity(vehicle, miles, DALLAS_FLAT_RATES, DALLAS_PER_MILE_OVER_100, "Dallas");
   if (vehicle === "sprinter") return sprinterOneWay(miles);
   if (miles <= 100) {
     const band = Math.min(Math.floor((miles - 0.0001) / 10), 9);
@@ -117,6 +144,11 @@ export function calculateHourly(vehicle: Vehicle, hours: number, city: RateCity 
     const minHours = NY_HOURLY_MIN[vehicle];
     const billableHours = Math.max(hours, minHours);
     return { price: billableHours * NY_HOURLY_RATES[vehicle], breakdown: `${billableHours} hr × $${NY_HOURLY_RATES[vehicle]}/hr (${minHours}-hr min)` };
+  }
+  if (city === "dallas") {
+    const minHours = DALLAS_HOURLY_MIN[vehicle];
+    const billableHours = Math.max(hours, minHours);
+    return { price: billableHours * DALLAS_HOURLY_RATES[vehicle], breakdown: `${billableHours} hr × $${DALLAS_HOURLY_RATES[vehicle]}/hr (${minHours}-hr min)` };
   }
   const billableHours = Math.max(hours, HOURLY_MIN_HOURS);
   return { price: billableHours * HOURLY_RATES[vehicle], breakdown: `${billableHours} hr × $${HOURLY_RATES[vehicle]}/hr` };
