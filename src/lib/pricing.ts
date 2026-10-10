@@ -18,7 +18,7 @@ export const NY_FLAT_RATES: Record<Vehicle, number[]> = {
 };
 
 export const LA_FLAT_RATES: Record<Vehicle, number[]> = {
-  sedan: [135, 155, 175, 200, 220, 240, 260, 280, 300, 320],
+  sedan: [130, 150, 170, 195, 215, 235, 255, 275, 295, 315],
   suv: [165, 185, 210, 240, 265, 295, 325, 355, 385, 410],
   sprinter: [295, 330, 395, 465, 540, 605, 680, 760, 830, 905],
 };
