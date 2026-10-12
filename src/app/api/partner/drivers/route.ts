@@ -4,6 +4,10 @@ import { normEmail, supabaseAdmin } from "@/lib/supabase";
 
 const SQL = "create table if not exists partner_drivers (id uuid primary key default gen_random_uuid(), partner_id uuid, name text, phone text, email text, active boolean default true, created_at timestamptz default now());";
 
+function digits(value: string) {
+  return String(value || "").replace(/\D/g, "").slice(-10);
+}
+
 export async function GET() {
   const session = readPartnerSession();
   if (!session) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
@@ -25,6 +29,12 @@ export async function POST(req: NextRequest) {
   const email = normEmail(body.email || "");
   if (!name || !phone || !email.includes("@")) {
     return NextResponse.json({ error: "Name, phone, and email are required" }, { status: 400 });
+  }
+  const { data: existing } = await db.from("partner_drivers").select("id, name, phone, email").eq("partner_id", session.partnerId).eq("active", true);
+  const phoneKey = digits(phone);
+  const duplicate = (existing || []).find((row: any) => normEmail(row.email) === email || (phoneKey && digits(row.phone) === phoneKey));
+  if (duplicate) {
+    return NextResponse.json({ error: duplicate.name + " is already added." }, { status: 409 });
   }
   const { data, error } = await db.from("partner_drivers").insert({
     partner_id: session.partnerId,
