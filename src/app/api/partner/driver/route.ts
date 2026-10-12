@@ -12,14 +12,11 @@ export async function POST(req: NextRequest) {
   const id = String(body.id || "");
   const status = String(body.status || "");
   if (!email.includes("@") || last4.length !== 4) {
-    return NextResponse.json({ error: "Partner email and the last 4 of your phone are required" }, { status: 400 });
+    return NextResponse.json({ error: "Your email and the last 4 of your phone are required" }, { status: 400 });
   }
 
-  const { data: partner } = await db.from("partners").select("id, company").eq("email", email).eq("active", true).maybeSingle();
-  if (!partner) return NextResponse.json({ error: "No partner for that email" }, { status: 401 });
-
-  const { data, error } = await db.from("farm_outs").select("*").eq("partner_id", partner.id).order("created_at", { ascending: false }).limit(40);
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  const { data, error } = await db.from("farm_outs").select("*").eq("driver_email", email).order("created_at", { ascending: false }).limit(40);
+  if (error) return NextResponse.json({ error: "Run the driver email script in Supabase. " + error.message }, { status: 500 });
   const jobs = (data || []).filter((row: any) => String(row.driver_phone || "").replace(/\D/g, "").endsWith(last4));
   if (!jobs.length) return NextResponse.json({ error: "No job for that email and last 4" }, { status: 401 });
 
