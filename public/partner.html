@@ -21,7 +21,7 @@
   <div class="wrap">
     <div class="gold">PARTNER PORTAL</div>
     <h1>Your Jean Limo jobs</h1>
-    <p class="muted">Assign your driver. They open jeanlimo.com/pdriver.html, enter this company email, and the last 4 of their phone.</p>
+    <p class="muted">Assign your driver. They open jeanlimo.com/pdriver.html and sign in with their own email and the last 4 of their phone.</p>
     <form id="login">
       <input name="email" type="email" placeholder="Company email" required />
       <input name="pin" placeholder="PIN" required />
@@ -49,6 +49,7 @@
           <form data-id="${job.id}">
             <input name="driver" placeholder="Your driver name" value="${job.driver || ''}" required />
             <input name="driverPhone" placeholder="Driver phone" value="${job.driverPhone || ''}" required />
+            <input name="driverEmail" type="email" placeholder="Driver email" value="${job.driverEmail || ''}" required />
             <button type="submit">Save driver</button>
           </form>
         </div>`).join('') || '<p>No jobs yet.</p>';
@@ -59,7 +60,7 @@
         const res = await fetch('/api/partner/jobs', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
         const data = await res.json();
         if (!res.ok) err.textContent = data.error || 'Could not save';
-        else { err.textContent = 'Driver saved. They sign in at jeanlimo.com/pdriver.html with this email and the last 4 of their phone.'; load(); }
+        else { err.textContent = 'Driver saved. They sign in at jeanlimo.com/pdriver.html with their email and the last 4 of their phone.'; load(); }
       });
     }
     document.getElementById('login').onsubmit = async (e) => {
