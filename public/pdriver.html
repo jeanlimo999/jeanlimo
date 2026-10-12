@@ -15,6 +15,8 @@
     .card { margin-top:14px; border:1px solid rgba(255,255,255,.1); border-radius:16px; padding:14px; background:#141416; }
     .muted { color:#9A9388; font-size:14px; }
     .err { color:#f87171; }
+    a.map { display:block; margin-top:10px; color:#E8D3B0; text-decoration:underline; }
+    .label { margin-top:10px; color:#C4A574; font-size:11px; letter-spacing:.14em; }
   </style>
 </head>
 <body>
@@ -33,6 +35,15 @@
     let creds = null;
     const err = document.getElementById('err');
     const board = document.getElementById('board');
+    function mapLink(address, label) {
+      if (!address) return '';
+      const href = 'https://maps.apple.com/?q=' + encodeURIComponent(address);
+      return '<div class="label">' + label + '</div><a class="map" href="' + href + '" target="_blank">' + address + '</a>';
+    }
+    function extra(label, value) {
+      if (!value) return '';
+      return '<div class="label">' + label + '</div><div>' + value + '</div>';
+    }
     async function load() {
       const res = await fetch('/api/partner/driver', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(creds) });
       const data = await res.json();
@@ -41,10 +52,13 @@
       board.innerHTML = (data.jobs || []).map(job => `
         <div class="card">
           <div class="gold">${job.date || ''} ${job.time || ''} · ${job.status || ''}</div>
-          <div style="font-size:20px;margin-top:6px">${job.guest}</div>
+          <div style="font-size:20px;margin-top:6px">${job.guest || ''}</div>
           <div class="muted">${job.phone || ''}</div>
-          <div style="margin-top:8px">${job.pickup || ''}</div>
-          <div>${job.dropoff || ''}</div>
+          ${mapLink(job.pickup, 'PICKUP')}
+          ${mapLink(job.dropoff, 'DROP OFF')}
+          ${extra('PASSENGERS', job.passengers)}
+          ${extra('FLIGHT', job.flight)}
+          ${extra('ADDITIONAL NOTE', job.notes)}
           <button data-id="${job.id}" data-status="on_the_way">On the way</button>
           <button data-id="${job.id}" data-status="onboard">Onboard</button>
           <button data-id="${job.id}" data-status="dropped_off">Dropped off</button>
