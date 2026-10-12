@@ -2,12 +2,22 @@ import { NextRequest, NextResponse } from "next/server";
 import { readPartnerSession } from "@/lib/session";
 import { normEmail, supabaseAdmin } from "@/lib/supabase";
 
+function driversFrom(rows: any[]) {
+  const seen = new Map<string, any>();
+  rows.forEach((row) => {
+    const email = normEmail(row.driver_email || "");
+    if (!email || !row.driver_name) return;
+    if (!seen.has(email)) seen.set(email, { name: row.driver_name, phone: row.driver_phone || "", email });
+  });
+  return Array.from(seen.values());
+}
+
 export async function GET() {
   const session = readPartnerSession();
   if (!session) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
   const db = supabaseAdmin();
   if (!db) return NextResponse.json({ error: "Not configured" }, { status: 500 });
-  const { data, error } = await db.from("farm_outs").select("*").eq("partner_id", session.partnerId).order("created_at", { ascending: false }).limit(40);
+  const { data, error } = await db.from("farm_outs").select("*").eq("partner_id", session.partnerId).order("created_at", { ascending: false }).limit(80);
   if (error) return NextResponse.json({ error: error.message, jobs: [] });
   const ids = (data || []).map((row) => row.booking_id).filter(Boolean);
   const { data: bookings } = ids.length
@@ -36,7 +46,7 @@ export async function GET() {
       driverEmail: row.driver_email || "",
     };
   });
-  return NextResponse.json({ company: session.company, jobs });
+  return NextResponse.json({ company: session.company, jobs, drivers: driversFrom(data || []) });
 }
 
 export async function POST(req: NextRequest) {
