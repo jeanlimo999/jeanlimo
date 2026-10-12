@@ -16,45 +16,71 @@
     .muted { color:#9A9388; font-size:14px; }
     .err { color:#f87171; }
     .ok { margin:12px 0; border:1px solid #C4A574; border-radius:12px; padding:12px; color:#E8D3B0; background:#1C1C20; }
-    .new { display:none; }
+    .top { display:flex; justify-content:space-between; align-items:center; margin-top:8px; }
+    .ghost { width:auto; margin:0; background:transparent; border:1px solid rgba(255,255,255,.15); color:#E8D3B0; padding:8px 14px; }
+    .panel { display:none; margin-top:12px; }
+    .row { display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid rgba(255,255,255,.08); }
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="gold">PARTNER PORTAL</div>
-    <h1>Your Jean Limo jobs</h1>
-    <p class="muted">Pick a saved driver. Add a new one once. They sign in at jeanlimo.com/pdriver.html with their email and the last 4 of their phone.</p>
+    <div class="top">
+      <h1>Your Jean Limo jobs</h1>
+      <button class="ghost" id="driversBtn" hidden>Drivers</button>
+    </div>
+    <p class="muted">Add a driver once. On a job, select that driver.</p>
     <form id="login">
       <input name="email" type="email" placeholder="Company email" required />
       <input name="pin" placeholder="PIN" required />
       <button type="submit">Sign in</button>
       <p class="err" id="err"></p>
     </form>
+    <div id="panel" class="panel card">
+      <div class="gold">DRIVERS</div>
+      <input id="dName" placeholder="Driver name" />
+      <input id="dPhone" placeholder="Driver phone" />
+      <input id="dEmail" type="email" placeholder="Driver email" />
+      <button id="addDriver">Add driver</button>
+      <div id="roster"></div>
+    </div>
     <div id="board" hidden></div>
   </div>
   <script>
     const err = document.getElementById('err');
     const board = document.getElementById('board');
+    const panel = document.getElementById('panel');
     let drivers = [];
     let saved = '';
-    function options() {
+    function options(selected) {
       return '<option value="">Select driver</option>' +
-        drivers.map((d, i) => '<option value="' + i + '">' + d.name + '</option>').join('') +
-        '<option value="new">Add new driver</option>';
+        drivers.map(d => '<option value="' + d.id + '"' + (d.email === selected ? ' selected' : '') + '>' + d.name + '</option>').join('');
     }
-    async function assign(id, driver) {
-      if (!driver.name || !driver.phone || !driver.email) {
-        err.textContent = 'Enter name, phone, and email';
-        return;
-      }
+    async function loadDrivers() {
+      const res = await fetch('/api/partner/drivers');
+      const data = await res.json();
+      drivers = data.drivers || [];
+      if (!res.ok && data.error) err.textContent = data.error;
+      document.getElementById('roster').innerHTML = drivers.map(d =>
+        '<div class="row"><div>' + d.name + '<div class="muted">' + d.phone + '</div></div><button class="ghost" data-del="' + d.id + '">Delete</button></div>'
+      ).join('') || '<p class="muted">No drivers yet.</p>';
+      document.querySelectorAll('[data-del]').forEach(btn => btn.onclick = async () => {
+        await fetch('/api/partner/drivers?id=' + btn.dataset.del, { method: 'DELETE' });
+        saved = 'Driver deleted';
+        load();
+      });
+    }
+    async function assign(id, driverId) {
+      const driver = drivers.find(d => d.id === driverId);
+      if (!driver) return;
       const res = await fetch('/api/partner/jobs', {
         method:'POST',
         headers:{'Content-Type':'application/json'},
         body: JSON.stringify({ id, driver: driver.name, driverPhone: driver.phone, driverEmail: driver.email })
       });
       const data = await res.json();
-      if (!res.ok) { err.textContent = data.error || 'Could not save'; return; }
-      saved = 'Driver saved. ' + driver.name + ' is assigned.';
+      if (!res.ok) { err.textContent = data.error || 'Could not assign'; return; }
+      saved = 'Driver assigned. ' + driver.name;
       err.textContent = '';
       load();
     }
@@ -62,9 +88,10 @@
       const res = await fetch('/api/partner/jobs');
       const data = await res.json();
       if (!res.ok) return;
-      drivers = data.drivers || [];
       document.getElementById('login').hidden = true;
+      document.getElementById('driversBtn').hidden = false;
       board.hidden = false;
+      await loadDrivers();
       board.innerHTML = (saved ? '<div class="ok">' + saved + '</div>' : '') +
         '<p class="muted">' + (data.company || '') + '</p>' + (data.jobs || []).map(job => `
         <div class="card">
@@ -73,33 +100,33 @@
           <div class="muted">${job.phone || ''}</div>
           <div style="margin-top:8px">${job.pickup || ''}</div>
           <div>${job.dropoff || ''}</div>
-          <select data-id="${job.id}">${options()}</select>
-          <div class="new">
-            <input name="driver" placeholder="Driver name" />
-            <input name="driverPhone" placeholder="Driver phone" />
-            <input name="driverEmail" type="email" placeholder="Driver email" />
-            <button type="button" class="save">Save driver</button>
-          </div>
+          <select data-id="${job.id}">${options(job.driverEmail)}</select>
         </div>`).join('') || '<p>No jobs yet.</p>';
       board.querySelectorAll('select').forEach(select => {
-        const card = select.closest('.card');
-        const box = card.querySelector('.new');
-        if (drivers.length) select.value = '0';
-        select.onchange = async () => {
-          if (select.value === 'new') { box.style.display = 'block'; return; }
-          box.style.display = 'none';
-          if (select.value === '') return;
-          await assign(select.dataset.id, drivers[Number(select.value)]);
-        };
-        card.querySelector('.save').onclick = async () => {
-          await assign(select.dataset.id, {
-            name: card.querySelector('[name=driver]').value,
-            phone: card.querySelector('[name=driverPhone]').value,
-            email: card.querySelector('[name=driverEmail]').value
-          });
-        };
+        select.onchange = () => { if (select.value) assign(select.dataset.id, select.value); };
       });
     }
+    document.getElementById('driversBtn').onclick = () => {
+      panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+    };
+    document.getElementById('addDriver').onclick = async () => {
+      const res = await fetch('/api/partner/drivers', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          name: document.getElementById('dName').value,
+          phone: document.getElementById('dPhone').value,
+          email: document.getElementById('dEmail').value
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) { err.textContent = data.error || 'Could not add driver'; return; }
+      saved = 'Driver saved. ' + data.driver.name;
+      document.getElementById('dName').value = '';
+      document.getElementById('dPhone').value = '';
+      document.getElementById('dEmail').value = '';
+      load();
+    };
     document.getElementById('login').onsubmit = async (e) => {
       e.preventDefault();
       const body = Object.fromEntries(new FormData(e.target).entries());
