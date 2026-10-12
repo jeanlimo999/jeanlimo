@@ -7,7 +7,7 @@ export async function GET() {
   if (!session) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
   const db = supabaseAdmin();
   if (!db) return NextResponse.json({ error: "Supabase is not configured" }, { status: 500 });
-  const { data, error } = await db.from("partners").select("id, company, contact, phone, email, city, airports, vehicles, active").eq("active", true).order("city");
+  const { data, error } = await db.from("partners").select("id, company, contact, phone, email, city, airports, vehicles, pin, active").eq("active", true).order("city");
   if (error) return NextResponse.json({ error: "Run supabase/partners.sql in Supabase, then add a partner. " + error.message, partners: [] }, { status: 200 });
   return NextResponse.json({ partners: data || [] });
 }
@@ -41,9 +41,30 @@ export async function PATCH(req: NextRequest) {
   if (!db) return NextResponse.json({ error: "Supabase is not configured" }, { status: 500 });
   const body = await req.json();
   const id = String(body.id || "");
-  const pin = String(body.pin || "").trim();
-  if (!id || pin.length < 4) return NextResponse.json({ error: "Pick a partner and a PIN of at least 4 digits" }, { status: 400 });
-  const { error } = await db.from("partners").update({ pin }).eq("id", id);
-  if (error) return NextResponse.json({ error: "Run the partner PIN script in Supabase. " + error.message }, { status: 500 });
+  if (!id) return NextResponse.json({ error: "Pick a partner" }, { status: 400 });
+  const update: Record<string, string> = {};
+  for (const key of ["company", "contact", "phone", "email", "city", "airports", "vehicles"]) {
+    if (body[key] != null) update[key] = String(body[key]).trim();
+  }
+  if (body.pin != null) {
+    const pin = String(body.pin).trim();
+    if (pin && pin.length < 4) return NextResponse.json({ error: "PIN needs at least 4 digits" }, { status: 400 });
+    if (pin) update.pin = pin;
+  }
+  if (!Object.keys(update).length) return NextResponse.json({ error: "Nothing to update" }, { status: 400 });
+  const { error } = await db.from("partners").update(update).eq("id", id);
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json({ ok: true });
+}
+
+export async function DELETE(req: NextRequest) {
+  const session = readDispatchSession();
+  if (!session) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
+  const db = supabaseAdmin();
+  if (!db) return NextResponse.json({ error: "Supabase is not configured" }, { status: 500 });
+  const id = String(new URL(req.url).searchParams.get("id") || "");
+  if (!id) return NextResponse.json({ error: "Pick a partner" }, { status: 400 });
+  const { error } = await db.from("partners").update({ active: false }).eq("id", id);
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true });
 }
