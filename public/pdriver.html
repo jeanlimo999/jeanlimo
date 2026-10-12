@@ -18,6 +18,7 @@
     a.map { display:block; margin-top:10px; color:#E8D3B0; text-decoration:underline; }
     a.phone { color:#E8D3B0; text-decoration:none; margin-right:12px; }
     .label { margin-top:10px; color:#C4A574; font-size:11px; letter-spacing:.14em; }
+    .out { margin-top:16px; background:transparent; border:1px solid rgba(255,255,255,.15); color:#E8D3B0; }
   </style>
 </head>
 <body>
@@ -33,9 +34,20 @@
     <div id="board"></div>
   </div>
   <script>
+    const KEY = 'jl-pdriver';
+    const HOURS = 12;
     let creds = null;
     const err = document.getElementById('err');
     const board = document.getElementById('board');
+    function save() {
+      localStorage.setItem(KEY, JSON.stringify({ ...creds, seen: Date.now() }));
+    }
+    function clear() {
+      localStorage.removeItem(KEY);
+      creds = null;
+      document.getElementById('login').hidden = false;
+      board.innerHTML = '';
+    }
     function mapLink(address, label) {
       if (!address) return '';
       const href = 'https://maps.apple.com/?q=' + encodeURIComponent(address);
@@ -55,7 +67,8 @@
     async function load() {
       const res = await fetch('/api/partner/driver', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(creds) });
       const data = await res.json();
-      if (!res.ok) { err.textContent = data.error || 'Could not open'; return; }
+      if (!res.ok) { err.textContent = data.error || 'Could not open'; clear(); return; }
+      save();
       document.getElementById('login').hidden = true;
       board.innerHTML = (data.jobs || []).map(job => `
         <div class="card">
@@ -71,7 +84,10 @@
           <button data-id="${job.id}" data-status="onboard">Onboard</button>
           <button data-id="${job.id}" data-status="dropped_off">Dropped off</button>
         </div>`).join('') || '<p>No job assigned.</p>';
-      board.querySelectorAll('button').forEach(btn => btn.onclick = async () => {
+      board.insertAdjacentHTML('beforeend', '<button class="out" id="out">Sign out</button>');
+      document.getElementById('out').onclick = clear;
+      board.querySelectorAll('button[data-id]').forEach(btn => btn.onclick = async () => {
+        save();
         const res = await fetch('/api/partner/driver', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ ...creds, id: btn.dataset.id, status: btn.dataset.status }) });
         const data = await res.json();
         if (!res.ok) err.textContent = data.error || 'Could not update';
@@ -83,6 +99,14 @@
       creds = Object.fromEntries(new FormData(e.target).entries());
       load();
     };
+    ['click', 'touchstart'].forEach(ev => document.addEventListener(ev, () => { if (creds) save(); }));
+    try {
+      const saved = JSON.parse(localStorage.getItem(KEY) || 'null');
+      if (saved && Date.now() - saved.seen < HOURS * 60 * 60 * 1000) {
+        creds = { email: saved.email, last4: saved.last4 };
+        load();
+      } else clear();
+    } catch {}
   </script>
 </body>
 </html>
