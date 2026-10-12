@@ -22,28 +22,35 @@ export async function POST(req: NextRequest) {
 
   if (!id) {
     const ids = jobs.map((row: any) => row.booking_id).filter(Boolean);
-    const { data: bookings } = ids.length
-      ? await db.from("bookings").select("id, confirmation, pickup, dropoff, ride_date, ride_time, flight_number, passengers, passenger_count, passenger_notes, notes, clients(full_name, phone)").in("id", ids)
-      : { data: [] };
-    const byId = new Map((bookings || []).map((b: any) => [b.id, b]));
+    const confirmations = jobs.map((row: any) => row.confirmation).filter(Boolean);
+    const [{ data: byIds }, { data: byConf }] = await Promise.all([
+      ids.length
+        ? db.from("bookings").select("id, confirmation, pickup, dropoff, ride_date, ride_time, flight_number, passengers, passenger_count, passenger_notes, notes, clients(full_name, phone)").in("id", ids)
+        : Promise.resolve({ data: [] }),
+      confirmations.length
+        ? db.from("bookings").select("id, confirmation, pickup, dropoff, ride_date, ride_time, flight_number, passengers, passenger_count, passenger_notes, notes, clients(full_name, phone)").in("confirmation", confirmations)
+        : Promise.resolve({ data: [] }),
+    ]);
+    const byId = new Map((byIds || []).map((b: any) => [b.id, b]));
+    const byConfirmation = new Map((byConf || []).map((b: any) => [b.confirmation, b]));
     return NextResponse.json({
       jobs: jobs.map((row: any) => {
-        const booking: any = byId.get(row.booking_id) || {};
-        const pax = booking.passengers || booking.passenger_count || "";
+        const booking: any = byId.get(row.booking_id) || byConfirmation.get(row.confirmation) || {};
+        const pax = booking.passengers || booking.passenger_count || row.passengers || "";
         return {
           id: row.id,
           status: row.status,
           driver: row.driver_name,
           confirmation: booking.confirmation || row.confirmation,
-          date: booking.ride_date || "",
-          time: booking.ride_time || "",
-          pickup: booking.pickup || "",
-          dropoff: booking.dropoff || "",
-          flight: booking.flight_number || "",
+          date: booking.ride_date || row.ride_date || "",
+          time: booking.ride_time || row.ride_time || "",
+          pickup: booking.pickup || row.pickup || "",
+          dropoff: booking.dropoff || row.dropoff || "",
+          flight: booking.flight_number || row.flight || "",
           passengers: pax === 0 || pax ? String(pax) : "",
-          notes: booking.passenger_notes || booking.notes || "",
-          guest: booking.clients?.full_name || "Guest",
-          phone: booking.clients?.phone || "",
+          notes: booking.passenger_notes || booking.notes || row.notes || "",
+          guest: booking.clients?.full_name || row.guest_name || "Guest",
+          phone: booking.clients?.phone || row.guest_phone || "",
         };
       }),
     });
