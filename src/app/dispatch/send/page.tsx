@@ -8,9 +8,7 @@ export default function SendPage() {
   const [job, setJob] = useState("");
   const [partner, setPartner] = useState("");
   const [pay, setPay] = useState("");
-  const [pin, setPin] = useState("");
   const [msg, setMsg] = useState("");
-  const [fix, setFix] = useState({ from: "", to: "" });
   const [company, setCompany] = useState({ company: "", contact: "", phone: "", email: "", city: "", airports: "", vehicles: "", pin: "", password: "" });
 
   function loadPartners() {
@@ -28,6 +26,28 @@ export default function SendPage() {
     });
     loadPartners();
   }, []);
+
+  function edit(id: string, field: string, value: string) {
+    setPartners(partners.map((p) => (p.id === id ? { ...p, [field]: value } : p)));
+  }
+
+  async function savePartner(p: any) {
+    const res = await fetch("/api/dispatch/partners", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(p),
+    });
+    const data = await res.json();
+    setMsg(res.ok ? p.company + " saved" : data.error || "Could not save");
+  }
+
+  async function removePartner(p: any) {
+    if (!confirm("Delete " + p.company + "?")) return;
+    const res = await fetch("/api/dispatch/partners?id=" + p.id, { method: "DELETE" });
+    const data = await res.json();
+    setMsg(res.ok ? p.company + " deleted" : data.error || "Could not delete");
+    loadPartners();
+  }
 
   async function approve(e: React.FormEvent) {
     e.preventDefault();
@@ -65,28 +85,6 @@ export default function SendPage() {
     loadPartners();
   }
 
-  async function fixEmail(e: React.FormEvent) {
-    e.preventDefault();
-    const res = await fetch("/api/dispatch/users", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(fix),
-    });
-    const data = await res.json();
-    setMsg(res.ok ? "Email updated to " + data.user.email : data.error || "Could not update email");
-  }
-
-  async function savePin(e: React.FormEvent) {
-    e.preventDefault();
-    const res = await fetch("/api/dispatch/partners", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: partner, pin }),
-    });
-    const data = await res.json();
-    setMsg(res.ok ? "PIN saved. They sign in at jeanlimo.com/partner.html" : data.error || "Could not save PIN");
-  }
-
   async function send(e: React.FormEvent) {
     e.preventDefault();
     const res = await fetch("/api/dispatch/farm", {
@@ -104,26 +102,35 @@ export default function SendPage() {
     <main className="min-h-screen bg-[#0B0B0C] px-4 py-8 text-[#F6F1E8]">
       <div className="mx-auto max-w-xl">
         <a href="/dispatch" className="text-sm text-[#C4A574]">Back to dispatch</a>
-        <h1 className="mt-3 text-3xl font-semibold">Approve a company</h1>
-        <p className="mt-2 text-sm text-[#9A9388]">The application email does not approve them. Fill this in after you check insurance. Password makes their dispatch login.</p>
+        <h1 className="mt-3 text-3xl font-semibold">Partners</h1>
+        <div className="mt-4 grid gap-3">
+          {partners.map((p) => (
+            <div key={p.id} className="rounded-2xl border border-white/10 bg-[#141416] p-3 grid gap-2">
+              <input className={input} value={p.company || ""} onChange={(e) => edit(p.id, "company", e.target.value)} />
+              <input className={input} placeholder="Email" value={p.email || ""} onChange={(e) => edit(p.id, "email", e.target.value)} />
+              <input className={input} placeholder="Phone" value={p.phone || ""} onChange={(e) => edit(p.id, "phone", e.target.value)} />
+              <input className={input} placeholder="City" value={p.city || ""} onChange={(e) => edit(p.id, "city", e.target.value)} />
+              <input className={input} placeholder="PIN" value={p.pin || ""} onChange={(e) => edit(p.id, "pin", e.target.value)} />
+              <div className="grid grid-cols-2 gap-2">
+                <button type="button" onClick={() => savePartner(p)} className="rounded-xl border border-[#C4A574]/40 py-3 text-[#E8D3B0]">Save</button>
+                <button type="button" onClick={() => removePartner(p)} className="rounded-xl border border-red-400/40 py-3 text-red-200">Delete</button>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <h2 className="mt-10 text-2xl font-semibold">Add a company</h2>
         <form onSubmit={approve} className="mt-4 grid gap-2">
           <input className={input} placeholder="Company name" value={company.company} onChange={(e) => setCompany({ ...company, company: e.target.value })} required />
           <input className={input} placeholder="Contact name" value={company.contact} onChange={(e) => setCompany({ ...company, contact: e.target.value })} />
           <input className={input} placeholder="Phone" value={company.phone} onChange={(e) => setCompany({ ...company, phone: e.target.value })} />
-          <input className={input} type="email" placeholder="Email" value={company.email} onChange={(e) => setCompany({ ...company, email: e.target.value })} required />
+          <input className={input} placeholder="Email" value={company.email} onChange={(e) => setCompany({ ...company, email: e.target.value })} required />
           <input className={input} placeholder="City" value={company.city} onChange={(e) => setCompany({ ...company, city: e.target.value })} />
           <input className={input} placeholder="Airports" value={company.airports} onChange={(e) => setCompany({ ...company, airports: e.target.value })} />
           <input className={input} placeholder="Vehicles" value={company.vehicles} onChange={(e) => setCompany({ ...company, vehicles: e.target.value })} />
           <input className={input} placeholder="Partner PIN, 4 digits" value={company.pin} onChange={(e) => setCompany({ ...company, pin: e.target.value })} />
           <input className={input} type="password" placeholder="Dispatch password, 8+ characters" value={company.password} onChange={(e) => setCompany({ ...company, password: e.target.value })} />
-          <button className="rounded-xl bg-gradient-to-b from-[#E8D3B0] to-[#C4A574] py-3 font-semibold text-[#16110a]">Approve and create login</button>
-        </form>
-
-        <h2 className="mt-10 text-2xl font-semibold">Fix a wrong email</h2>
-        <form onSubmit={fixEmail} className="mt-4 grid gap-2">
-          <input className={input} placeholder="Wrong email, klam281@gmail.con" value={fix.from} onChange={(e) => setFix({ ...fix, from: e.target.value })} required />
-          <input className={input} placeholder="Correct email, klam281@gmail.com" value={fix.to} onChange={(e) => setFix({ ...fix, to: e.target.value })} required />
-          <button className="rounded-xl border border-[#C4A574]/40 py-3 text-[#E8D3B0]">Update email</button>
+          <button className="rounded-xl bg-gradient-to-b from-[#E8D3B0] to-[#C4A574] py-3 font-semibold text-[#16110a]">Add company</button>
         </form>
 
         <h2 className="mt-10 text-2xl font-semibold">Send a job</h2>
@@ -138,11 +145,6 @@ export default function SendPage() {
           </select>
           <input className={input} placeholder="What you pay them $" value={pay} onChange={(e) => setPay(e.target.value)} required />
           <button className="rounded-xl border border-[#C4A574]/40 py-3 text-[#E8D3B0]">Send job</button>
-        </form>
-        <form onSubmit={savePin} className="mt-6 grid gap-2">
-          <div className="text-xs uppercase tracking-widest text-[#C4A574]">Change their PIN</div>
-          <input className={input} placeholder="PIN for the selected partner" value={pin} onChange={(e) => setPin(e.target.value)} />
-          <button className="rounded-xl border border-white/10 py-3 text-[#E8D3B0]">Save PIN</button>
         </form>
         {msg && <p className="mt-3 text-sm text-[#E8D3B0]">{msg}</p>}
       </div>
