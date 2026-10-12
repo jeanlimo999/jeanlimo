@@ -21,12 +21,13 @@ export async function POST(req: NextRequest) {
   if (!id) {
     const ids = jobs.map((row: any) => row.booking_id).filter(Boolean);
     const { data: bookings } = ids.length
-      ? await db.from("bookings").select("id, confirmation, pickup, dropoff, ride_date, ride_time, clients(full_name, phone)").in("id", ids)
+      ? await db.from("bookings").select("id, confirmation, pickup, dropoff, ride_date, ride_time, flight_number, passengers, passenger_count, passenger_notes, notes, clients(full_name, phone)").in("id", ids)
       : { data: [] };
     const byId = new Map((bookings || []).map((b: any) => [b.id, b]));
     return NextResponse.json({
       jobs: jobs.map((row: any) => {
         const booking: any = byId.get(row.booking_id) || {};
+        const pax = booking.passengers || booking.passenger_count || "";
         return {
           id: row.id,
           status: row.status,
@@ -36,6 +37,9 @@ export async function POST(req: NextRequest) {
           time: booking.ride_time || "",
           pickup: booking.pickup || "",
           dropoff: booking.dropoff || "",
+          flight: booking.flight_number || "",
+          passengers: pax === 0 || pax ? String(pax) : "",
+          notes: booking.passenger_notes || booking.notes || "",
           guest: booking.clients?.full_name || "Guest",
           phone: booking.clients?.phone || "",
         };
