@@ -9,7 +9,7 @@ export default function SendPage() {
   const [partner, setPartner] = useState("");
   const [pay, setPay] = useState("");
   const [msg, setMsg] = useState("");
-  const [company, setCompany] = useState({ company: "", contact: "", phone: "", email: "", city: "", airports: "", vehicles: "", pin: "", password: "" });
+  const [company, setCompany] = useState({ company: "", contact: "", phone: "", email: "", city: "", airports: "", vehicles: "", pin: "" });
 
   function loadPartners() {
     fetch("/api/dispatch/partners").then(async (res) => {
@@ -51,6 +51,10 @@ export default function SendPage() {
 
   async function approve(e: React.FormEvent) {
     e.preventDefault();
+    if (company.pin.length < 4) {
+      setMsg("PIN needs at least 4 digits");
+      return;
+    }
     const created = await fetch("/api/dispatch/partners", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -61,27 +65,13 @@ export default function SendPage() {
       setMsg(createdData.error || "Could not approve company");
       return;
     }
-    if (company.pin) {
-      await fetch("/api/dispatch/partners", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: createdData.partner.id, pin: company.pin }),
-      });
-    }
-    let login = "";
-    if (company.password) {
-      const user = await fetch("/api/dispatch/users", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: company.email, password: company.password, name: company.company }),
-      });
-      const userData = await user.json();
-      login = user.ok
-        ? " Dispatch login is ready at jeanlimo.com/dispatch."
-        : " Partner saved, but dispatch login failed: " + (userData.error || "password must be 8+ characters");
-    }
-    setMsg(createdData.partner.company + " is approved." + login);
-    setCompany({ company: "", contact: "", phone: "", email: "", city: "", airports: "", vehicles: "", pin: "", password: "" });
+    await fetch("/api/dispatch/partners", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: createdData.partner.id, pin: company.pin }),
+    });
+    setMsg(createdData.partner.company + " is approved. They sign in at jeanlimo.com/partner.html and only see jobs you send them.");
+    setCompany({ company: "", contact: "", phone: "", email: "", city: "", airports: "", vehicles: "", pin: "" });
     loadPartners();
   }
 
@@ -103,6 +93,7 @@ export default function SendPage() {
       <div className="mx-auto max-w-xl">
         <a href="/dispatch" className="text-sm text-[#C4A574]">Back to dispatch</a>
         <h1 className="mt-3 text-3xl font-semibold">Partners</h1>
+        <p className="mt-2 text-sm text-[#9A9388]">Partners cannot open this board. They use jeanlimo.com/partner.html and only see jobs you send.</p>
         <div className="mt-4 grid gap-3">
           {partners.map((p) => (
             <div key={p.id} className="rounded-2xl border border-white/10 bg-[#141416] p-3 grid gap-2">
@@ -128,9 +119,8 @@ export default function SendPage() {
           <input className={input} placeholder="City" value={company.city} onChange={(e) => setCompany({ ...company, city: e.target.value })} />
           <input className={input} placeholder="Airports" value={company.airports} onChange={(e) => setCompany({ ...company, airports: e.target.value })} />
           <input className={input} placeholder="Vehicles" value={company.vehicles} onChange={(e) => setCompany({ ...company, vehicles: e.target.value })} />
-          <input className={input} placeholder="Partner PIN, 4 digits" value={company.pin} onChange={(e) => setCompany({ ...company, pin: e.target.value })} />
-          <input className={input} type="password" placeholder="Dispatch password, 8+ characters" value={company.password} onChange={(e) => setCompany({ ...company, password: e.target.value })} />
-          <button className="rounded-xl bg-gradient-to-b from-[#E8D3B0] to-[#C4A574] py-3 font-semibold text-[#16110a]">Add company</button>
+          <input className={input} placeholder="Partner PIN, 4 digits" value={company.pin} onChange={(e) => setCompany({ ...company, pin: e.target.value })} required />
+          <button className="rounded-xl bg-gradient-to-b from-[#E8D3B0] to-[#C4A574] py-3 font-semibold text-[#16110a]">Approve partner</button>
         </form>
 
         <h2 className="mt-10 text-2xl font-semibold">Send a job</h2>
