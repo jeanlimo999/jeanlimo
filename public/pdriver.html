@@ -16,6 +16,7 @@
     .muted { color:#9A9388; font-size:14px; }
     .err { color:#f87171; }
     a.map { display:block; margin-top:10px; color:#E8D3B0; text-decoration:underline; }
+    a.phone { color:#E8D3B0; text-decoration:none; margin-right:12px; }
     .label { margin-top:10px; color:#C4A574; font-size:11px; letter-spacing:.14em; }
   </style>
 </head>
@@ -40,6 +41,13 @@
       const href = 'https://maps.apple.com/?q=' + encodeURIComponent(address);
       return '<div class="label">' + label + '</div><a class="map" href="' + href + '" target="_blank">' + address + '</a>';
     }
+    function phoneLinks(phone) {
+      const digits = String(phone || '').replace(/\D/g, '');
+      if (!digits) return '';
+      return '<div class="muted" style="margin-top:6px">' + phone +
+        ' <a class="phone" href="tel:' + digits + '">Call</a>' +
+        '<a class="phone" href="sms:' + digits + '">Text</a></div>';
+    }
     function extra(label, value) {
       if (!value) return '';
       return '<div class="label">' + label + '</div><div>' + value + '</div>';
@@ -53,7 +61,7 @@
         <div class="card">
           <div class="gold">${job.date || ''} ${job.time || ''} · ${job.status || ''}</div>
           <div style="font-size:20px;margin-top:6px">${job.guest || ''}</div>
-          <div class="muted">${job.phone || ''}</div>
+          ${phoneLinks(job.phone)}
           ${mapLink(job.pickup, 'PICKUP')}
           ${mapLink(job.dropoff, 'DROP OFF')}
           ${extra('PASSENGERS', job.passengers)}
