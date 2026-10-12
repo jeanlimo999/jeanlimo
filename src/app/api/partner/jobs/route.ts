@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { readPartnerSession } from "@/lib/session";
-import { supabaseAdmin } from "@/lib/supabase";
+import { normEmail, supabaseAdmin } from "@/lib/supabase";
 
 export async function GET() {
   const session = readPartnerSession();
@@ -33,6 +33,7 @@ export async function GET() {
       phone: guest.phone || "",
       driver: row.driver_name || "",
       driverPhone: row.driver_phone || "",
+      driverEmail: row.driver_email || "",
     };
   });
   return NextResponse.json({ company: session.company, jobs });
@@ -47,15 +48,17 @@ export async function POST(req: NextRequest) {
   const id = String(body.id || "");
   const driver = String(body.driver || "").trim();
   const driverPhone = String(body.driverPhone || "").trim();
-  if (!id || !driver || !driverPhone) {
-    return NextResponse.json({ error: "Driver name and phone are required" }, { status: 400 });
+  const driverEmail = normEmail(body.driverEmail || "");
+  if (!id || !driver || !driverPhone || !driverEmail.includes("@")) {
+    return NextResponse.json({ error: "Driver name, phone, and email are required" }, { status: 400 });
   }
   const { error } = await db.from("farm_outs").update({
     driver_name: driver,
     driver_phone: driverPhone,
+    driver_email: driverEmail,
     status: "accepted",
     updated_at: new Date().toISOString(),
   }).eq("id", id).eq("partner_id", session.partnerId);
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return NextResponse.json({ error: "Run the driver email script in Supabase. " + error.message }, { status: 500 });
   return NextResponse.json({ ok: true });
 }
