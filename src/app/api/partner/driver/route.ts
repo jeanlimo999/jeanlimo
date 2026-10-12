@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase";
+import { normEmail, supabaseAdmin } from "@/lib/supabase";
 
 const allowed = ["on_the_way", "onboard", "dropped_off"];
 
@@ -7,16 +7,21 @@ export async function POST(req: NextRequest) {
   const db = supabaseAdmin();
   if (!db) return NextResponse.json({ error: "Not configured" }, { status: 500 });
   const body = await req.json().catch(() => ({}));
-  const phone = String(body.phone || "").replace(/\D/g, "");
-  const pin = String(body.pin || "").trim();
+  const email = normEmail(body.email || "");
+  const last4 = String(body.last4 || body.phone || "").replace(/\D/g, "").slice(-4);
   const id = String(body.id || "");
   const status = String(body.status || "");
-  if (!phone || !pin) return NextResponse.json({ error: "Phone and PIN are required" }, { status: 400 });
+  if (!email.includes("@") || last4.length !== 4) {
+    return NextResponse.json({ error: "Partner email and the last 4 of your phone are required" }, { status: 400 });
+  }
 
-  const { data, error } = await db.from("farm_outs").select("*").eq("driver_pin", pin).order("created_at", { ascending: false }).limit(20);
-  if (error) return NextResponse.json({ error: "Run the driver PIN script in Supabase. " + error.message }, { status: 500 });
-  const jobs = (data || []).filter((row: any) => String(row.driver_phone || "").replace(/\D/g, "").endsWith(phone.slice(-10)));
-  if (!jobs.length) return NextResponse.json({ error: "No job for that phone and PIN" }, { status: 401 });
+  const { data: partner } = await db.from("partners").select("id, company").eq("email", email).eq("active", true).maybeSingle();
+  if (!partner) return NextResponse.json({ error: "No partner for that email" }, { status: 401 });
+
+  const { data, error } = await db.from("farm_outs").select("*").eq("partner_id", partner.id).order("created_at", { ascending: false }).limit(40);
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  const jobs = (data || []).filter((row: any) => String(row.driver_phone || "").replace(/\D/g, "").endsWith(last4));
+  if (!jobs.length) return NextResponse.json({ error: "No job for that email and last 4" }, { status: 401 });
 
   if (!id) {
     const ids = jobs.map((row: any) => row.booking_id).filter(Boolean);
