@@ -15,6 +15,7 @@
     .card { margin-top:14px; border:1px solid rgba(255,255,255,.1); border-radius:16px; padding:14px; background:#141416; }
     .muted { color:#9A9388; font-size:14px; }
     .err { color:#f87171; }
+    .ok { margin:12px 0; border:1px solid #C4A574; border-radius:12px; padding:12px; color:#E8D3B0; background:#1C1C20; }
     .new { display:none; }
   </style>
 </head>
@@ -35,20 +36,27 @@
     const err = document.getElementById('err');
     const board = document.getElementById('board');
     let drivers = [];
+    let saved = '';
     function options() {
       return '<option value="">Select driver</option>' +
         drivers.map((d, i) => '<option value="' + i + '">' + d.name + '</option>').join('') +
         '<option value="new">Add new driver</option>';
     }
     async function assign(id, driver) {
+      if (!driver.name || !driver.phone || !driver.email) {
+        err.textContent = 'Enter name, phone, and email';
+        return;
+      }
       const res = await fetch('/api/partner/jobs', {
         method:'POST',
         headers:{'Content-Type':'application/json'},
         body: JSON.stringify({ id, driver: driver.name, driverPhone: driver.phone, driverEmail: driver.email })
       });
       const data = await res.json();
-      if (!res.ok) err.textContent = data.error || 'Could not save';
-      else { err.textContent = driver.name + ' assigned.'; load(); }
+      if (!res.ok) { err.textContent = data.error || 'Could not save'; return; }
+      saved = 'Driver saved. ' + driver.name + ' is assigned.';
+      err.textContent = '';
+      load();
     }
     async function load() {
       const res = await fetch('/api/partner/jobs');
@@ -57,7 +65,8 @@
       drivers = data.drivers || [];
       document.getElementById('login').hidden = true;
       board.hidden = false;
-      board.innerHTML = '<p class="muted">' + (data.company || '') + '</p>' + (data.jobs || []).map(job => `
+      board.innerHTML = (saved ? '<div class="ok">' + saved + '</div>' : '') +
+        '<p class="muted">' + (data.company || '') + '</p>' + (data.jobs || []).map(job => `
         <div class="card">
           <div class="gold">${job.date || ''} ${job.time || ''} · $${job.pay} · ${job.status}</div>
           <div style="font-size:20px;margin-top:6px">${job.guest}</div>
