@@ -10,6 +10,7 @@ export default function SendPage() {
   const [pay, setPay] = useState("");
   const [pin, setPin] = useState("");
   const [msg, setMsg] = useState("");
+  const [fix, setFix] = useState({ from: "", to: "" });
   const [company, setCompany] = useState({ company: "", contact: "", phone: "", email: "", city: "", airports: "", vehicles: "", pin: "", password: "" });
 
   function loadPartners() {
@@ -64,6 +65,17 @@ export default function SendPage() {
     loadPartners();
   }
 
+  async function fixEmail(e: React.FormEvent) {
+    e.preventDefault();
+    const res = await fetch("/api/dispatch/users", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(fix),
+    });
+    const data = await res.json();
+    setMsg(res.ok ? "Email updated to " + data.user.email : data.error || "Could not update email");
+  }
+
   async function savePin(e: React.FormEvent) {
     e.preventDefault();
     const res = await fetch("/api/dispatch/partners", {
@@ -105,6 +117,13 @@ export default function SendPage() {
           <input className={input} placeholder="Partner PIN, 4 digits" value={company.pin} onChange={(e) => setCompany({ ...company, pin: e.target.value })} />
           <input className={input} type="password" placeholder="Dispatch password, 8+ characters" value={company.password} onChange={(e) => setCompany({ ...company, password: e.target.value })} />
           <button className="rounded-xl bg-gradient-to-b from-[#E8D3B0] to-[#C4A574] py-3 font-semibold text-[#16110a]">Approve and create login</button>
+        </form>
+
+        <h2 className="mt-10 text-2xl font-semibold">Fix a wrong email</h2>
+        <form onSubmit={fixEmail} className="mt-4 grid gap-2">
+          <input className={input} placeholder="Wrong email, klam281@gmail.con" value={fix.from} onChange={(e) => setFix({ ...fix, from: e.target.value })} required />
+          <input className={input} placeholder="Correct email, klam281@gmail.com" value={fix.to} onChange={(e) => setFix({ ...fix, to: e.target.value })} required />
+          <button className="rounded-xl border border-[#C4A574]/40 py-3 text-[#E8D3B0]">Update email</button>
         </form>
 
         <h2 className="mt-10 text-2xl font-semibold">Send a job</h2>
