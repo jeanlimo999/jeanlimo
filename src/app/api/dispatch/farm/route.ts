@@ -21,11 +21,11 @@ export async function POST(req: NextRequest) {
   const { data: partner, error: pErr } = await db.from("partners").select("*").eq("id", partnerId).maybeSingle();
   if (pErr || !partner) return NextResponse.json({ error: pErr?.message || "Partner not found. Add them on the dispatch board first." }, { status: 400 });
 
-  const { data: booking } = await db.from("bookings").select("id, confirmation, pickup, dropoff, ride_date, ride_time, flight_number, passengers, passenger_notes").eq("id", bookingId).maybeSingle();
+  const { data: booking } = await db.from("bookings").select("id, confirmation, pickup, dropoff, ride_date, ride_time, flight_number, passengers, passenger_notes, clients(full_name, phone)").eq("id", bookingId).maybeSingle();
   const linkToken = token();
-  const { error } = await db.from("farm_outs").insert({
+  const row: any = {
     token: linkToken,
-    booking_id: bookingId,
+    booking_id: booking?.id || bookingId,
     confirmation: booking?.confirmation || body.confirmation || "",
     partner_id: partner.id,
     partner_name: partner.company,
@@ -34,7 +34,29 @@ export async function POST(req: NextRequest) {
     pay_cents: pay,
     status: "offered",
     updated_at: new Date().toISOString(),
-  });
+    guest_name: booking?.clients?.full_name || "",
+    guest_phone: booking?.clients?.phone || "",
+    pickup: booking?.pickup || "",
+    dropoff: booking?.dropoff || "",
+    ride_date: booking?.ride_date || "",
+    ride_time: booking?.ride_time || "",
+    flight: booking?.flight_number || "",
+    passengers: booking?.passengers || "",
+    notes: booking?.passenger_notes || "",
+  };
+  let { error } = await db.from("farm_outs").insert(row);
+  if (error && /guest_name|column/i.test(error.message)) {
+    delete row.guest_name;
+    delete row.guest_phone;
+    delete row.pickup;
+    delete row.dropoff;
+    delete row.ride_date;
+    delete row.ride_time;
+    delete row.flight;
+    delete row.passengers;
+    delete row.notes;
+    ({ error } = await db.from("farm_outs").insert(row));
+  }
   if (error) return NextResponse.json({ error: "Run supabase/partners.sql in Supabase first. " + error.message }, { status: 500 });
 
   const link = "https://jeanlimo.com/farm.html?t=" + linkToken;
