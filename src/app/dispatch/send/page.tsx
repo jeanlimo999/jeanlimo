@@ -2,6 +2,20 @@
 
 import { useEffect, useState } from "react";
 
+function whenLabel(job: any) {
+  const raw = String(job.when || "").trim();
+  const [date, time] = raw.split(/\s+/);
+  const parts = (date || "").split("-");
+  const prettyDate = parts.length === 3 ? parts[1] + "/" + parts[2] + "/" + parts[0] : date || "";
+  const match = (time || "").match(/^(\d{1,2}):(\d{2})/);
+  if (!match) return prettyDate || "No time";
+  let hour = Number(match[1]);
+  const minute = match[2];
+  const ampm = hour >= 12 ? "PM" : "AM";
+  hour = hour % 12 || 12;
+  return prettyDate + " " + hour + ":" + minute + " " + ampm;
+}
+
 export default function SendPage() {
   const [jobs, setJobs] = useState<any[]>([]);
   const [partners, setPartners] = useState<any[]>([]);
@@ -152,7 +166,7 @@ export default function SendPage() {
           <form onSubmit={send} className="mt-4 grid gap-2">
             <select className={input} value={job} onChange={(e) => setJob(e.target.value)} required>
               <option value="">Choose job</option>
-              {jobs.map((j) => <option key={j.id || j.bookingId} value={j.bookingId || j.id}>{j.when || "No time"} · {j.confirmation} · {j.guestName} · {j.pickup}</option>)}
+              {jobs.map((j) => <option key={j.id || j.bookingId} value={j.bookingId || j.id}>{whenLabel(j)} · {j.confirmation} · {j.guestName} · {j.pickup}</option>)}
             </select>
             <select className={input} value={partner} onChange={(e) => setPartner(e.target.value)} required>
               <option value="">Choose partner</option>
