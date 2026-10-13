@@ -7,6 +7,11 @@ function token() {
   return Math.random().toString(36).slice(2, 8) + Math.random().toString(36).slice(2, 8);
 }
 
+function clientOf(booking: any) {
+  const clients = booking?.clients;
+  return Array.isArray(clients) ? clients[0] : clients;
+}
+
 export async function POST(req: NextRequest) {
   const session = readDispatchSession();
   if (!session) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
@@ -21,7 +26,9 @@ export async function POST(req: NextRequest) {
   const { data: partner, error: pErr } = await db.from("partners").select("*").eq("id", partnerId).maybeSingle();
   if (pErr || !partner) return NextResponse.json({ error: pErr?.message || "Partner not found. Add them on the dispatch board first." }, { status: 400 });
 
-  const { data: booking } = await db.from("bookings").select("id, confirmation, pickup, dropoff, ride_date, ride_time, flight_number, passengers, passenger_notes, clients(full_name, phone)").eq("id", bookingId).maybeSingle();
+  const { data: bookingRaw } = await db.from("bookings").select("id, confirmation, pickup, dropoff, ride_date, ride_time, flight_number, passengers, passenger_notes, clients(full_name, phone)").eq("id", bookingId).maybeSingle();
+  const booking: any = bookingRaw;
+  const guest = clientOf(booking);
   const linkToken = token();
   const row: any = {
     token: linkToken,
@@ -34,8 +41,8 @@ export async function POST(req: NextRequest) {
     pay_cents: pay,
     status: "offered",
     updated_at: new Date().toISOString(),
-    guest_name: booking?.clients?.full_name || "",
-    guest_phone: booking?.clients?.phone || "",
+    guest_name: guest?.full_name || "",
+    guest_phone: guest?.phone || "",
     pickup: booking?.pickup || "",
     dropoff: booking?.dropoff || "",
     ride_date: booking?.ride_date || "",
