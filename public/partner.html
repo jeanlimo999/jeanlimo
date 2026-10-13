@@ -18,6 +18,7 @@
     .ok { margin:12px 0; border:1px solid #C4A574; border-radius:12px; padding:12px; color:#E8D3B0; background:#1C1C20; }
     .top { display:flex; justify-content:space-between; align-items:center; margin-top:8px; }
     .ghost { width:auto; margin:0; background:transparent; border:1px solid rgba(255,255,255,.15); color:#E8D3B0; padding:8px 14px; }
+    .return { background:transparent; border:1px solid rgba(255,255,255,.15); color:#E8D3B0; }
     .panel { display:none; margin-top:12px; }
     .row { display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid rgba(255,255,255,.08); }
     .who { cursor:pointer; }
@@ -106,6 +107,19 @@
       err.textContent = '';
       load();
     }
+    async function giveBack(id, confirmation) {
+      if (!confirm('Return ' + (confirmation || 'this booking') + ' to Jean Limo dispatch?')) return;
+      const res = await fetch('/api/partner/jobs', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ id, action: 'return' })
+      });
+      const data = await res.json();
+      if (!res.ok) { err.textContent = data.error || 'Could not return'; return; }
+      saved = 'Booking returned to Jean Limo dispatch.';
+      err.textContent = '';
+      load();
+    }
     async function load() {
       const res = await fetch('/api/partner/jobs');
       const data = await res.json();
@@ -118,14 +132,19 @@
         '<p class="muted">' + (data.company || '') + '</p>' + (data.jobs || []).map(job => `
         <div class="card">
           <div class="gold">${job.date || ''} ${job.time || ''} · $${job.pay} · ${job.status}</div>
+          <div class="muted" style="margin-top:6px">Booking ${job.confirmation || ''}</div>
           <div style="font-size:20px;margin-top:6px">${job.guest}</div>
           <div class="muted">${job.phone || ''}</div>
           <div style="margin-top:8px">${job.pickup || ''}</div>
           <div>${job.dropoff || ''}</div>
           <select data-id="${job.id}">${options(job.driverEmail)}</select>
+          <button class="return" data-return="${job.id}" data-conf="${job.confirmation || ''}">Return booking</button>
         </div>`).join('') || '<p>No jobs yet.</p>';
       board.querySelectorAll('select').forEach(select => {
         select.onchange = () => { if (select.value) assign(select.dataset.id, select.value); };
+      });
+      board.querySelectorAll('[data-return]').forEach(btn => {
+        btn.onclick = () => giveBack(btn.dataset.return, btn.dataset.conf);
       });
     }
     document.getElementById('driversBtn').onclick = () => {
