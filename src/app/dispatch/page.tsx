@@ -73,7 +73,9 @@ export default function DispatchPage() {
   const [err, setErr] = useState("");
   const [msg, setMsg] = useState("");
   const [rosterOpen, setRosterOpen] = useState(false);
-  const [tab, setTab] = useState<"open" | "done">("open");
+  const [tab, setTab] = useState<"open" | "done" | "partners">("open");
+  const [partnerTab, setPartnerTab] = useState<"open" | "done">("open");
+  const [sent, setSent] = useState<any[]>([]);
   const [form, setForm] = useState({ name: "", phone: "", pin: "", vehicle: "sedan" });
   const [owner, setOwner] = useState({ name: "", email: "", password: "" });
   const [manualOpen, setManualOpen] = useState(false);
@@ -101,6 +103,9 @@ export default function DispatchPage() {
     setDrivers(data.drivers || []);
     setJobs(data.jobs || []);
     setRevenue(data.revenue || { week: 0, month: 0, year: 0, lifetime: 0 });
+    const sentRes = await fetch("/api/dispatch/sent");
+    const sentData = await sentRes.json().catch(() => ({}));
+    setSent(sentData.jobs || []);
     setErr("");
   }
 
@@ -111,6 +116,9 @@ export default function DispatchPage() {
   const today = ymdToday();
   const openJobs = jobs.filter((j) => !isDone(j, today));
   const doneJobs = jobs.filter((j) => isDone(j, today)).slice().sort((a, b) => String(b.when).localeCompare(String(a.when)));
+  const sentDone = (s: any) => ["dropped_off", "completed", "done"].includes(String(s.status || "").toLowerCase());
+  const sentOpen = sent.filter((s) => !sentDone(s));
+  const sentClosed = sent.filter(sentDone);
   const nToday = openJobs.filter((j) => (j.rideDate || "").slice(0, 10) === today).length;
   const nUp = openJobs.filter((j) => (j.rideDate || "") > today).length;
 
@@ -425,7 +433,7 @@ export default function DispatchPage() {
           </div>
         )}
 
-        <div className="mt-6 grid grid-cols-2 gap-2 rounded-2xl border border-white/10 bg-[#141416] p-1">
+        <div className="mt-6 grid grid-cols-3 gap-2 rounded-2xl border border-white/10 bg-[#141416] p-1">
           <button
             onClick={() => setTab("open")}
             className={`rounded-xl py-3 text-sm font-semibold ${tab === "open" ? "bg-gradient-to-b from-[#E8D3B0] to-[#C4A574] text-[#16110a]" : "text-[#9A9388]"}`}
@@ -438,10 +446,41 @@ export default function DispatchPage() {
           >
             Completed ({doneJobs.length})
           </button>
+          <button
+            onClick={() => setTab("partners")}
+            className={`rounded-xl py-3 text-sm font-semibold ${tab === "partners" ? "bg-gradient-to-b from-[#E8D3B0] to-[#C4A574] text-[#16110a]" : "text-[#9A9388]"}`}
+          >
+            Partners ({sent.length})
+          </button>
         </div>
 
+        {tab === "partners" && (
+          <div className="mt-3 grid grid-cols-2 gap-2 rounded-2xl border border-white/10 bg-[#141416] p-1">
+            <button onClick={() => setPartnerTab("open")} className={`rounded-xl py-2 text-sm font-semibold ${partnerTab === "open" ? "bg-[#C4A574] text-[#16110a]" : "text-[#9A9388]"}`}>Open ({sentOpen.length})</button>
+            <button onClick={() => setPartnerTab("done")} className={`rounded-xl py-2 text-sm font-semibold ${partnerTab === "done" ? "bg-[#C4A574] text-[#16110a]" : "text-[#9A9388]"}`}>Completed ({sentClosed.length})</button>
+          </div>
+        )}
+
         <div className="mt-4 space-y-3">
-          {tab === "open"
+          {tab === "partners"
+            ? (partnerTab === "open" ? sentOpen : sentClosed).length
+              ? (partnerTab === "open" ? sentOpen : sentClosed).map((s) => (
+                  <div key={s.id} className="rounded-2xl border border-white/10 bg-[#141416] p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="text-sm text-[#C4A574]">{formatDate(s.date)}{s.time ? ` · ${formatTime(s.date + " " + s.time)}` : ""}</div>
+                      <div className="text-[10px] tracking-widest text-[#C4A574]">{s.confirmation}</div>
+                    </div>
+                    <div className="mt-2 text-lg font-medium">{s.guest}</div>
+                    <div className="mt-1 text-sm text-[#E8D3B0]">{s.partner} · ${s.pay} · {s.status}</div>
+                    {s.driver && <div className="text-sm text-[#9A9388]">Driver {s.driver}</div>}
+                    <div className="mt-3 text-[11px] uppercase tracking-widest text-[#9A9388]">Pickup</div>
+                    <div className="text-sm leading-5">{s.pickup || "—"}</div>
+                    <div className="mt-3 text-[11px] uppercase tracking-widest text-[#9A9388]">Drop off</div>
+                    <div className="text-sm leading-5">{s.dropoff || "—"}</div>
+                  </div>
+                ))
+              : <p className="text-sm text-[#9A9388]">{partnerTab === "open" ? "No partner jobs open." : "No partner jobs completed."}</p>
+            : tab === "open"
             ? openJobs.length
               ? openJobs.map((j) => jobCard(j, false))
               : <p className="text-sm text-[#9A9388]">No open jobs</p>
