@@ -47,6 +47,28 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ driver: data });
 }
 
+export async function PATCH(req: NextRequest) {
+  const session = readPartnerSession();
+  if (!session) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
+  const db = supabaseAdmin();
+  if (!db) return NextResponse.json({ error: "Not configured" }, { status: 500 });
+  const body = await req.json().catch(() => ({}));
+  const id = String(body.id || "");
+  const name = String(body.name || "").trim();
+  const phone = String(body.phone || "").trim();
+  const email = normEmail(body.email || "");
+  if (!id || !name || !phone || !email.includes("@")) {
+    return NextResponse.json({ error: "Name, phone, and email are required" }, { status: 400 });
+  }
+  const { data: existing } = await db.from("partner_drivers").select("id, name, phone, email").eq("partner_id", session.partnerId).eq("active", true);
+  const phoneKey = digits(phone);
+  const duplicate = (existing || []).find((row: any) => row.id !== id && (normEmail(row.email) === email || (phoneKey && digits(row.phone) === phoneKey)));
+  if (duplicate) return NextResponse.json({ error: duplicate.name + " is already added." }, { status: 409 });
+  const { data, error } = await db.from("partner_drivers").update({ name, phone, email }).eq("id", id).eq("partner_id", session.partnerId).select("id, name, phone, email").single();
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json({ driver: data });
+}
+
 export async function DELETE(req: NextRequest) {
   const session = readPartnerSession();
   if (!session) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
