@@ -5,6 +5,28 @@ import { bookingIsUpcoming } from "@/lib/portal";
 
 type DriverRow = { id: string; name?: string; phone?: string; vehicle?: string; photo_url?: string };
 
+function withReturn(rows: any[]) {
+  const out: any[] = [];
+  for (const b of rows) {
+    out.push(b);
+    if (b.return_date || b.return_pickup || b.return_dropoff) {
+      out.push({
+        ...b,
+        id: (b.id || b.confirmation) + "-return",
+        confirmation: (b.confirmation || "") + " return",
+        ride_date: b.return_date || b.ride_date,
+        ride_time: b.return_time || "",
+        pickup: b.return_pickup || b.dropoff,
+        dropoff: b.return_dropoff || b.pickup,
+        flight_number: b.return_flight_number || "",
+        booking_id: b.id,
+        is_return: true,
+      });
+    }
+  }
+  return out;
+}
+
 export async function GET() {
   const session = readSession();
   if (!session) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
@@ -39,7 +61,7 @@ export async function GET() {
     return Number.isNaN(stamp) ? 0 : stamp;
   };
 
-  const mapped = rows.map((b: any) => {
+  const mapped = withReturn(rows).map((b: any) => {
     const d = driversById[b.assigned_driver_id] || null;
     return {
       ...b,
