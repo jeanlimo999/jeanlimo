@@ -22,7 +22,7 @@ export async function GET() {
     clientId = client.id;
   }
 
-  const { error } = await db.from("bookings").insert({
+  const row: any = {
     confirmation,
     client_id: clientId,
     status: "confirmed",
@@ -38,9 +38,16 @@ export async function GET() {
     amount_cents: 11000,
     passenger_notes: "6.7 mi · sedan flat",
     breakdown: "6.7 mi · sedan flat",
-    city: "Houston",
     updated_at: new Date().toISOString(),
-  });
+  };
+  let { error } = await db.from("bookings").insert(row);
+  if (error && /column|schema/i.test(error.message || "")) {
+    delete row.passengers;
+    delete row.trip_status;
+    delete row.breakdown;
+    delete row.passenger_notes;
+    ({ error } = await db.from("bookings").insert(row));
+  }
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true, confirmation });
 }
