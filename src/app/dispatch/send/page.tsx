@@ -102,6 +102,7 @@ export default function SendPage() {
 
   async function send(e: React.FormEvent) {
     e.preventDefault();
+    if (!job) { setMsg("Choose a job"); return; }
     const res = await fetch("/api/dispatch/farm", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -169,10 +170,19 @@ export default function SendPage() {
         </button>
         {sending && (
           <form onSubmit={send} className="mt-4 grid gap-2">
-            <select className={input} value={job} onChange={(e) => setJob(e.target.value)} required>
-              <option value="">Choose job</option>
-              {jobs.map((j) => <option key={j.id || j.bookingId} value={j.bookingId || j.id}>{whenLabel(j)} · {j.confirmation} · {j.guestName} · {j.pickup}</option>)}
-            </select>
+            <div className="grid gap-2">
+              {jobs.length === 0 && <p className="text-sm text-[#9A9388]">No upcoming jobs.</p>}
+              {jobs.map((j) => {
+                const id = j.bookingId || j.id;
+                const selected = job === id;
+                return (
+                  <button type="button" key={j.id || id} onClick={() => setJob(id)} className={`rounded-xl border px-3 py-3 text-left ${selected ? "border-[#C4A574] bg-[#1C1C20]" : "border-white/10 bg-[#141416]"}`}>
+                    <span className="block">{whenLabel(j)} · {j.confirmation} · {j.guestName}</span>
+                    <span className="mt-1 block text-sm text-[#9A9388]">{j.pickup || "No pickup"}</span>
+                  </button>
+                );
+              })}
+            </div>
             <select className={input} value={partner} onChange={(e) => setPartner(e.target.value)} required>
               <option value="">Choose partner</option>
               {partners.map((p) => <option key={p.id} value={p.id}>{p.company} · {p.city || ""}</option>)}
