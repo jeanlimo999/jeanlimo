@@ -97,9 +97,10 @@ export async function saveWebsiteBooking(booking: {
   city?: string;
 }) {
   const db = supabaseAdmin();
-  if (!db) return { saved: false, reason: "supabase_missing" };
+  if (!db) throw new Error("Supabase is not configured");
   const email = normEmail(booking.email);
-  if (!email || !booking.confirmation) return { saved: false, reason: "missing_fields" };
+  if (!booking.confirmation) throw new Error("Missing confirmation");
+  if (!email) throw new Error("Customer email is required to save the booking");
 
   const client = await upsertClient({
     email,
@@ -131,7 +132,14 @@ export async function saveWebsiteBooking(booking: {
     updated_at: new Date().toISOString(),
   };
 
-  const { error } = await db.from("bookings").upsert(row, { onConflict: "confirmation" });
+  let { error } = await db.from("bookings").upsert(row, { onConflict: "confirmation" });
+  if (error && /column|schema/i.test(error.message || "")) {
+    const slim = { ...row };
+    delete (slim as any).passenger_notes;
+    delete (slim as any).city;
+    delete (slim as any).stripe_session_id;
+    ({ error } = await db.from("bookings").upsert(slim, { onConflict: "confirmation" }));
+  }
   if (error) throw error;
   return { saved: true, clientId: client.id };
 }
