@@ -72,13 +72,21 @@
       return [date, time].filter(Boolean).join(' \u00b7 ');
     }
     function maps(addr){ if(!addr) return ''; const q = encodeURIComponent(addr); return '<div class="meta">'+esc(addr)+'</div><div class="meta"><a href="https://maps.apple.com/?daddr='+q+'">Apple Maps</a> \u00b7 <a href="https://www.google.com/maps/dir/?api=1&destination='+q+'">Google Maps</a></div>'; }
+    function readyForButtons(j){
+      const date = String(j.rideDate || '').slice(0,10);
+      const time = String(j.rideTime || '00:00').slice(0,5);
+      if(!date) return false;
+      const pickup = new Date(date+'T'+time+':00');
+      if(Number.isNaN(pickup.getTime())) return false;
+      return Date.now() >= pickup.getTime() - 3*60*60*1000;
+    }
     function card(j){
       const digits = String(j.guestPhone||'').replace(/[^0-9+]/g,'');
       const phone = digits ? ' <a href="tel:'+digits+'">'+esc(j.guestPhone)+'</a> <a href="tel:'+digits+'">Call</a> <a href="sms:'+digits+'">Text</a>' : '';
       const notes = String(j.notes||'').trim();
       const status = j.tripStatus || '';
       const btn = (value, label) => '<button class="status'+(status===value?' on':'')+'" type="button" data-id="'+esc(j.bookingId)+'" data-leg="'+esc(j.live_leg||'outbound')+'" data-status="'+value+'">'+label+'</button>';
-      const actions = tab==='done' ? '' : '<div class="actions">'+btn('on_the_way','On the way')+btn('on_location','At location')+btn('onboard','Onboard')+btn('dropped_off','Dropped off')+'</div>';
+      const actions = tab==='done' || !readyForButtons(j) ? '' : '<div class="actions">'+btn('on_the_way','On the way')+btn('on_location','At location')+btn('onboard','Onboard')+btn('dropped_off','Dropped off')+'</div>';
       return '<div class="job"><div class="when">'+esc(whenLabel(j))+'</div><div>'+esc(j.guestName||'Guest')+phone+'</div><div class="meta">Pickup</div>'+maps(j.pickup)+'<div class="meta">Drop-off</div>'+maps(j.dropoff)+(j.flight?'<div class="meta">Flight: '+esc(j.flight)+'</div>':'')+(j.passengers?'<div class="meta">Passengers: '+esc(j.passengers)+'</div>':'')+(notes?'<div class="meta">Additional note</div><div class="meta note">'+esc(notes)+'</div>':'')+actions+'</div>';
     }
     function render(){
