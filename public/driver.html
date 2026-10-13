@@ -26,6 +26,9 @@
     .tabs { display:flex; gap:8px; margin-bottom:12px; }
     .tab { flex:1; border:1px solid var(--line); background:var(--bg2); color:var(--muted); border-radius:999px; padding:10px; font-weight:700; }
     .tab.on { background:linear-gradient(180deg,var(--gold2),var(--gold)); color:#16110a; border:0; }
+    .actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px; }
+    .status { border:1px solid var(--line); background:#1C1C20; color:var(--text); border-radius:12px; padding:12px 8px; font-weight:700; }
+    .status.on { background:linear-gradient(180deg,var(--gold2),var(--gold)); color:#16110a; border:0; }
   </style>
 </head>
 <body>
@@ -73,7 +76,10 @@
       const digits = String(j.guestPhone||'').replace(/[^0-9+]/g,'');
       const phone = digits ? ' <a href="tel:'+digits+'">'+esc(j.guestPhone)+'</a> <a href="tel:'+digits+'">Call</a> <a href="sms:'+digits+'">Text</a>' : '';
       const notes = String(j.notes||'').trim();
-      return '<div class="job"><div class="when">'+esc(whenLabel(j))+'</div><div>'+esc(j.guestName||'Guest')+phone+'</div><div class="meta">Pickup</div>'+maps(j.pickup)+'<div class="meta">Drop-off</div>'+maps(j.dropoff)+(j.flight?'<div class="meta">Flight: '+esc(j.flight)+'</div>':'')+(j.passengers?'<div class="meta">Passengers: '+esc(j.passengers)+'</div>':'')+(notes?'<div class="meta">Additional note</div><div class="meta note">'+esc(notes)+'</div>':'')+'</div>';
+      const status = j.tripStatus || '';
+      const btn = (value, label) => '<button class="status'+(status===value?' on':'')+'" type="button" data-id="'+esc(j.bookingId)+'" data-leg="'+esc(j.live_leg||'outbound')+'" data-status="'+value+'">'+label+'</button>';
+      const actions = tab==='done' ? '' : '<div class="actions">'+btn('on_the_way','On the way')+btn('on_location','At location')+btn('onboard','Onboard')+btn('dropped_off','Dropped off')+'</div>';
+      return '<div class="job"><div class="when">'+esc(whenLabel(j))+'</div><div>'+esc(j.guestName||'Guest')+phone+'</div><div class="meta">Pickup</div>'+maps(j.pickup)+'<div class="meta">Drop-off</div>'+maps(j.dropoff)+(j.flight?'<div class="meta">Flight: '+esc(j.flight)+'</div>':'')+(j.passengers?'<div class="meta">Passengers: '+esc(j.passengers)+'</div>':'')+(notes?'<div class="meta">Additional note</div><div class="meta note">'+esc(notes)+'</div>':'')+actions+'</div>';
     }
     function render(){
       $('tab-open').classList.toggle('on', tab==='open');
@@ -96,6 +102,15 @@
       $('hello').textContent = ((driver && driver.name) || 'Driver');
       render();
     }
+    $('joblist').onclick = async (e) => {
+      const btn = e.target.closest('[data-status]');
+      if (!btn) return;
+      try {
+        await api('/api/driver/status', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ bookingId: btn.dataset.id, status: btn.dataset.status, live_leg: btn.dataset.leg }) });
+        if (btn.dataset.status === 'dropped_off') tab = 'done';
+        await load();
+      } catch (err) { alert(err.message || 'Could not update'); }
+    };
     $('tab-open').onclick = () => { tab='open'; render(); };
     $('tab-done').onclick = () => { tab='done'; render(); };
     $('signin').onclick = async () => {
