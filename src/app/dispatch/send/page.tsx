@@ -26,7 +26,7 @@ export default function SendPage() {
   const [openId, setOpenId] = useState("");
   const [adding, setAdding] = useState(false);
   const [sending, setSending] = useState(false);
-  const [job, setJob] = useState("");
+  const [jobId, setJobId] = useState("");
   const [partner, setPartner] = useState("");
   const [pay, setPay] = useState("");
   const [msg, setMsg] = useState("");
@@ -102,14 +102,27 @@ export default function SendPage() {
 
   async function send(e: React.FormEvent) {
     e.preventDefault();
-    if (!job) { setMsg("Choose a job"); return; }
+    const selected = jobs.find((j) => j.id === jobId);
+    if (!selected) { setMsg("Choose one job"); return; }
     const res = await fetch("/api/dispatch/farm", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ bookingId: job, partnerId: partner, pay }),
+      body: JSON.stringify({
+        bookingId: selected.bookingId,
+        partnerId: partner,
+        pay,
+        leg: selected.leg || "outbound",
+        confirmation: selected.confirmation,
+        pickup: selected.pickup,
+        dropoff: selected.dropoff,
+        rideDate: selected.rideDate,
+        rideTime: selected.rideTime,
+        flight: selected.flight,
+        notes: selected.notes,
+      }),
     });
     const data = await res.json();
-    setMsg(res.ok ? "Sent to " + data.partner + ". They assign their driver at jeanlimo.com/partner.html" : data.error || "Could not send");
+    setMsg(res.ok ? "Sent " + selected.confirmation + " to " + data.partner : data.error || "Could not send");
     if (res.ok) setSending(false);
   }
 
@@ -172,23 +185,19 @@ export default function SendPage() {
           <form onSubmit={send} className="mt-4 grid gap-2">
             <div className="grid gap-2">
               {jobs.length === 0 && <p className="text-sm text-[#9A9388]">No upcoming jobs.</p>}
-              {jobs.map((j) => {
-                const id = j.bookingId || j.id;
-                const selected = job === id;
-                return (
-                  <button type="button" key={j.id || id} onClick={() => setJob(id)} className={`rounded-xl border px-3 py-3 text-left ${selected ? "border-[#C4A574] bg-[#1C1C20]" : "border-white/10 bg-[#141416]"}`}>
-                    <span className="block">{whenLabel(j)} · {j.confirmation} · {j.guestName}</span>
-                    <span className="mt-1 block text-sm text-[#9A9388]">{j.pickup || "No pickup"}</span>
-                  </button>
-                );
-              })}
+              {jobs.map((j) => (
+                <button type="button" key={j.id} onClick={() => setJobId(j.id)} className={`rounded-xl border px-3 py-3 text-left ${jobId === j.id ? "border-[#C4A574] bg-[#1C1C20]" : "border-white/10 bg-[#141416]"}`}>
+                  <span className="block">{whenLabel(j)} · {j.confirmation} · {j.guestName}</span>
+                  <span className="mt-1 block text-sm text-[#9A9388]">{j.pickup || "No pickup"}</span>
+                </button>
+              ))}
             </div>
             <select className={input} value={partner} onChange={(e) => setPartner(e.target.value)} required>
               <option value="">Choose partner</option>
               {partners.map((p) => <option key={p.id} value={p.id}>{p.company} · {p.city || ""}</option>)}
             </select>
             <input className={input} placeholder="What you pay them $" value={pay} onChange={(e) => setPay(e.target.value)} required />
-            <button className="rounded-xl border border-[#C4A574]/40 py-3 text-[#E8D3B0]">Send job</button>
+            <button className="rounded-xl border border-[#C4A574]/40 py-3 text-[#E8D3B0]">Send this job</button>
           </form>
         )}
         {msg && <p className="mt-3 text-sm text-[#E8D3B0]">{msg}</p>}
