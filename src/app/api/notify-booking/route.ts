@@ -60,7 +60,7 @@ async function saveWithRetry(booking: any) {
     try {
       const result = await saveWebsiteBooking(booking);
       if (result?.saved) return { saved: true, error: "" };
-      last = result?.reason || "Save returned no result";
+      last = "Save returned no result";
     } catch (err: any) {
       last = err?.message || "Save failed";
     }
