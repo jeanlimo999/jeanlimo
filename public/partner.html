@@ -20,6 +20,7 @@
     .ghost { width:auto; margin:0; background:transparent; border:1px solid rgba(255,255,255,.15); color:#E8D3B0; padding:8px 14px; }
     .panel { display:none; margin-top:12px; }
     .row { display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid rgba(255,255,255,.08); }
+    .who { cursor:pointer; }
   </style>
 </head>
 <body>
@@ -29,7 +30,7 @@
       <h1>Your Jean Limo jobs</h1>
       <button class="ghost" id="driversBtn" hidden>Drivers</button>
     </div>
-    <p class="muted">Add a driver once. On a job, select that driver.</p>
+    <p class="muted">Add a driver once. Tap a name to edit. On a job, select that driver.</p>
     <form id="login">
       <input name="email" type="email" placeholder="Company email" required />
       <input name="pin" placeholder="PIN" required />
@@ -37,7 +38,7 @@
       <p class="err" id="err"></p>
     </form>
     <div id="panel" class="panel card">
-      <div class="gold">DRIVERS</div>
+      <div class="gold" id="formLabel">DRIVERS</div>
       <input id="dName" placeholder="Driver name" />
       <input id="dPhone" placeholder="Driver phone" />
       <input id="dEmail" type="email" placeholder="Driver email" />
@@ -52,9 +53,18 @@
     const panel = document.getElementById('panel');
     let drivers = [];
     let saved = '';
+    let editing = null;
     function options(selected) {
       return '<option value="">Select driver</option>' +
         drivers.map(d => '<option value="' + d.id + '"' + (d.email === selected ? ' selected' : '') + '>' + d.name + '</option>').join('');
+    }
+    function resetForm() {
+      editing = null;
+      document.getElementById('dName').value = '';
+      document.getElementById('dPhone').value = '';
+      document.getElementById('dEmail').value = '';
+      document.getElementById('addDriver').textContent = 'Add driver';
+      document.getElementById('formLabel').textContent = 'DRIVERS';
     }
     async function loadDrivers() {
       const res = await fetch('/api/partner/drivers');
@@ -62,11 +72,23 @@
       drivers = data.drivers || [];
       if (!res.ok && data.error) err.textContent = data.error;
       document.getElementById('roster').innerHTML = drivers.map(d =>
-        '<div class="row"><div>' + d.name + '<div class="muted">' + d.phone + '</div></div><button class="ghost" data-del="' + d.id + '">Delete</button></div>'
+        '<div class="row"><div class="who" data-edit="' + d.id + '">' + d.name + '<div class="muted">' + d.phone + '</div></div><button class="ghost" data-del="' + d.id + '">Delete</button></div>'
       ).join('') || '<p class="muted">No drivers yet.</p>';
+      document.querySelectorAll('[data-edit]').forEach(el => el.onclick = () => {
+        const driver = drivers.find(d => d.id === el.dataset.edit);
+        if (!driver) return;
+        editing = driver.id;
+        document.getElementById('dName').value = driver.name || '';
+        document.getElementById('dPhone').value = driver.phone || '';
+        document.getElementById('dEmail').value = driver.email || '';
+        document.getElementById('addDriver').textContent = 'Save changes';
+        document.getElementById('formLabel').textContent = 'EDIT ' + driver.name;
+        panel.scrollIntoView({ behavior: 'smooth' });
+      });
       document.querySelectorAll('[data-del]').forEach(btn => btn.onclick = async () => {
         await fetch('/api/partner/drivers?id=' + btn.dataset.del, { method: 'DELETE' });
         saved = 'Driver deleted';
+        resetForm();
         load();
       });
     }
@@ -110,21 +132,22 @@
       panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
     };
     document.getElementById('addDriver').onclick = async () => {
+      const body = {
+        id: editing,
+        name: document.getElementById('dName').value,
+        phone: document.getElementById('dPhone').value,
+        email: document.getElementById('dEmail').value
+      };
       const res = await fetch('/api/partner/drivers', {
-        method:'POST',
+        method: editing ? 'PATCH' : 'POST',
         headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({
-          name: document.getElementById('dName').value,
-          phone: document.getElementById('dPhone').value,
-          email: document.getElementById('dEmail').value
-        })
+        body: JSON.stringify(body)
       });
       const data = await res.json();
-      if (!res.ok) { err.textContent = data.error || 'Could not add driver'; return; }
-      saved = 'Driver saved. ' + data.driver.name;
-      document.getElementById('dName').value = '';
-      document.getElementById('dPhone').value = '';
-      document.getElementById('dEmail').value = '';
+      if (!res.ok) { err.textContent = data.error || 'Could not save driver'; return; }
+      saved = editing ? 'Driver updated. ' + data.driver.name : 'Driver saved. ' + data.driver.name;
+      err.textContent = '';
+      resetForm();
       load();
     };
     document.getElementById('login').onsubmit = async (e) => {
