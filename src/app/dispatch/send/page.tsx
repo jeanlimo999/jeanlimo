@@ -16,6 +16,10 @@ function whenLabel(job: any) {
   return prettyDate + " " + hour + ":" + minute + " " + ampm;
 }
 
+function today() {
+  return new Date().toLocaleDateString("en-CA");
+}
+
 export default function SendPage() {
   const [jobs, setJobs] = useState<any[]>([]);
   const [partners, setPartners] = useState<any[]>([]);
@@ -39,7 +43,8 @@ export default function SendPage() {
     fetch("/api/dispatch/board").then(async (res) => {
       if (res.status === 401) window.location.href = "/dispatch";
       const data = await res.json();
-      setJobs(data.jobs || []);
+      const day = today();
+      setJobs((data.jobs || []).filter((j: any) => String(j.rideDate || "").slice(0, 10) >= day));
     });
     loadPartners();
   }, []);
