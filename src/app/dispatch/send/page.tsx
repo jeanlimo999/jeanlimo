@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 export default function SendPage() {
   const [jobs, setJobs] = useState<any[]>([]);
   const [partners, setPartners] = useState<any[]>([]);
+  const [openId, setOpenId] = useState("");
   const [job, setJob] = useState("");
   const [partner, setPartner] = useState("");
   const [pay, setPay] = useState("");
@@ -39,6 +40,7 @@ export default function SendPage() {
     });
     const data = await res.json();
     setMsg(res.ok ? p.company + " saved" : data.error || "Could not save");
+    if (res.ok) setOpenId("");
   }
 
   async function removePartner(p: any) {
@@ -46,6 +48,7 @@ export default function SendPage() {
     const res = await fetch("/api/dispatch/partners?id=" + p.id, { method: "DELETE" });
     const data = await res.json();
     setMsg(res.ok ? p.company + " deleted" : data.error || "Could not delete");
+    setOpenId("");
     loadPartners();
   }
 
@@ -93,19 +96,30 @@ export default function SendPage() {
       <div className="mx-auto max-w-xl">
         <a href="/dispatch" className="text-sm text-[#C4A574]">Back to dispatch</a>
         <h1 className="mt-3 text-3xl font-semibold">Partners</h1>
-        <p className="mt-2 text-sm text-[#9A9388]">Partners cannot open this board. They use jeanlimo.com/partner.html and only see jobs you send.</p>
-        <div className="mt-4 grid gap-3">
+        <p className="mt-2 text-sm text-[#9A9388]">Tap a company to edit. They use jeanlimo.com/partner.html and only see jobs you send.</p>
+        <div className="mt-4 grid gap-2">
           {partners.map((p) => (
-            <div key={p.id} className="rounded-2xl border border-white/10 bg-[#141416] p-3 grid gap-2">
-              <input className={input} value={p.company || ""} onChange={(e) => edit(p.id, "company", e.target.value)} />
-              <input className={input} placeholder="Email" value={p.email || ""} onChange={(e) => edit(p.id, "email", e.target.value)} />
-              <input className={input} placeholder="Phone" value={p.phone || ""} onChange={(e) => edit(p.id, "phone", e.target.value)} />
-              <input className={input} placeholder="City" value={p.city || ""} onChange={(e) => edit(p.id, "city", e.target.value)} />
-              <input className={input} placeholder="PIN" value={p.pin || ""} onChange={(e) => edit(p.id, "pin", e.target.value)} />
-              <div className="grid grid-cols-2 gap-2">
-                <button type="button" onClick={() => savePartner(p)} className="rounded-xl border border-[#C4A574]/40 py-3 text-[#E8D3B0]">Save</button>
-                <button type="button" onClick={() => removePartner(p)} className="rounded-xl border border-red-400/40 py-3 text-red-200">Delete</button>
-              </div>
+            <div key={p.id} className="rounded-2xl border border-white/10 bg-[#141416]">
+              <button type="button" onClick={() => setOpenId(openId === p.id ? "" : p.id)} className="flex w-full items-center justify-between px-4 py-4 text-left">
+                <span>
+                  <span className="block text-lg">{p.company}</span>
+                  <span className="block text-sm text-[#9A9388]">{p.city || "No city"}</span>
+                </span>
+                <span className="text-[#C4A574]">{openId === p.id ? "Close" : "Edit"}</span>
+              </button>
+              {openId === p.id && (
+                <div className="grid gap-2 px-3 pb-3">
+                  <input className={input} value={p.company || ""} onChange={(e) => edit(p.id, "company", e.target.value)} />
+                  <input className={input} placeholder="Email" value={p.email || ""} onChange={(e) => edit(p.id, "email", e.target.value)} />
+                  <input className={input} placeholder="Phone" value={p.phone || ""} onChange={(e) => edit(p.id, "phone", e.target.value)} />
+                  <input className={input} placeholder="City" value={p.city || ""} onChange={(e) => edit(p.id, "city", e.target.value)} />
+                  <input className={input} placeholder="PIN" value={p.pin || ""} onChange={(e) => edit(p.id, "pin", e.target.value)} />
+                  <div className="grid grid-cols-2 gap-2">
+                    <button type="button" onClick={() => savePartner(p)} className="rounded-xl border border-[#C4A574]/40 py-3 text-[#E8D3B0]">Save</button>
+                    <button type="button" onClick={() => removePartner(p)} className="rounded-xl border border-red-400/40 py-3 text-red-200">Delete</button>
+                  </div>
+                </div>
+              )}
             </div>
           ))}
         </div>
