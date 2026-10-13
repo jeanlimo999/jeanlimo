@@ -54,6 +54,20 @@ function bookingText(b: any) {
   return lines.join("\n");
 }
 
+async function saveWithRetry(booking: any) {
+  let last = "";
+  for (let i = 0; i < 2; i += 1) {
+    try {
+      const result = await saveWebsiteBooking(booking);
+      if (result?.saved) return { saved: true, error: "" };
+      last = result?.reason || "Save returned no result";
+    } catch (err: any) {
+      last = err?.message || "Save failed";
+    }
+  }
+  return { saved: false, error: last };
+}
+
 export async function POST(req: NextRequest) {
   try {
     const booking = await req.json();
@@ -61,11 +75,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing booking" }, { status: 400 });
     }
 
-    try {
-      await saveWebsiteBooking(booking);
-    } catch (err) {
-      console.error("Supabase save failed", err);
-    }
+    const saved = await saveWithRetry(booking);
 
     const user = process.env.GMAIL_USER;
     const pass = process.env.GMAIL_APP_PASSWORD;
@@ -82,13 +92,18 @@ export async function POST(req: NextRequest) {
     });
 
     const text = bookingText(booking);
+    const ownerText = saved.saved
+      ? text
+      : `THIS BOOKING IS NOT ON THE DISPATCH BOARD.\nReason: ${saved.error}\nAdd it with Add trip.\n\n${text}`;
 
     await transporter.sendMail({
       from: `"Jean Limo" <${user}>`,
       to: OWNER_EMAIL,
       replyTo: booking.email || user,
-      subject: `New Jean Limo booking ${booking.confirmation}`,
-      text,
+      subject: saved.saved
+        ? `New Jean Limo booking ${booking.confirmation}`
+        : `NOT ON BOARD ${booking.confirmation}`,
+      text: ownerText,
     });
 
     let customerSent = false;
@@ -103,7 +118,7 @@ export async function POST(req: NextRequest) {
       customerSent = true;
     }
 
-    return NextResponse.json({ ok: true, ownerSent: true, customerSent });
+    return NextResponse.json({ ok: true, saved: saved.saved, ownerSent: true, customerSent });
   } catch (err: any) {
     console.error("Email error:", err);
     return NextResponse.json({ error: err.message || "Email failed" }, { status: 500 });
