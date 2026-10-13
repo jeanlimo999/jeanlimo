@@ -152,7 +152,7 @@ export default function SendPage() {
           <form onSubmit={send} className="mt-4 grid gap-2">
             <select className={input} value={job} onChange={(e) => setJob(e.target.value)} required>
               <option value="">Choose job</option>
-              {jobs.map((j) => <option key={j.bookingId || j.id} value={j.bookingId || j.id}>{j.confirmation} · {j.guestName} · {j.pickup}</option>)}
+              {jobs.map((j) => <option key={j.id || j.bookingId} value={j.bookingId || j.id}>{j.when || "No time"} · {j.confirmation} · {j.guestName} · {j.pickup}</option>)}
             </select>
             <select className={input} value={partner} onChange={(e) => setPartner(e.target.value)} required>
               <option value="">Choose partner</option>
