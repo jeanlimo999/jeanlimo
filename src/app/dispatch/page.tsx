@@ -114,8 +114,10 @@ export default function DispatchPage() {
   }, []);
 
   const today = ymdToday();
-  const openJobs = jobs.filter((j) => !isDone(j, today));
-  const doneJobs = jobs.filter((j) => isDone(j, today)).slice().sort((a, b) => String(b.when).localeCompare(String(a.when)));
+  const sentKeys = new Set(sent.map((s) => String(s.confirmation || "").trim().toLowerCase()));
+  const isSent = (j: any) => sentKeys.has(String(j.confirmation || "").trim().toLowerCase());
+  const openJobs = jobs.filter((j) => !isDone(j, today) && !isSent(j));
+  const doneJobs = jobs.filter((j) => isDone(j, today) && !isSent(j)).slice().sort((a, b) => String(b.when).localeCompare(String(a.when)));
   const sentDone = (s: any) => ["dropped_off", "completed", "done"].includes(String(s.status || "").toLowerCase());
   const sentOpen = sent.filter((s) => !sentDone(s));
   const sentClosed = sent.filter(sentDone);
