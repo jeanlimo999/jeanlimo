@@ -26,14 +26,21 @@ export async function POST(req: NextRequest) {
   const { data: partner, error: pErr } = await db.from("partners").select("*").eq("id", partnerId).maybeSingle();
   if (pErr || !partner) return NextResponse.json({ error: pErr?.message || "Partner not found. Add them on the dispatch board first." }, { status: 400 });
 
-  const { data: bookingRaw } = await db.from("bookings").select("id, confirmation, pickup, dropoff, ride_date, ride_time, flight_number, passengers, passenger_notes, clients(full_name, phone)").eq("id", bookingId).maybeSingle();
+  const { data: bookingRaw } = await db.from("bookings").select("id, confirmation, pickup, dropoff, ride_date, ride_time, return_date, return_time, return_pickup, return_dropoff, flight_number, return_flight_number, passengers, passenger_notes, clients(full_name, phone)").eq("id", bookingId).maybeSingle();
   const booking: any = bookingRaw;
   const guest = clientOf(booking);
+  const isReturn = body.leg === "return";
+  const confirmation = body.confirmation || (isReturn ? (booking?.confirmation || "") + " return" : booking?.confirmation || "");
+  const pickup = body.pickup || (isReturn ? booking?.return_pickup || booking?.dropoff : booking?.pickup) || "";
+  const dropoff = body.dropoff || (isReturn ? booking?.return_dropoff || booking?.pickup : booking?.dropoff) || "";
+  const rideDate = body.rideDate || (isReturn ? booking?.return_date : booking?.ride_date) || "";
+  const rideTime = body.rideTime || (isReturn ? booking?.return_time : booking?.ride_time) || "";
+  const flight = body.flight || (isReturn ? booking?.return_flight_number : booking?.flight_number) || "";
   const linkToken = token();
   const row: any = {
     token: linkToken,
     booking_id: booking?.id || bookingId,
-    confirmation: booking?.confirmation || body.confirmation || "",
+    confirmation,
     partner_id: partner.id,
     partner_name: partner.company,
     partner_phone: partner.phone || "",
@@ -43,13 +50,13 @@ export async function POST(req: NextRequest) {
     updated_at: new Date().toISOString(),
     guest_name: guest?.full_name || "",
     guest_phone: guest?.phone || "",
-    pickup: booking?.pickup || "",
-    dropoff: booking?.dropoff || "",
-    ride_date: booking?.ride_date || "",
-    ride_time: booking?.ride_time || "",
-    flight: booking?.flight_number || "",
+    pickup,
+    dropoff,
+    ride_date: rideDate,
+    ride_time: rideTime,
+    flight,
     passengers: booking?.passengers || "",
-    notes: booking?.passenger_notes || "",
+    notes: body.notes || "",
   };
   let { error } = await db.from("farm_outs").insert(row);
   if (error && /guest_name|column/i.test(error.message)) {
@@ -71,11 +78,11 @@ export async function POST(req: NextRequest) {
     "Jean Limo farm-out",
     partner.company,
     "",
-    "Confirmation: " + (booking?.confirmation || ""),
-    "When: " + [booking?.ride_date, booking?.ride_time].filter(Boolean).join(" "),
-    "Pickup: " + (booking?.pickup || ""),
-    "Drop-off: " + (booking?.dropoff || ""),
-    "Flight: " + (booking?.flight_number || ""),
+    "Confirmation: " + confirmation,
+    "When: " + [rideDate, rideTime].filter(Boolean).join(" "),
+    "Pickup: " + pickup,
+    "Drop-off: " + dropoff,
+    "Flight: " + flight,
     "Passengers: " + (booking?.passengers || ""),
     "Your pay: $" + (pay / 100).toFixed(0),
     "",
@@ -94,14 +101,14 @@ export async function POST(req: NextRequest) {
       from: `"Jean Limo" <${user}>`,
       to: partner.email,
       replyTo: process.env.BOOKING_NOTIFY_EMAIL || "cashtienlam@gmail.com",
-      subject: "Jean Limo job " + (booking?.confirmation || ""),
+      subject: "Jean Limo job " + confirmation,
       text,
     });
     emailed = true;
   }
 
   const sms = partner.phone
-    ? "sms:" + String(partner.phone).replace(/[^\d+]/g, "") + "?body=" + encodeURIComponent("Jean Limo job " + (booking?.confirmation || "") + ". Accept here: " + link)
+    ? "sms:" + String(partner.phone).replace(/[^\d+]/g, "") + "?body=" + encodeURIComponent("Jean Limo job " + confirmation + ". Accept here: " + link)
     : "";
   return NextResponse.json({ ok: true, link, sms, emailed, partner: partner.company });
 }
