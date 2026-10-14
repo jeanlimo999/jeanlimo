@@ -36,6 +36,8 @@ export async function PATCH(req: NextRequest) {
   if (body.name != null) patch.name = String(body.name);
   if (body.phone != null) patch.phone = String(body.phone).replace(/\D/g, "");
   if (body.email != null) patch.email = String(body.email).trim().toLowerCase();
+  if (body.pin != null) patch.pin = String(body.pin).trim();
+  if (body.vehicle != null) patch.vehicle = String(body.vehicle).trim();
   const { data, error } = await db.from("drivers").update(patch).eq("id", id).select("*").single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ driver: data });
