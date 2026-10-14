@@ -1,6 +1,57 @@
 import { NextRequest, NextResponse } from "next/server";
+import nodemailer from "nodemailer";
 import { readDispatchSession } from "@/lib/session";
 import { supabaseAdmin } from "@/lib/supabase";
+
+function prettyDate(value?: string) {
+  const m = String(value || "").match(/^(\d{4})-(\d{2})-(\d{2})/);
+  return m ? `${m[2]}/${m[3]}/${m[1]}` : "";
+}
+function prettyTime(value?: string) {
+  const m = String(value || "").match(/^(\d{1,2}):(\d{2})/);
+  if (!m) return "";
+  let hour = parseInt(m[1], 10);
+  const ampm = hour >= 12 ? "PM" : "AM";
+  hour = hour % 12 === 0 ? 12 : hour % 12;
+  return `${hour}:${m[2]} ${ampm}`;
+}
+function money(cents: number) {
+  return "$" + Math.round(Number(cents || 0) / 100);
+}
+
+async function emailDrivers(db: any, booking: any) {
+  const user = process.env.GMAIL_USER;
+  const pass = process.env.GMAIL_APP_PASSWORD;
+  if (!user || !pass) return 0;
+  const { data: drivers } = await db.from("drivers").select("*").eq("active", true);
+  const emails = (drivers || []).map((d: any) => String(d.email || "").trim()).filter((e: string) => e.includes("@"));
+  if (!emails.length) return 0;
+
+  const total = Number(booking.amount_cents || 0);
+  const hasReturn = Boolean(booking.return_date || booking.return_pickup);
+  const pay = Math.round((hasReturn ? total / 2 : total) * 0.85);
+  const when = [prettyDate(booking.ride_date), prettyTime(booking.ride_time)].filter(Boolean).join(" at ");
+  const text = [
+    "A job is available.",
+    "",
+    `Date: ${when}`,
+    `Pay: ${money(pay)}`,
+    `Pickup: ${booking.pickup || ""}`,
+    `Drop-off: ${booking.dropoff || ""}`,
+    "",
+    "Open the driver app and check Available.",
+    "https://jeanlimo.com/driver",
+  ].join("\n");
+
+  const transporter = nodemailer.createTransport({ service: "gmail", auth: { user, pass } });
+  await transporter.sendMail({
+    from: `"Jean Limo" <${user}>`,
+    to: emails.join(","),
+    subject: `Job available ${when} · ${money(pay)}`,
+    text,
+  });
+  return emails.length;
+}
 
 export async function POST(req: NextRequest) {
   const session = readDispatchSession();
@@ -12,16 +63,19 @@ export async function POST(req: NextRequest) {
   if (!bookingId) return NextResponse.json({ error: "Booking required" }, { status: 400 });
 
   if (body.auction) {
-    const { error } = await db
+    const { data: booking, error } = await db
       .from("bookings")
       .update({
         assigned_driver_id: null,
         trip_status: "auction",
         updated_at: new Date().toISOString(),
       })
-      .eq("id", bookingId);
+      .eq("id", bookingId)
+      .select("*")
+      .single();
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    return NextResponse.json({ ok: true, auction: true });
+    const emailed = await emailDrivers(db, booking).catch(() => 0);
+    return NextResponse.json({ ok: true, auction: true, emailed });
   }
 
   const driverId = body.driverId ? String(body.driverId) : null;
