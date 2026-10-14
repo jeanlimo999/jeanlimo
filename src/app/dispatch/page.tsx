@@ -278,7 +278,7 @@ export default function DispatchPage() {
         )}
         <div className="mt-3 text-xs text-[#E8D3B0]">
           {d ? `Driver ${d.name}` : completed ? "" : "Unassigned"}
-          {j.amountCents ? `${d || completed ? " · " : ""}${money(j.amountCents)}` : ""}
+          {j.driverPayCents ? ` · ${money(j.driverPayCents)}` : ""}
         </div>
         {!completed && (
           <select className="mt-3 w-full rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" value={j.assignedDriverId || ""} onChange={(e) => assign(j, e.target.value)}>
