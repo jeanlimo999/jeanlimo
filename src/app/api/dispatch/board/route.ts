@@ -89,6 +89,8 @@ export async function GET() {
       if (row.return_date || row.return_pickup) {
         list.push({
           ...base,
+          assignedDriverId: row.return_assigned_driver_id || "",
+          tripStatus: row.return_trip_status || "confirmed",
           id: row.confirmation + "-R",
           leg: "return",
           confirmation: row.confirmation + " return",
