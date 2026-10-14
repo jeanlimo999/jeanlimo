@@ -86,7 +86,7 @@ export async function GET() {
         passengers: pax === 0 || pax ? String(pax) : "",
         notes: outboundNotes,
       }];
-      if (row.return_date || row.return_pickup) {
+      if ((row.return_date || row.return_pickup) && row.return_trip_status !== "cancelled") {
         list.push({
           ...base,
           assignedDriverId: row.return_assigned_driver_id || "",
