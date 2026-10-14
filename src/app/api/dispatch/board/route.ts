@@ -52,6 +52,10 @@ export async function GET() {
 
     const jobs = (bookings || []).flatMap((row: any) => {
       const guest = row.clients || {};
+      const total = cents(row);
+      const hasReturn = Boolean(row.return_date || row.return_pickup);
+      const legCents = hasReturn ? Math.round(total / 2) : total;
+      const driverPayCents = Math.round(legCents * 0.9);
       const base = {
         bookingId: row.id,
         guestName: guest.full_name || "Guest",
@@ -60,7 +64,8 @@ export async function GET() {
         assignedDriverId: row.assigned_driver_id || "",
         tripStatus: row.trip_status || row.status || "confirmed",
         confirmation: row.confirmation,
-        amountCents: cents(row),
+        amountCents: total,
+        driverPayCents,
         city: row.city || "Houston",
       };
       const rawNotes = String(row.passenger_notes || row.notes || "");
@@ -84,7 +89,6 @@ export async function GET() {
       if (row.return_date || row.return_pickup) {
         list.push({
           ...base,
-          amountCents: 0,
           id: row.confirmation + "-R",
           leg: "return",
           confirmation: row.confirmation + " return",
