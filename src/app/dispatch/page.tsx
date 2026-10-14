@@ -197,6 +197,17 @@ export default function DispatchPage() {
     }
   }
 
+  async function auction(job: any) {
+    const res = await fetch("/api/dispatch/assign", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ bookingId: job.bookingId, auction: true }),
+    });
+    const data = await res.json();
+    if (!res.ok) setErr(data.error || "Could not send to auction");
+    else { setMsg("Sent to auction"); await load(); }
+  }
+
   async function assign(job: any, driverId: string) {
     const res = await fetch("/api/dispatch/assign", {
       method: "POST",
@@ -277,9 +288,12 @@ export default function DispatchPage() {
           </>
         )}
         <div className="mt-3 text-xs text-[#E8D3B0]">
-          {d ? `Driver ${d.name}` : completed ? "" : "Unassigned"}
+          {j.tripStatus === "auction" ? "Auction" : d ? `Driver ${d.name}` : completed ? "" : "Unassigned"}
           {j.driverPayCents ? ` · ${money(j.driverPayCents)}` : ""}
         </div>
+        {!completed && j.tripStatus !== "auction" && (
+          <button onClick={() => auction(j)} className="mt-3 w-full rounded-xl border border-[#C4A574]/50 py-2 text-sm text-[#E8D3B0]">Send to auction</button>
+        )}
         {!completed && (
           <select className="mt-3 w-full rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" value={j.assignedDriverId || ""} onChange={(e) => assign(j, e.target.value)}>
             <option value="">Unassigned</option>
