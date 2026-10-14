@@ -26,9 +26,12 @@
     .tabs { display:flex; gap:8px; margin-bottom:12px; }
     .tab { flex:1; border:1px solid var(--line); background:var(--bg2); color:var(--muted); border-radius:999px; padding:10px; font-weight:700; }
     .tab.on { background:linear-gradient(180deg,var(--gold2),var(--gold)); color:#16110a; border:0; }
-    .actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px; }
-    .status { border:1px solid var(--line); background:#1C1C20; color:var(--text); border-radius:12px; padding:12px 8px; font-weight:700; }
-    .status.on { background:linear-gradient(180deg,var(--gold2),var(--gold)); color:#16110a; border:0; }
+    .slide { position:relative; margin-top:14px; height:58px; border-radius:999px; background:#2a2a2e; overflow:hidden; touch-action:none; user-select:none; }
+    .slide.locked { background:#1a1a1d; }
+    .slide .label { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-weight:700; color:#d8d2c8; pointer-events:none; text-align:center; padding:0 64px; }
+    .slide.locked .label { color:#8d877e; font-weight:600; }
+    .slide .thumb { position:absolute; left:4px; top:4px; width:50px; height:50px; border-radius:999px; background:linear-gradient(180deg,var(--gold2),var(--gold)); color:#16110a; display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:700; }
+    .slide.locked .thumb { background:#3a3a3e; color:#777; }
   </style>
 </head>
 <body>
@@ -72,28 +75,78 @@
       return [date, time].filter(Boolean).join(' \u00b7 ');
     }
     function maps(addr){ if(!addr) return ''; const q = encodeURIComponent(addr); return '<div class="meta">'+esc(addr)+'</div><div class="meta"><a href="https://maps.apple.com/?daddr='+q+'">Apple Maps</a> \u00b7 <a href="https://www.google.com/maps/dir/?api=1&destination='+q+'">Google Maps</a></div>'; }
-    function readyForButtons(j){
+    function pickupDate(j){
       const date = String(j.rideDate || '').slice(0,10);
       const time = String(j.rideTime || '00:00').slice(0,5);
-      if(!date) return false;
-      const pickup = new Date(date+'T'+time+':00');
-      if(Number.isNaN(pickup.getTime())) return false;
-      return Date.now() >= pickup.getTime() - 3*60*60*1000;
+      if(!date) return null;
+      const d = new Date(date+'T'+time+':00');
+      return Number.isNaN(d.getTime()) ? null : d;
+    }
+    function clock(d){
+      let h = d.getHours();
+      const m = String(d.getMinutes()).padStart(2,'0');
+      const ampm = h >= 12 ? 'PM' : 'AM';
+      h = h % 12 === 0 ? 12 : h % 12;
+      return h+':'+m+' '+ampm;
+    }
+    function nextStep(status){
+      if (status === 'on_the_way') return { value:'on_location', label:'Slide for At location' };
+      if (status === 'on_location') return { value:'onboard', label:'Slide for Customer on board' };
+      if (status === 'onboard') return { value:'dropped_off', label:'Slide for Dropped off' };
+      return { value:'on_the_way', label:'Slide for On the way' };
+    }
+    function slider(j){
+      if (tab === 'done') return '';
+      const status = j.tripStatus || '';
+      const started = ['on_the_way','on_location','onboard'].includes(status);
+      const pickup = pickupDate(j);
+      const openAt = pickup ? pickup.getTime() - 3*60*60*1000 : 0;
+      const ready = started || (pickup && Date.now() >= openAt);
+      const step = nextStep(status);
+      const label = ready ? step.label : ('Earliest start: ' + (pickup ? clock(new Date(openAt)) : ''));
+      return '<div class="slide'+(ready?'':' locked')+'" data-id="'+esc(j.bookingId)+'" data-leg="'+esc(j.live_leg||'outbound')+'" data-next="'+step.value+'"><div class="label">'+esc(label)+'</div><div class="thumb">&#8594;</div></div>';
     }
     function card(j){
       const digits = String(j.guestPhone||'').replace(/[^0-9+]/g,'');
       const phone = digits ? ' <a href="tel:'+digits+'">'+esc(j.guestPhone)+'</a> <a href="tel:'+digits+'">Call</a> <a href="sms:'+digits+'">Text</a>' : '';
       const notes = String(j.notes||'').trim();
-      const status = j.tripStatus || '';
-      const btn = (value, label) => '<button class="status'+(status===value?' on':'')+'" type="button" data-id="'+esc(j.bookingId)+'" data-leg="'+esc(j.live_leg||'outbound')+'" data-status="'+value+'">'+label+'</button>';
-      const actions = tab==='done' || !readyForButtons(j) ? '' : '<div class="actions">'+btn('on_the_way','On the way')+btn('on_location','At location')+btn('onboard','Onboard')+btn('dropped_off','Dropped off')+'</div>';
-      return '<div class="job"><div class="when">'+esc(whenLabel(j))+'</div><div>'+esc(j.guestName||'Guest')+phone+'</div><div class="meta">Pickup</div>'+maps(j.pickup)+'<div class="meta">Drop-off</div>'+maps(j.dropoff)+(j.flight?'<div class="meta">Flight: '+esc(j.flight)+'</div>':'')+(j.passengers?'<div class="meta">Passengers: '+esc(j.passengers)+'</div>':'')+(notes?'<div class="meta">Additional note</div><div class="meta note">'+esc(notes)+'</div>':'')+actions+'</div>';
+      return '<div class="job"><div class="when">'+esc(whenLabel(j))+'</div><div>'+esc(j.guestName||'Guest')+phone+'</div><div class="meta">Pickup</div>'+maps(j.pickup)+'<div class="meta">Drop-off</div>'+maps(j.dropoff)+(j.flight?'<div class="meta">Flight: '+esc(j.flight)+'</div>':'')+(j.passengers?'<div class="meta">Passengers: '+esc(j.passengers)+'</div>':'')+(notes?'<div class="meta">Additional note</div><div class="meta note">'+esc(notes)+'</div>':'')+slider(j)+'</div>';
     }
     function render(){
       $('tab-open').classList.toggle('on', tab==='open');
       $('tab-done').classList.toggle('on', tab==='done');
       const list = tab==='done' ? doneJobs : jobs;
       $('joblist').innerHTML = list.length ? list.map(card).join('') : '<p class="sub">No trips in this tab.</p>';
+      wireSlides();
+    }
+    function wireSlides(){
+      document.querySelectorAll('.slide').forEach(slide => {
+        if (slide.classList.contains('locked')) return;
+        const thumb = slide.querySelector('.thumb');
+        let dragging = false, startX = 0;
+        const max = () => slide.clientWidth - thumb.clientWidth - 8;
+        const down = (e) => { dragging = true; startX = e.clientX; thumb.setPointerCapture(e.pointerId); };
+        const move = (e) => {
+          if (!dragging) return;
+          const left = Math.max(4, Math.min(max(), 4 + (e.clientX - startX)));
+          thumb.style.left = left + 'px';
+        };
+        const up = async () => {
+          if (!dragging) return;
+          dragging = false;
+          const left = parseFloat(thumb.style.left || '4');
+          if (left < max() * 0.82) { thumb.style.left = '4px'; return; }
+          try {
+            await api('/api/driver/status', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ bookingId: slide.dataset.id, status: slide.dataset.next, live_leg: slide.dataset.leg }) });
+            if (slide.dataset.next === 'dropped_off') tab = 'done';
+            await load();
+          } catch (err) { alert(err.message || 'Could not update'); thumb.style.left = '4px'; }
+        };
+        thumb.addEventListener('pointerdown', down);
+        thumb.addEventListener('pointermove', move);
+        thumb.addEventListener('pointerup', up);
+        thumb.addEventListener('pointercancel', up);
+      });
     }
     async function api(url, opts){
       const res = await fetch(url, Object.assign({credentials:'same-origin'}, opts||{}));
@@ -110,15 +163,6 @@
       $('hello').textContent = ((driver && driver.name) || 'Driver');
       render();
     }
-    $('joblist').onclick = async (e) => {
-      const btn = e.target.closest('[data-status]');
-      if (!btn) return;
-      try {
-        await api('/api/driver/status', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ bookingId: btn.dataset.id, status: btn.dataset.status, live_leg: btn.dataset.leg }) });
-        if (btn.dataset.status === 'dropped_off') tab = 'done';
-        await load();
-      } catch (err) { alert(err.message || 'Could not update'); }
-    };
     $('tab-open').onclick = () => { tab='open'; render(); };
     $('tab-done').onclick = () => { tab='done'; render(); };
     $('signin').onclick = async () => {
