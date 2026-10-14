@@ -55,7 +55,7 @@ export async function GET() {
       const total = cents(row);
       const hasReturn = Boolean(row.return_date || row.return_pickup);
       const legCents = hasReturn ? Math.round(total / 2) : total;
-      const driverPayCents = Math.round(legCents * 0.85);
+      const driverPayCents = Math.round(legCents * 0.80);
       const base = {
         bookingId: row.id,
         guestName: guest.full_name || "Guest",
