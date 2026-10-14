@@ -436,6 +436,7 @@ export default function DispatchPage() {
             <form onSubmit={addDriver} className="mt-4 grid gap-2">
               <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" placeholder="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
               <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" placeholder="Phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+              <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" type="email" placeholder="Email for job alerts" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
               <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" placeholder="Driver app PIN" value={form.pin} onChange={(e) => setForm({ ...form, pin: e.target.value })} />
               <button className="rounded-xl bg-gradient-to-b from-[#E8D3B0] to-[#C4A574] py-3 font-semibold text-[#16110a]">Save driver</button>
             </form>
