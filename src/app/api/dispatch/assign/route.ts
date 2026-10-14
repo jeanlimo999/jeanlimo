@@ -62,14 +62,15 @@ export async function POST(req: NextRequest) {
   const bookingId = String(body.bookingId || "");
   if (!bookingId) return NextResponse.json({ error: "Booking required" }, { status: 400 });
 
+  const leg = String(body.leg || "outbound");
+  const isReturn = leg === "return";
   if (body.auction) {
+    const patch = isReturn
+      ? { return_assigned_driver_id: null, return_trip_status: "auction", updated_at: new Date().toISOString() }
+      : { assigned_driver_id: null, trip_status: "auction", updated_at: new Date().toISOString() };
     const { data: booking, error } = await db
       .from("bookings")
-      .update({
-        assigned_driver_id: null,
-        trip_status: "auction",
-        updated_at: new Date().toISOString(),
-      })
+      .update(patch)
       .eq("id", bookingId)
       .select("*")
       .single();
@@ -79,13 +80,12 @@ export async function POST(req: NextRequest) {
   }
 
   const driverId = body.driverId ? String(body.driverId) : null;
+  const patch = isReturn
+    ? { return_assigned_driver_id: driverId, return_trip_status: driverId ? "assigned" : "confirmed", updated_at: new Date().toISOString() }
+    : { assigned_driver_id: driverId, trip_status: driverId ? "assigned" : "confirmed", updated_at: new Date().toISOString() };
   const { error } = await db
     .from("bookings")
-    .update({
-      assigned_driver_id: driverId,
-      trip_status: driverId ? "assigned" : "confirmed",
-      updated_at: new Date().toISOString(),
-    })
+    .update(patch)
     .eq("id", bookingId);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true });
