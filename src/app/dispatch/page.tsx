@@ -197,6 +197,30 @@ export default function DispatchPage() {
     }
   }
 
+  async function removeTrip(job: any) {
+    if (!confirm("Delete this trip?")) return;
+    const res = await fetch("/api/dispatch/delete", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ bookingId: job.bookingId, leg: job.leg }),
+    });
+    const data = await res.json();
+    if (!res.ok) setErr(data.error || "Could not delete");
+    else { setMsg(data.emailed ? "Deleted and driver emailed" : "Trip deleted"); await load(); }
+  }
+
+  async function removePartner(job: any) {
+    if (!confirm("Delete this partner trip?")) return;
+    const res = await fetch("/api/dispatch/delete", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ kind: "partner", id: job.id }),
+    });
+    const data = await res.json();
+    if (!res.ok) setErr(data.error || "Could not delete");
+    else { setMsg("Partner trip deleted"); await load(); }
+  }
+
   async function auction(job: any) {
     const res = await fetch("/api/dispatch/assign", {
       method: "POST",
@@ -300,6 +324,9 @@ export default function DispatchPage() {
         </div>
         {!completed && j.tripStatus !== "auction" && (
           <button onClick={() => auction(j)} className="mt-3 w-full rounded-xl border border-[#C4A574]/50 py-2 text-sm text-[#E8D3B0]">Send to auction</button>
+        )}
+        {!completed && (
+          <button onClick={() => removeTrip(j)} className="mt-3 w-full rounded-xl border border-red-500/40 py-2 text-sm text-red-300">Delete trip</button>
         )}
         {!completed && (
           <select className="mt-3 w-full rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" value={j.assignedDriverId || ""} onChange={(e) => assign(j, e.target.value)}>
