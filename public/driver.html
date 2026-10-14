@@ -112,7 +112,7 @@
       const notes = String(j.notes||'').trim();
       const pay = Number(j.driverPay || 0);
       const fare = pay ? '<div class="when" style="font-size:18px">Your pay $'+pay.toFixed(0)+'</div>' : '';
-      const accept = j.available ? '<button class="primary accept" type="button" data-accept="'+esc(j.bookingId)+'">Accept job</button>' : slider(j);
+      const accept = j.available ? '<button class="primary accept" type="button" data-accept="'+esc(j.bookingId)+'" data-leg="'+esc(j.live_leg||'outbound')+'">Accept job</button>' : slider(j);
       return '<div class="job"><div class="when">'+esc(whenLabel(j))+'</div>'+fare+'<div>'+esc(j.guestName||'Guest')+phone+'</div><div class="meta">Pickup</div>'+maps(j.pickup)+'<div class="meta">Drop-off</div>'+maps(j.dropoff)+(j.flight?'<div class="meta">Flight: '+esc(j.flight)+'</div>':'')+(j.passengers?'<div class="meta">Passengers: '+esc(j.passengers)+'</div>':'')+(notes?'<div class="meta">Additional note</div><div class="meta note">'+esc(notes)+'</div>':'')+accept+'</div>';
     }
     function render(){
@@ -172,7 +172,7 @@
       const btn = e.target.closest('[data-accept]');
       if (!btn) return;
       try {
-        await api('/api/driver/accept', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ bookingId: btn.dataset.accept }) });
+        await api('/api/driver/accept', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ bookingId: btn.dataset.accept, leg: btn.dataset.leg }) });
         tab = 'open';
         await load();
       } catch (err) { alert(err.message || 'Could not accept'); }
