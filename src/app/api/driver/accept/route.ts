@@ -56,6 +56,7 @@ export async function POST(req: NextRequest) {
   if (!db) return NextResponse.json({ error: "Supabase is not configured" }, { status: 500 });
   const body = await req.json().catch(() => ({}));
   const bookingId = String(body.bookingId || "");
+  const isReturn = String(body.leg || "outbound") === "return";
   if (!bookingId) return NextResponse.json({ error: "Booking required" }, { status: 400 });
 
   const { data: booking } = await db
@@ -63,19 +64,21 @@ export async function POST(req: NextRequest) {
     .select("*, clients(full_name, phone)")
     .eq("id", bookingId)
     .maybeSingle();
-  if (!booking || booking.trip_status !== "auction" || booking.assigned_driver_id) {
+  const open = isReturn
+    ? booking && booking.return_trip_status === "auction" && !booking.return_assigned_driver_id
+    : booking && booking.trip_status === "auction" && !booking.assigned_driver_id;
+  if (!open) {
     return NextResponse.json({ error: "That job is no longer available" }, { status: 409 });
   }
 
+  const patch = isReturn
+    ? { return_assigned_driver_id: session.driverId, return_trip_status: "assigned", updated_at: new Date().toISOString() }
+    : { assigned_driver_id: session.driverId, trip_status: "assigned", updated_at: new Date().toISOString() };
   const { error } = await db
     .from("bookings")
-    .update({
-      assigned_driver_id: session.driverId,
-      trip_status: "assigned",
-      updated_at: new Date().toISOString(),
-    })
+    .update(patch)
     .eq("id", bookingId)
-    .eq("trip_status", "auction");
+    .eq(isReturn ? "return_trip_status" : "trip_status", "auction");
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   await emailOwner(booking, session.name || "A driver").catch(() => null);
