@@ -30,7 +30,7 @@ export async function GET() {
     if (!db) return NextResponse.json({ error: "Supabase is not configured" }, { status: 500 });
 
     const [{ data: drivers, error: dErr }, { data: bookings, error: bErr }] = await Promise.all([
-      db.from("drivers").select("id, name, phone, pin, vehicle, photo_url, active, last_lat, last_lng").eq("active", true).order("name"),
+      db.from("drivers").select("*").eq("active", true).order("name"),
       db.from("bookings").select("*, clients(full_name, phone, email)").not("status", "eq", "cancelled").order("ride_date", { ascending: true }),
     ]);
     if (dErr) return NextResponse.json({ error: dErr.message }, { status: 500 });
