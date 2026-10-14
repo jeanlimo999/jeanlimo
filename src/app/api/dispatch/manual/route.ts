@@ -1,10 +1,71 @@
 import { NextResponse } from "next/server";
+import nodemailer from "nodemailer";
 import { readDispatchSession } from "@/lib/session";
 import { supabaseAdmin } from "@/lib/supabase";
+import { formatDateTime } from "@/lib/booking";
 
 function code() {
   const n = Math.floor(1000 + Math.random() * 9000);
   return `INH-${n}`;
+}
+
+async function emailOwner(booking: {
+  confirmation: string;
+  name: string;
+  phone: string;
+  date: string;
+  time: string;
+  pickup: string;
+  dropoff: string;
+  vehicle: string;
+  flight: string;
+  passengers: string;
+  amount: string;
+  notes: string;
+}) {
+  const user = process.env.GMAIL_USER;
+  const pass = process.env.GMAIL_APP_PASSWORD;
+  const to = process.env.BOOKING_NOTIFY_EMAIL || "cashtienlam@gmail.com";
+  if (!user || !pass) return false;
+
+  try {
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: { user, pass },
+    });
+
+    const text = [
+      `Confirmation: ${booking.confirmation}`,
+      `Name: ${booking.name}`,
+      `Phone: ${booking.phone}`,
+      `Vehicle: ${booking.vehicle}`,
+      `Type: transfer`,
+      "",
+      `Date / time: ${formatDateTime(booking.date, booking.time)}`,
+      `Flight: ${booking.flight}`,
+      `Passengers: ${booking.passengers}`,
+      `Additional note: ${booking.notes}`,
+      `Pickup address: ${booking.pickup}`,
+      `Drop-off address: ${booking.dropoff}`,
+      "",
+      `Amount: ${booking.amount ? "$" + Number(booking.amount).toFixed(2) : ""}`,
+      `Notes: Manual in-house trip`,
+      "",
+      "Jean Limo LLC",
+      "Jeannie 281-917-0929 · Cash 281-917-0085",
+    ].join("\n");
+
+    await transporter.sendMail({
+      from: `"Jean Limo" <${user}>`,
+      to,
+      subject: `New Jean Limo booking ${booking.confirmation}`,
+      text,
+    });
+    return true;
+  } catch (err) {
+    console.error("Manual trip email failed:", err);
+    return false;
+  }
 }
 
 export async function POST(req: Request) {
@@ -62,5 +123,21 @@ export async function POST(req: Request) {
 
   const { error } = await db.from("bookings").insert(row);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ ok: true, confirmation });
+
+  const emailed = await emailOwner({
+    confirmation,
+    name,
+    phone,
+    date,
+    time,
+    pickup,
+    dropoff,
+    vehicle: String(body.vehicle || "sedan"),
+    flight: String(body.flight || ""),
+    passengers: String(body.passengers || ""),
+    amount: String(body.amount || ""),
+    notes: String(body.notes || ""),
+  });
+
+  return NextResponse.json({ ok: true, confirmation, emailed });
 }
