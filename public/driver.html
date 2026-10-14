@@ -110,7 +110,9 @@
       const digits = String(j.guestPhone||'').replace(/[^0-9+]/g,'');
       const phone = digits ? ' <a href="tel:'+digits+'">'+esc(j.guestPhone)+'</a> <a href="tel:'+digits+'">Call</a> <a href="sms:'+digits+'">Text</a>' : '';
       const notes = String(j.notes||'').trim();
-      return '<div class="job"><div class="when">'+esc(whenLabel(j))+'</div><div>'+esc(j.guestName||'Guest')+phone+'</div><div class="meta">Pickup</div>'+maps(j.pickup)+'<div class="meta">Drop-off</div>'+maps(j.dropoff)+(j.flight?'<div class="meta">Flight: '+esc(j.flight)+'</div>':'')+(j.passengers?'<div class="meta">Passengers: '+esc(j.passengers)+'</div>':'')+(notes?'<div class="meta">Additional note</div><div class="meta note">'+esc(notes)+'</div>':'')+slider(j)+'</div>';
+      const pay = Number(j.driverPay || 0);
+      const fare = pay ? '<div class="when" style="font-size:18px">Your pay $'+pay.toFixed(0)+'</div>' : '';
+      return '<div class="job"><div class="when">'+esc(whenLabel(j))+'</div>'+fare+'<div>'+esc(j.guestName||'Guest')+phone+'</div><div class="meta">Pickup</div>'+maps(j.pickup)+'<div class="meta">Drop-off</div>'+maps(j.dropoff)+(j.flight?'<div class="meta">Flight: '+esc(j.flight)+'</div>':'')+(j.passengers?'<div class="meta">Passengers: '+esc(j.passengers)+'</div>':'')+(notes?'<div class="meta">Additional note</div><div class="meta note">'+esc(notes)+'</div>':'')+slider(j)+'</div>';
     }
     function render(){
       $('tab-open').classList.toggle('on', tab==='open');
