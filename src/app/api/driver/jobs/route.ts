@@ -4,9 +4,11 @@ import { supabaseAdmin } from "@/lib/supabase";
 
 function toJobs(row: any, driverId: string) {
   const guest = row.clients || {};
-  const assigned = row.assigned_driver_id === driverId;
-  const auction = row.trip_status === "auction" && !row.assigned_driver_id;
-  if (!assigned && !auction) return [];
+  const outboundMine = row.assigned_driver_id === driverId;
+  const returnMine = row.return_assigned_driver_id === driverId;
+  const outboundAuction = row.trip_status === "auction" && !row.assigned_driver_id;
+  const returnAuction = row.return_trip_status === "auction" && !row.return_assigned_driver_id;
+  if (!outboundMine && !returnMine && !outboundAuction && !returnAuction) return [];
   const pax = row.passengers || row.passenger_count || row.pax || "";
   const rawNotes = String(row.passenger_notes || row.notes || "");
   const split = rawNotes.indexOf("Return:");
@@ -58,7 +60,10 @@ function toJobs(row: any, driverId: string) {
       notes: returnNotes,
     });
   }
-  return jobs;
+  return jobs.filter((job) => {
+    if (job.live_leg === "return") return returnMine || returnAuction;
+    return outboundMine || outboundAuction;
+  }).map((job) => ({ ...job, available: job.live_leg === "return" ? returnAuction : outboundAuction }));
 }
 
 export async function GET() {
@@ -68,8 +73,8 @@ export async function GET() {
   if (!db) return NextResponse.json({ error: "Supabase is not configured" }, { status: 500 });
 
   const [{ data, error }, { data: open, error: openErr }] = await Promise.all([
-    db.from("bookings").select("*, clients(full_name, phone, email)").eq("assigned_driver_id", session.driverId).not("status", "eq", "cancelled").order("ride_date", { ascending: true }),
-    db.from("bookings").select("*, clients(full_name, phone, email)").eq("trip_status", "auction").is("assigned_driver_id", null).not("status", "eq", "cancelled").order("ride_date", { ascending: true }),
+    db.from("bookings").select("*, clients(full_name, phone, email)").or(`assigned_driver_id.eq.${session.driverId},return_assigned_driver_id.eq.${session.driverId}`).not("status", "eq", "cancelled").order("ride_date", { ascending: true }),
+    db.from("bookings").select("*, clients(full_name, phone, email)").or("trip_status.eq.auction,return_trip_status.eq.auction").not("status", "eq", "cancelled").order("ride_date", { ascending: true }),
   ]);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   if (openErr) return NextResponse.json({ error: openErr.message }, { status: 500 });
