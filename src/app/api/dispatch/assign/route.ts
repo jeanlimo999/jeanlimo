@@ -29,7 +29,7 @@ async function emailDrivers(db: any, booking: any) {
 
   const total = Number(booking.amount_cents || 0);
   const hasReturn = Boolean(booking.return_date || booking.return_pickup);
-  const pay = Math.round((hasReturn ? total / 2 : total) * 0.85);
+  const pay = Math.round((hasReturn ? total / 2 : total) * 0.80);
   const when = [prettyDate(booking.ride_date), prettyTime(booking.ride_time)].filter(Boolean).join(" at ");
   const text = [
     "A job is available.",
