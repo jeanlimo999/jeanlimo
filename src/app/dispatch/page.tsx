@@ -201,7 +201,7 @@ export default function DispatchPage() {
     const res = await fetch("/api/dispatch/assign", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ bookingId: job.bookingId, auction: true }),
+      body: JSON.stringify({ bookingId: job.bookingId, auction: true, leg: job.leg }),
     });
     const data = await res.json();
     if (!res.ok) setErr(data.error || "Could not send to auction");
@@ -212,7 +212,7 @@ export default function DispatchPage() {
     const res = await fetch("/api/dispatch/assign", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ bookingId: job.bookingId, driverId }),
+      body: JSON.stringify({ bookingId: job.bookingId, driverId, leg: job.leg }),
     });
     const data = await res.json();
     if (!res.ok) setErr(data.error || "Assign failed");
