@@ -15,7 +15,7 @@ function toJobs(row: any, driverId: string) {
   const total = Number(row.amount_cents || 0);
   const hasReturn = Boolean(row.return_date || row.return_pickup);
   const legCents = hasReturn ? Math.round(total / 2) : total;
-  const driverPay = Math.round(legCents * 0.85) / 100;
+  const driverPay = Math.round(legCents * 0.80) / 100;
   const base = {
     bookingId: row.id,
     driverPay,
