@@ -27,7 +27,7 @@ async function emailOwner(booking: any, driverName: string) {
   if (!user || !pass) return;
   const total = Number(booking.amount_cents || 0);
   const hasReturn = Boolean(booking.return_date || booking.return_pickup);
-  const pay = Math.round((hasReturn ? total / 2 : total) * 0.85);
+  const pay = Math.round((hasReturn ? total / 2 : total) * 0.80);
   const when = [prettyDate(booking.ride_date), prettyTime(booking.ride_time)].filter(Boolean).join(" at ");
   const guest = booking.clients || {};
   const text = [
