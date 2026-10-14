@@ -5,7 +5,8 @@ import { supabaseAdmin } from "@/lib/supabase";
 function toJobs(row: any, driverId: string) {
   const guest = row.clients || {};
   const assigned = row.assigned_driver_id === driverId;
-  if (!assigned) return [];
+  const auction = row.trip_status === "auction" && !row.assigned_driver_id;
+  if (!assigned && !auction) return [];
   const pax = row.passengers || row.passenger_count || row.pax || "";
   const rawNotes = String(row.passenger_notes || row.notes || "");
   const split = rawNotes.indexOf("Return:");
@@ -66,17 +67,18 @@ export async function GET() {
   const db = supabaseAdmin();
   if (!db) return NextResponse.json({ error: "Supabase is not configured" }, { status: 500 });
 
-  const { data, error } = await db
-    .from("bookings")
-    .select("*, clients(full_name, phone, email)")
-    .eq("assigned_driver_id", session.driverId)
-    .not("status", "eq", "cancelled")
-    .order("ride_date", { ascending: true });
+  const [{ data, error }, { data: open, error: openErr }] = await Promise.all([
+    db.from("bookings").select("*, clients(full_name, phone, email)").eq("assigned_driver_id", session.driverId).not("status", "eq", "cancelled").order("ride_date", { ascending: true }),
+    db.from("bookings").select("*, clients(full_name, phone, email)").eq("trip_status", "auction").is("assigned_driver_id", null).not("status", "eq", "cancelled").order("ride_date", { ascending: true }),
+  ]);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (openErr) return NextResponse.json({ error: openErr.message }, { status: 500 });
 
   const jobs = (data || []).flatMap((row) => toJobs(row, session.driverId));
+  const available = (open || []).flatMap((row) => toJobs(row, session.driverId).map((job) => ({ ...job, available: true })));
   return NextResponse.json({
     driver: { id: session.driverId, name: session.name, phone: session.phone },
     jobs,
+    available,
   });
 }
