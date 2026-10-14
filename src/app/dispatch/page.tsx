@@ -76,7 +76,7 @@ export default function DispatchPage() {
   const [tab, setTab] = useState<"open" | "done" | "partners">("open");
   const [partnerTab, setPartnerTab] = useState<"open" | "done">("open");
   const [sent, setSent] = useState<any[]>([]);
-  const [form, setForm] = useState({ name: "", phone: "", pin: "", vehicle: "sedan" });
+  const [form, setForm] = useState({ id: "", name: "", phone: "", pin: "", email: "", vehicle: "sedan" });
   const [owner, setOwner] = useState({ name: "", email: "", password: "" });
   const [manualOpen, setManualOpen] = useState(false);
   const [trip, setTrip] = useState({ name: "", phone: "", date: "", time: "", pickup: "", dropoff: "", flight: "", passengers: "", notes: "", vehicle: "sedan", amount: "" });
@@ -222,20 +222,27 @@ export default function DispatchPage() {
     }
   }
 
+  function editDriver(d: any) {
+    setForm({ id: d.id, name: d.name || "", phone: d.phone || "", pin: d.pin || "", email: d.email || "", vehicle: d.vehicle || "sedan" });
+    setMsg("Editing " + (d.name || "driver"));
+    setErr("");
+  }
+
   async function addDriver(e: React.FormEvent) {
     e.preventDefault();
+    const editing = Boolean(form.id);
     const res = await fetch("/api/dispatch/drivers", {
-      method: "POST",
+      method: editing ? "PATCH" : "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),
     });
     const data = await res.json();
     if (!res.ok) {
-      const raw = data.error || "Could not add driver";
-      setErr(/drivers_pin_idx|duplicate key/i.test(raw) ? "That PIN is already used. Give this driver a different PIN." : raw);
+      const raw = data.error || "Could not save driver";
+      setErr(/email/i.test(raw) ? "Add an email column in Supabase first: alter table drivers add column if not exists email text;" : /drivers_pin_idx|duplicate key/i.test(raw) ? "That PIN is already used. Give this driver a different PIN." : raw);
     } else {
-      setForm({ name: "", phone: "", pin: "", vehicle: "sedan" });
-      setMsg((data.driver?.name || "Driver") + " added");
+      setForm({ id: "", name: "", phone: "", pin: "", email: "", vehicle: "sedan" });
+      setMsg((data.driver?.name || "Driver") + (editing ? " updated" : " added"));
       await load();
     }
   }
@@ -423,7 +430,7 @@ export default function DispatchPage() {
           <div className="mt-4 rounded-2xl border border-white/10 bg-[#141416] p-4">
             <div className="text-[11px] uppercase tracking-widest text-[#C4A574]">Roster</div>
             {drivers.map((d) => (
-              <div key={d.id} className="mt-3 flex items-center gap-3 border-t border-white/10 pt-3">
+              <div key={d.id} onClick={() => editDriver(d)} className="mt-3 flex cursor-pointer items-center gap-3 border-t border-white/10 pt-3">
                 {d.photo_url ? (
                   <img src={d.photo_url} alt="" className="h-10 w-10 rounded-full object-cover" />
                 ) : (
@@ -436,9 +443,10 @@ export default function DispatchPage() {
             <form onSubmit={addDriver} className="mt-4 grid gap-2">
               <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" placeholder="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
               <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" placeholder="Phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
-              <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" type="email" placeholder="Email for job alerts" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+              <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" type="email" placeholder="Email for job alerts" value={form.email || ""} onChange={(e) => setForm({ ...form, email: e.target.value })} />
               <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" placeholder="Driver app PIN" value={form.pin} onChange={(e) => setForm({ ...form, pin: e.target.value })} />
-              <button className="rounded-xl bg-gradient-to-b from-[#E8D3B0] to-[#C4A574] py-3 font-semibold text-[#16110a]">Save driver</button>
+              <button className="rounded-xl bg-gradient-to-b from-[#E8D3B0] to-[#C4A574] py-3 font-semibold text-[#16110a]">{form.id ? "Save changes" : "Save driver"}</button>
+              {form.id && <button type="button" onClick={() => setForm({ id: "", name: "", phone: "", pin: "", email: "", vehicle: "sedan" })} className="rounded-xl border border-white/10 py-3 text-sm text-[#9A9388]">Cancel</button>}
             </form>
             <form onSubmit={addOwner} className="mt-6 grid gap-2 border-t border-white/10 pt-4">
               <div className="text-[11px] uppercase tracking-widest text-[#C4A574]">Add another owner</div>
