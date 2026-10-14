@@ -48,14 +48,14 @@
     <div class="top"><div class="brand">JEAN LIMO</div><button class="ghost" id="signout" type="button">Sign out</button></div>
     <div class="pad">
       <h1 id="hello">Your jobs</h1>
-      <div class="tabs"><button class="tab on" id="tab-open" type="button">Upcoming</button><button class="tab" id="tab-done" type="button">Completed</button></div>
+      <div class="tabs"><button class="tab on" id="tab-open" type="button">Upcoming</button><button class="tab" id="tab-available" type="button">Available</button><button class="tab" id="tab-done" type="button">Completed</button></div>
       <div id="joblist"></div>
     </div>
   </section>
   <script>
     const $ = id => document.getElementById(id);
     const show = id => document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === id));
-    let jobs = [], doneJobs = [], tab = 'open', driver = null;
+    let jobs = [], doneJobs = [], available = [], tab = 'open', driver = null;
     function esc(s){ return String(s||'').replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>'); }
     function fmtDate(value){
       const m = String(value||'').match(/(\d{4})-(\d{2})-(\d{2})/);
@@ -96,7 +96,7 @@
       return { value:'on_the_way', label:'Slide for On the way' };
     }
     function slider(j){
-      if (tab === 'done') return '';
+      if (tab === 'done' || j.available) return '';
       const status = j.tripStatus || '';
       const started = ['on_the_way','on_location','onboard'].includes(status);
       const pickup = pickupDate(j);
@@ -112,12 +112,14 @@
       const notes = String(j.notes||'').trim();
       const pay = Number(j.driverPay || 0);
       const fare = pay ? '<div class="when" style="font-size:18px">Your pay $'+pay.toFixed(0)+'</div>' : '';
-      return '<div class="job"><div class="when">'+esc(whenLabel(j))+'</div>'+fare+'<div>'+esc(j.guestName||'Guest')+phone+'</div><div class="meta">Pickup</div>'+maps(j.pickup)+'<div class="meta">Drop-off</div>'+maps(j.dropoff)+(j.flight?'<div class="meta">Flight: '+esc(j.flight)+'</div>':'')+(j.passengers?'<div class="meta">Passengers: '+esc(j.passengers)+'</div>':'')+(notes?'<div class="meta">Additional note</div><div class="meta note">'+esc(notes)+'</div>':'')+slider(j)+'</div>';
+      const accept = j.available ? '<button class="primary accept" type="button" data-accept="'+esc(j.bookingId)+'">Accept job</button>' : slider(j);
+      return '<div class="job"><div class="when">'+esc(whenLabel(j))+'</div>'+fare+'<div>'+esc(j.guestName||'Guest')+phone+'</div><div class="meta">Pickup</div>'+maps(j.pickup)+'<div class="meta">Drop-off</div>'+maps(j.dropoff)+(j.flight?'<div class="meta">Flight: '+esc(j.flight)+'</div>':'')+(j.passengers?'<div class="meta">Passengers: '+esc(j.passengers)+'</div>':'')+(notes?'<div class="meta">Additional note</div><div class="meta note">'+esc(notes)+'</div>':'')+accept+'</div>';
     }
     function render(){
       $('tab-open').classList.toggle('on', tab==='open');
+      $('tab-available').classList.toggle('on', tab==='available');
       $('tab-done').classList.toggle('on', tab==='done');
-      const list = tab==='done' ? doneJobs : jobs;
+      const list = tab==='done' ? doneJobs : tab==='available' ? available : jobs;
       $('joblist').innerHTML = list.length ? list.map(card).join('') : '<p class="sub">No trips in this tab.</p>';
       wireSlides();
     }
@@ -162,10 +164,21 @@
       const all = data.jobs || [];
       jobs = all.filter(j => j.tripStatus !== 'dropped_off');
       doneJobs = all.filter(j => j.tripStatus === 'dropped_off');
+      available = data.available || [];
       $('hello').textContent = ((driver && driver.name) || 'Driver');
       render();
     }
+    $('joblist').onclick = async (e) => {
+      const btn = e.target.closest('[data-accept]');
+      if (!btn) return;
+      try {
+        await api('/api/driver/accept', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ bookingId: btn.dataset.accept }) });
+        tab = 'open';
+        await load();
+      } catch (err) { alert(err.message || 'Could not accept'); }
+    };
     $('tab-open').onclick = () => { tab='open'; render(); };
+    $('tab-available').onclick = () => { tab='available'; render(); };
     $('tab-done').onclick = () => { tab='done'; render(); };
     $('signin').onclick = async () => {
       try {
