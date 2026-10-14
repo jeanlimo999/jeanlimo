@@ -7,7 +7,7 @@ export async function GET() {
   if (!session) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
   const db = supabaseAdmin();
   if (!db) return NextResponse.json({ error: "Not configured" }, { status: 500 });
-  const { data, error } = await db.from("farm_outs").select("*").neq("status", "returned").order("created_at", { ascending: false }).limit(200);
+  const { data, error } = await db.from("farm_outs").select("*").neq("status", "returned").neq("status", "cancelled").order("created_at", { ascending: false }).limit(200);
   if (error) return NextResponse.json({ error: error.message, jobs: [] });
   const jobs = (data || []).map((row: any) => ({
     id: row.id,
