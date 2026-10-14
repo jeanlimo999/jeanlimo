@@ -14,6 +14,7 @@ export async function POST(req: NextRequest) {
     pin: String(body.pin || "").trim(),
     vehicle: String(body.vehicle || "sedan").trim() || "sedan",
     photo_url: String(body.photo_url || "").trim(),
+    email: String(body.email || "").trim().toLowerCase(),
     active: true,
   };
   if (!row.name) return NextResponse.json({ error: "Name required" }, { status: 400 });
@@ -34,6 +35,7 @@ export async function PATCH(req: NextRequest) {
   if (body.photo_url != null) patch.photo_url = String(body.photo_url);
   if (body.name != null) patch.name = String(body.name);
   if (body.phone != null) patch.phone = String(body.phone).replace(/\D/g, "");
+  if (body.email != null) patch.email = String(body.email).trim().toLowerCase();
   const { data, error } = await db.from("drivers").update(patch).eq("id", id).select("*").single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ driver: data });
