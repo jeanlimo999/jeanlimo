@@ -9,8 +9,22 @@ export async function POST(req: NextRequest) {
   if (!db) return NextResponse.json({ error: "Supabase is not configured" }, { status: 500 });
   const body = await req.json();
   const bookingId = String(body.bookingId || "");
-  const driverId = body.driverId ? String(body.driverId) : null;
   if (!bookingId) return NextResponse.json({ error: "Booking required" }, { status: 400 });
+
+  if (body.auction) {
+    const { error } = await db
+      .from("bookings")
+      .update({
+        assigned_driver_id: null,
+        trip_status: "auction",
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", bookingId);
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ ok: true, auction: true });
+  }
+
+  const driverId = body.driverId ? String(body.driverId) : null;
   const { error } = await db
     .from("bookings")
     .update({
