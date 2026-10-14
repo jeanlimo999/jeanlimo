@@ -11,8 +11,13 @@ function toJobs(row: any, driverId: string) {
   const split = rawNotes.indexOf("Return:");
   const outboundNotes = (split >= 0 ? rawNotes.slice(0, split) : rawNotes).replace(/\s*\|\s*$/, "").trim();
   const returnNotes = split >= 0 ? rawNotes.slice(split + 7).trim() : "";
+  const total = Number(row.amount_cents || 0);
+  const hasReturn = Boolean(row.return_date || row.return_pickup);
+  const legCents = hasReturn ? Math.round(total / 2) : total;
+  const driverPay = Math.round(legCents * 0.9) / 100;
   const base = {
     bookingId: row.id,
+    driverPay,
     guestName: guest.full_name || "Guest",
     guestPhone: guest.phone || "",
     vehicle: row.vehicle,
