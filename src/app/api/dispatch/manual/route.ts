@@ -9,6 +9,12 @@ function code() {
   return `INH-${n}`;
 }
 
+function parseAmount(raw: unknown) {
+  const cleaned = String(raw ?? "").replace(/[^0-9.]/g, "");
+  const n = Number(cleaned);
+  return Number.isFinite(n) ? n : 0;
+}
+
 async function emailOwner(booking: {
   confirmation: string;
   name: string;
@@ -48,11 +54,11 @@ async function emailOwner(booking: {
       `Pickup address: ${booking.pickup}`,
       `Drop-off address: ${booking.dropoff}`,
       "",
-      `Amount: ${booking.amount ? "$" + Number(booking.amount).toFixed(2) : ""}`,
+      `Amount: ${booking.amount ? "$" + parseAmount(booking.amount).toFixed(2) : ""}`,
       `Notes: Manual in-house trip`,
       "",
       "Jean Limo LLC",
-      "Jeannie 281-917-0929 · Cash 281-917-0085",
+      "Jeannie 281-917-0929 \u00b7 Cash 281-917-0085",
     ].join("\n");
 
     await transporter.sendMail({
@@ -98,7 +104,7 @@ export async function POST(req: Request) {
     clientId = client.id;
   }
 
-  const amount = Number(body.amount || 0);
+  const amount = parseAmount(body.amount);
   const notes = [String(body.notes || "").trim(), "In-house manual trip"].filter(Boolean).join(" | ");
   const confirmation = code();
   const row = {
@@ -114,7 +120,7 @@ export async function POST(req: Request) {
     dropoff,
     flight_number: String(body.flight || "").slice(0, 20),
     passengers: Number(body.passengers || 0) || null,
-    amount_cents: Math.round((Number.isFinite(amount) ? amount : 0) * 100),
+    amount_cents: Math.round(amount * 100),
     passenger_notes: notes,
     breakdown: "Manual in-house",
     updated_at: new Date().toISOString(),
