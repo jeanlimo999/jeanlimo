@@ -100,7 +100,7 @@
       const status = j.tripStatus || '';
       const started = ['on_the_way','on_location','onboard'].includes(status);
       const pickup = pickupDate(j);
-      const openAt = pickup ? pickup.getTime() - 3*60*60*1000 : 0;
+      const openAt = pickup ? pickup.getTime() - 2*60*60*1000 : 0;
       const ready = started || (pickup && Date.now() >= openAt);
       const step = nextStep(status);
       const label = ready ? step.label : ('Earliest start: ' + (pickup ? clock(new Date(openAt)) : ''));
