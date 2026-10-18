@@ -1,49 +1,28 @@
-import Link from "next/link";
-
-export const metadata = {
-  title: "Privacy Policy | Jean Limo",
-  description: "How Jean Limo LLC collects and uses booking information.",
-};
-
 export default function PrivacyPage() {
   return (
-    <main className="min-h-screen bg-zinc-950 px-6 py-16 text-zinc-200">
-      <div className="mx-auto max-w-2xl">
-        <Link href="/" className="text-sm text-yellow-500">
-          ← jeanlimo.com
-        </Link>
-        <h1 className="mt-6 font-serif text-4xl text-yellow-400">Privacy Policy</h1>
-        <p className="mt-2 text-sm text-zinc-500">Jean Limo LLC · Houston, Texas · Updated September 2026</p>
-        <div className="mt-8 space-y-5 text-sm leading-6 text-zinc-300">
-          <p>
-            Jean Limo LLC (“we”) provides private chauffeur and ground transportation. This policy covers the website, the Jean Limo booking app at jeanlimo.com/app, and related dispatch tools.
-          </p>
-          <h2 className="pt-2 text-lg text-white">Information we collect</h2>
-          <p>
-            Name, email, phone, pickup and drop-off addresses, flight number, ride date and time, vehicle choice, payment confirmation from Stripe, and trip status. If you allow location access, we may use it only to complete a booked ride.
-          </p>
-          <h2 className="pt-2 text-lg text-white">How we use it</h2>
-          <p>
-            To quote and confirm rides, assign a chauffeur, send updates, process payment, prevent fraud, and improve service. We do not sell personal information.
-          </p>
-          <h2 className="pt-2 text-lg text-white">Payments</h2>
-          <p>
-            Card charges are processed by Stripe. We do not store full card numbers on our servers.
-          </p>
-          <h2 className="pt-2 text-lg text-white">Sharing</h2>
-          <p>
-            We share trip details with the assigned chauffeur and dispatch. Providers such as Stripe, Google Maps, and our hosting or database vendors process data only to run the service.
-          </p>
-          <h2 className="pt-2 text-lg text-white">Retention and rights</h2>
-          <p>
-            Booking records are kept as needed for operations, taxes, and legal requirements. Email info@jeanlimo.com to request a copy, correction, or deletion of your information where the law allows.
-          </p>
-          <h2 className="pt-2 text-lg text-white">Contact</h2>
-          <p>
-            Jean Limo LLC · Houston, TX · info@jeanlimo.com · Jeannie 281-917-0929 · Cash 281-917-0085
-          </p>
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 px-4 py-16">
+      <div className="max-w-2xl mx-auto">
+        <h1 className="font-serif text-3xl text-yellow-500 mb-6">Privacy Policy</h1>
+        <div className="space-y-6 text-sm text-zinc-300 leading-relaxed">
+          <p>Jean Limo LLC respects your privacy. This policy describes how we collect, use, and protect information when you book or use our services.</p>
+
+          <h2 className="text-lg text-yellow-400 font-medium">Information We Collect</h2>
+          <p>When you book a ride we collect your name, phone number, email address, pickup and drop-off locations, and payment information processed by Stripe. We may also collect vehicle preference, passenger count, and any notes you provide.</p>
+
+          <h2 className="text-lg text-yellow-400 font-medium">How We Use It</h2>
+          <p>We use your information to fulfill bookings, communicate about your ride (including optional text messages when you consent), process payments, and improve our service. We do not sell your personal information.</p>
+
+          <h2 className="text-lg text-yellow-400 font-medium">SMS Consent</h2>
+          <p>Text message consent is collected separately via an unchecked checkbox on the booking form. You may opt out at any time by replying STOP. We honor opt-out requests promptly.</p>
+
+          <h2 className="text-lg text-yellow-400 font-medium">Data Security & Retention</h2>
+          <p>We take reasonable measures to protect your information. Booking records are retained as needed for operations, accounting, and legal requirements.</p>
+
+          <h2 className="text-lg text-yellow-400 font-medium">Contact</h2>
+          <p>Questions about this policy? Contact Jean Limo LLC at 281-917-0929 or 281-917-0085.</p>
         </div>
+        <a href="/" className="inline-block mt-8 text-yellow-500 hover:underline">← Back to Home</a>
       </div>
-    </main>
+    </div>
   );
 }
