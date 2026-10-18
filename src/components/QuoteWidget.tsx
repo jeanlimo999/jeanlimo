@@ -52,6 +52,7 @@ export default function QuoteWidget() {
   const [luggage, setLuggage] = useState(1);
   const [notes, setNotes] = useState("");
   const [returnNotes, setReturnNotes] = useState("");
+  const [smsConsent, setSmsConsent] = useState(false);
   const resultsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -136,7 +137,7 @@ export default function QuoteWidget() {
           returnFlightNumber: wantReturn ? returnFlightNumber : "", returnDate: wantReturn ? returnDate : "",
           returnTime: wantReturn ? returnTime : "", returnPickup: wantReturn ? returnPickup || dropoff : "",
           returnDropoff: wantReturn ? returnDropoff || pickup : "",
-          smsConsent: true,
+          smsConsent,
         }),
       });
       const data = await res.json();
@@ -240,7 +241,12 @@ export default function QuoteWidget() {
               </div>
             )}
           </div>
-          <p className="text-xs text-zinc-400 leading-relaxed">By continuing, you agree to receive text messages from Jean Limo about this booking, including when your driver is on the way and other ride updates. Message frequency varies. Msg & data rates may apply. Reply STOP to opt out.</p>
+          <div className="flex items-start gap-2 text-xs text-zinc-300">
+            <input type="checkbox" id="smsConsent" checked={smsConsent} onChange={(e) => setSmsConsent(e.target.checked)} className="mt-0.5" />
+            <label htmlFor="smsConsent" className="leading-relaxed">
+              I agree to receive text messages from Jean Limo about this booking, including when my driver is on the way and other ride updates. Message frequency varies. Msg & data rates may apply. Reply STOP to opt out, HELP for help. See our <a href="/terms" className="text-yellow-500 underline">Terms</a> and <a href="/privacy" className="text-yellow-500 underline">Privacy Policy</a>.
+            </label>
+          </div>
           <button onClick={handlePay} disabled={loading} className="w-full py-3 bg-yellow-500 hover:bg-yellow-400 disabled:opacity-60 text-zinc-900 font-semibold rounded-lg transition">{loading ? "Redirecting to Stripe…" : "Continue & Pay Securely"}</button>
           <button onClick={() => setShowBooking(false)} className="w-full py-1.5 text-sm text-zinc-400 hover:text-white">← Back to vehicles</button>
         </div>
