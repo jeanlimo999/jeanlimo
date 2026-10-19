@@ -474,8 +474,8 @@ export default function DispatchPage() {
                 <input className="w-full rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" type="time" value={trip.time} onChange={(e) => setTrip({ ...trip, time: e.target.value })} />
               </label>
             </div>
-            <AddressInput id="manual-pickup" value={trip.pickup} onChange={(v) => setTrip({ ...trip, pickup: v })} placeholder="Pickup" className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" />
-            <AddressInput id="manual-dropoff" value={trip.dropoff} onChange={(v) => setTrip({ ...trip, dropoff: v })} placeholder="Drop-off" className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" />
+            <AddressInput id="manual-pickup" value={trip.pickup} onChange={(v) => setTrip({ ...trip, pickup: v })} placeholder="Pickup" className="w-full rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" />
+            <AddressInput id="manual-dropoff" value={trip.dropoff} onChange={(v) => setTrip({ ...trip, dropoff: v })} placeholder="Drop-off" className="w-full rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" />
             <div className="grid grid-cols-2 gap-2">
               <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" placeholder="Flight" value={trip.flight} onChange={(e) => setTrip({ ...trip, flight: e.target.value })} />
               <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" placeholder="Passengers" value={trip.passengers} onChange={(e) => setTrip({ ...trip, passengers: e.target.value })} />
@@ -508,8 +508,8 @@ export default function DispatchPage() {
                 <input className="w-full rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" type="time" value={trip.time} onChange={(e) => setTrip({ ...trip, time: e.target.value })} />
               </label>
             </div>
-            <AddressInput id="edit-pickup" value={trip.pickup} onChange={(v) => setTrip({ ...trip, pickup: v })} placeholder="Pickup" className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" />
-            <AddressInput id="edit-dropoff" value={trip.dropoff} onChange={(v) => setTrip({ ...trip, dropoff: v })} placeholder="Drop-off" className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" />
+            <AddressInput id="edit-pickup" value={trip.pickup} onChange={(v) => setTrip({ ...trip, pickup: v })} placeholder="Pickup" className="w-full rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" />
+            <AddressInput id="edit-dropoff" value={trip.dropoff} onChange={(v) => setTrip({ ...trip, dropoff: v })} placeholder="Drop-off" className="w-full rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" />
             <div className="grid grid-cols-2 gap-2">
               <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" placeholder="Flight" value={trip.flight} onChange={(e) => setTrip({ ...trip, flight: e.target.value })} />
               <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" placeholder="Passengers" value={trip.passengers} onChange={(e) => setTrip({ ...trip, passengers: e.target.value })} />
