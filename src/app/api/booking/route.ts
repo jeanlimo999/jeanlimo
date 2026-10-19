@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import nodemailer from "nodemailer";
 import { createClient } from "@supabase/supabase-js";
-import { bookingFromSession, formatDateTime } from "@/lib/booking";
+import { bookingFromSession, formatDateTime, blacklaneSubject } from "@/lib/booking";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-06-20",
@@ -124,18 +124,26 @@ export async function POST(req: NextRequest) {
         service: "gmail",
         auth: { user: gmailUser, pass: gmailPass },
       });
-      const subject =
-        action === "cancel"
-          ? `Cancel request ${booking.confirmation}`
-          : `Change request ${booking.confirmation}`;
+      const kind = action === "cancel" ? "Ride cancellation" : "Change request";
+      const subject = blacklaneSubject(kind, booking.confirmation, booking.date);
       const originalWhen = formatDateTime(booking.date, booking.time) || "n/a";
       const newWhen = formatDateTime(newDate || booking.date, newTime || booking.time) || originalWhen;
+      const text = [
+        `${action === "cancel" ? "Cancel" : "Change"} request received`,
+        "",
+        "Ride details",
+        `Booking no: ${booking.confirmation}`,
+        `Customer: ${booking.name || ""}`,
+        `Original: ${originalWhen}`,
+        action === "change" ? `Requested: ${newWhen}` : "",
+        notes ? `Notes: ${notes}` : "",
+      ].filter(Boolean).join("\n");
       await transporter.sendMail({
         from: `"Jean Limo" <${gmailUser}>`,
         to: owner,
         replyTo: booking.email || gmailUser,
         subject,
-        text: `${action} ${booking.confirmation} ${booking.name} ${newWhen} ${notes}`,
+        text,
       });
     }
     return NextResponse.json({
