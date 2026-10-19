@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 import { readDispatchSession } from "@/lib/session";
 import { supabaseAdmin } from "@/lib/supabase";
-import { formatDateTime, blacklaneSubject, blacklaneDate } from "@/lib/booking";
+import { formatDateTime, blacklaneSubject, blacklaneDate, rideDetailsHtml } from "@/lib/booking";
 
 function code() {
   const n = Math.floor(1000 + Math.random() * 9000);
@@ -40,28 +40,20 @@ async function emailOwner(booking: {
       auth: { user, pass },
     });
 
-    const text = [
-      "Ride details",
-      `Booking no: ${booking.confirmation}`,
-      "",
-      `${blacklaneDate(booking.date)} ${formatDateTime("", booking.time)}`.trim(),
-      "",
-      `From ${booking.pickup}`,
-      `To ${booking.dropoff}`,
-      "",
-      `Vehicle: ${booking.vehicle}`,
-      `Name: ${booking.name}`,
-      `Phone: ${booking.phone}`,
-      `Flight: ${booking.flight}`,
-      `Passengers: ${booking.passengers}`,
-      `Additional note: ${booking.notes}`,
-      "",
-      `Amount: ${booking.amount ? "$" + parseAmount(booking.amount).toFixed(2) : ""}`,
-      `Notes: Manual in-house trip`,
-      "",
-      "Jean Limo LLC",
-      "Jeannie 281-917-0929 · Cash 281-917-0085",
-    ].join("\n");
+    const html = rideDetailsHtml({
+      confirmation: booking.confirmation,
+      dateLabel: blacklaneDate(booking.date),
+      time: formatDateTime("", booking.time),
+      pickup: booking.pickup,
+      dropoff: booking.dropoff,
+      vehicle: booking.vehicle,
+      name: booking.name,
+      phone: booking.phone,
+      flight: booking.flight,
+      notes: [booking.notes, booking.passengers ? `Passengers: ${booking.passengers}` : ""].filter(Boolean).join(" | "),
+      amount: booking.amount ? `Amount: $${parseAmount(booking.amount).toFixed(2)}` : "",
+      extra: `<div style="margin-top:12px;">Manual in-house trip<br/>Jean Limo LLC<br/>Jeannie 281-917-0929 · Cash 281-917-0085</div>`,
+    });
 
     const subject = blacklaneSubject("Ride confirmation", booking.confirmation, booking.date);
 
@@ -69,7 +61,7 @@ async function emailOwner(booking: {
       from: `"Jean Limo" <${user}>`,
       to,
       subject,
-      text,
+      html,
     });
     return true;
   } catch (err) {
