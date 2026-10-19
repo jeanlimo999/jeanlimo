@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 import { supabaseAdmin } from "@/lib/supabase";
-import { formatDateTime, blacklaneSubject, blacklaneDate, rideDetailsHtml } from "@/lib/booking";
+import { formatDateTime, blacklaneDate, rideDetailsHtml, jeanLimoSubject } from "@/lib/booking";
 
 const SITE = "https://jeanlimo.com";
 const CRON_SECRET = process.env.CRON_SECRET || "";
@@ -131,7 +131,12 @@ export async function GET(req: NextRequest) {
     if (pickup < windowStart || pickup > windowEnd) continue;
 
     try {
-      const subject = blacklaneSubject("Reminder", b.confirmation, b.ride_date);
+      const time = formatDateTime("", b.ride_time) || b.ride_time || "";
+      const subject = jeanLimoSubject({
+        time,
+        customer: client.full_name,
+        pickingUp: true,
+      });
       await transporter.sendMail({
         from: `"Jean Limo" <${user}>`,
         to: client.email,
