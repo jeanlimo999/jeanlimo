@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 import { readDispatchSession } from "@/lib/session";
 import { supabaseAdmin } from "@/lib/supabase";
+import { blacklaneSubject, blacklaneDate, formatTimeDisplay } from "@/lib/booking";
 
 function prettyDate(value?: string) {
   const m = String(value || "").match(/^(\d{4})-(\d{2})-(\d{2})/);
@@ -30,24 +31,32 @@ async function emailDrivers(db: any, booking: any) {
   const total = Number(booking.amount_cents || 0);
   const hasReturn = Boolean(booking.return_date || booking.return_pickup);
   const pay = Math.round((hasReturn ? total / 2 : total) * 0.80);
-  const when = [prettyDate(booking.ride_date), prettyTime(booking.ride_time)].filter(Boolean).join(" at ");
+  const dateStr = booking.ride_date;
+  const when = [blacklaneDate(dateStr), prettyTime(booking.ride_time)].filter(Boolean).join(" ");
   const text = [
-    "A job is available.",
+    "You've been offered a ride",
+    "A job is available. Open the driver app and check Available.",
     "",
-    `Date: ${when}`,
+    "Ride details",
+    `Booking no: ${booking.confirmation || ""}`,
+    "",
+    when,
+    "",
+    `From ${booking.pickup || ""}`,
+    `To ${booking.dropoff || ""}`,
+    "",
     `Pay: ${money(pay)}`,
-    `Pickup: ${booking.pickup || ""}`,
-    `Drop-off: ${booking.dropoff || ""}`,
     "",
-    "Open the driver app and check Available.",
     "https://jeanlimo.com/driver",
   ].join("\n");
+
+  const subject = blacklaneSubject("Ride assignment", booking.confirmation || "", dateStr);
 
   const transporter = nodemailer.createTransport({ service: "gmail", auth: { user, pass } });
   await transporter.sendMail({
     from: `"Jean Limo" <${user}>`,
     to: emails.join(","),
-    subject: `Job available ${when} · ${money(pay)}`,
+    subject,
     text,
   });
   return emails.length;
