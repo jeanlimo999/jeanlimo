@@ -1,61 +1,57 @@
 import { NextRequest, NextResponse } from "next/server";
 import nodemailer from "nodemailer";
-import { formatDateTime, blacklaneSubject, blacklaneDate } from "@/lib/booking";
+import { formatDateTime, blacklaneSubject, blacklaneDate, rideDetailsHtml } from "@/lib/booking";
 import { saveWebsiteBooking } from "@/lib/portal";
 
 const OWNER_EMAIL = process.env.BOOKING_NOTIFY_EMAIL || "cashtienlam@gmail.com";
 const SITE = "https://jeanlimo.com";
 
-function bookingText(b: any) {
+function bookingHtml(b: any) {
   const dateLabel = blacklaneDate(b.date);
-  const lines = [
-    "Ride details",
-    `Booking no: ${b.confirmation || "N/A"}`,
-    "",
-    dateLabel ? `${dateLabel} ${formatDateTime("", b.time) || b.time || ""}`.trim() : formatDateTime(b.date, b.time),
-    "",
-    `From ${b.pickup || ""}`,
-    `To ${b.dropoff || ""}`,
-    "",
-    `Vehicle: ${b.vehicle || ""}`,
-    `Type: ${
-      String(b.type || "").toLowerCase() === "hourly"
-        ? "hourly"
-        : b.returnDate || b.returnPickup || b.returnDropoff
-          ? "round trip"
-          : "transfer"
-    }`,
-    `Name: ${b.name || ""}`,
-    `Phone: ${b.phone || ""}`,
-    `Email: ${b.email || ""}`,
-    `Flight: ${b.flightNumber || ""}`,
-    `Additional note: ${b.notes || ""}`,
-  ];
+  const time = formatDateTime("", b.time) || b.time || "";
+  const type =
+    String(b.type || "").toLowerCase() === "hourly"
+      ? "hourly"
+      : b.returnDate || b.returnPickup || b.returnDropoff
+        ? "round trip"
+        : "transfer";
 
+  let extra = "";
   if (b.returnDate || b.returnTime || b.returnPickup || b.returnDropoff) {
-    lines.push(
-      "",
-      "Return trip",
-      `Date / time: ${formatDateTime(b.returnDate, b.returnTime)}`,
-      `Return flight: ${b.returnFlightNumber || ""}`,
-      `Return pickup: ${b.returnPickup || ""}`,
-      `Return drop-off: ${b.returnDropoff || ""}`,
-      `Return note: ${b.returnNotes || ""}`
-    );
+    extra += `
+      <div style="margin-top:16px;font-weight:700;">Return trip</div>
+      <div>${formatDateTime(b.returnDate, b.returnTime)}</div>
+      <div style="margin:6px 0;"><strong>From</strong> ${String(b.returnPickup || "").replace(/</g, "<")}</div>
+      <div><strong>To</strong> ${String(b.returnDropoff || "").replace(/</g, "<")}</div>
+      ${b.returnFlightNumber ? `<div style="margin:8px 0;"><span style="background:#fff3cd;color:#856404;padding:4px 8px;border-radius:4px;font-weight:700;">Flight: ${String(b.returnFlightNumber).replace(/</g, "<")}</span></div>` : ""}
+      ${b.returnNotes ? `<div>Note: ${String(b.returnNotes).replace(/</g, "<")}</div>` : ""}
+    `;
   }
 
-  lines.push(
-    "",
-    `Amount paid: ${b.amount != null ? "$" + Number(b.amount).toFixed(2) : ""}`,
-    `Notes: ${b.breakdown || ""}`,
-    "",
-    "Jean Limo LLC",
-    "Jeannie 281-917-0929 · Cash 281-917-0085",
-    `My trips: ${SITE}/account`,
-    `Manage booking: ${SITE}/manage`
-  );
+  extra += `
+    <div style="margin-top:16px;">
+      Jean Limo LLC<br/>
+      Jeannie 281-917-0929 · Cash 281-917-0085<br/>
+      <a href="${SITE}/account">My trips</a> · <a href="${SITE}/manage">Manage booking</a>
+    </div>
+  `;
 
-  return lines.join("\n");
+  return rideDetailsHtml({
+    confirmation: b.confirmation,
+    dateLabel,
+    time,
+    pickup: b.pickup,
+    dropoff: b.dropoff,
+    vehicle: b.vehicle,
+    type,
+    name: b.name,
+    phone: b.phone,
+    email: b.email,
+    flight: b.flightNumber,
+    notes: b.notes,
+    amount: b.amount != null ? `Amount paid: $${Number(b.amount).toFixed(2)}` : "",
+    extra,
+  });
 }
 
 async function saveWithRetry(booking: any) {
@@ -95,10 +91,10 @@ export async function POST(req: NextRequest) {
       auth: { user, pass },
     });
 
-    const text = bookingText(booking);
-    const ownerText = saved.saved
-      ? text
-      : `THIS BOOKING IS NOT ON THE DISPATCH BOARD.\nReason: ${saved.error}\nAdd it with Add trip.\n\n${text}`;
+    const html = bookingHtml(booking);
+    const ownerHtml = saved.saved
+      ? html
+      : `<p style="color:#c00;font-weight:700;">THIS BOOKING IS NOT ON THE DISPATCH BOARD.<br/>Reason: ${saved.error}<br/>Add it with Add trip.</p>${html}`;
 
     const subject = blacklaneSubject("Ride confirmation", booking.confirmation, booking.date);
 
@@ -107,7 +103,7 @@ export async function POST(req: NextRequest) {
       to: OWNER_EMAIL,
       replyTo: booking.email || user,
       subject: saved.saved ? subject : `NOT ON BOARD ${booking.confirmation}`,
-      text: ownerText,
+      html: ownerHtml,
     });
 
     let customerSent = false;
@@ -117,7 +113,7 @@ export async function POST(req: NextRequest) {
         to: String(booking.email),
         replyTo: OWNER_EMAIL,
         subject,
-        text: `Thank you for booking Jean Limo.\n\n${text}`,
+        html: `<p>Thank you for booking Jean Limo.</p>${html}`,
       });
       customerSent = true;
     }
