@@ -38,7 +38,7 @@ function reminderHtml(b: any, client: any) {
   extra += `
     <div style="margin-top:16px;">
       Need to make a change or cancel?<br/>
-      <a href="${SITE}/manage">Manage booking</a> · <a href="${SITE}/app">Mobile</a><br/><br/>
+      <a href="${SITE}/app">Open in app</a> · <a href="${SITE}/manage">Manage booking</a><br/><br/>
       Questions? Call or text Jeannie at 281-917-0929.<br/><br/>
       Thank you for choosing Jean Limo.<br/>
       Jean Limo LLC · Houston, TX
