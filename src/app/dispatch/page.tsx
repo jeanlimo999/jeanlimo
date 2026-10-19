@@ -382,9 +382,7 @@ export default function DispatchPage() {
         {!completed && (
           <button onClick={() => startEdit(j)} className="mt-3 w-full rounded-xl border border-[#C4A574]/50 py-2 text-sm text-[#E8D3B0]">Edit trip</button>
         )}
-        {!completed && (
-          <button onClick={() => removeTrip(j)} className="mt-3 w-full rounded-xl border border-red-500/40 py-2 text-sm text-red-300">Delete trip</button>
-        )}
+        <button onClick={() => removeTrip(j)} className="mt-3 w-full rounded-xl border border-red-500/40 py-2 text-sm text-red-300">Delete trip</button>
         {!completed && (
           <select className="mt-3 w-full rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" value={j.assignedDriverId || ""} onChange={(e) => assign(j, e.target.value)}>
             <option value="">Unassigned</option>
