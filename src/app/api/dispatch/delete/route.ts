@@ -2,12 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 import { readDispatchSession } from "@/lib/session";
 import { supabaseAdmin } from "@/lib/supabase";
-import { blacklaneSubject, blacklaneDate, formatTimeDisplay } from "@/lib/booking";
+import { blacklaneSubject, blacklaneDate, formatTimeDisplay, rideDetailsHtml } from "@/lib/booking";
 
-function prettyDate(value?: string) {
-  const m = String(value || "").match(/^(\d{4})-(\d{2})-(\d{2})/);
-  return m ? `${m[2]}/${m[3]}/${m[1]}` : "";
-}
 function prettyTime(value?: string) {
   const m = String(value || "").match(/^(\d{1,2}):(\d{2})/);
   if (!m) return "";
@@ -17,12 +13,12 @@ function prettyTime(value?: string) {
   return `${hour}:${m[2]} ${ampm}`;
 }
 
-async function sendCancel(to: string, subject: string, text: string) {
+async function sendCancel(to: string, subject: string, html: string) {
   const user = process.env.GMAIL_USER;
   const pass = process.env.GMAIL_APP_PASSWORD;
   if (!user || !pass || !to.includes("@")) return;
   const transporter = nodemailer.createTransport({ service: "gmail", auth: { user, pass } });
-  await transporter.sendMail({ from: `"Jean Limo" <${user}>`, to, subject, text }).catch(() => null);
+  await transporter.sendMail({ from: `"Jean Limo" <${user}>`, to, subject, html }).catch(() => null);
 }
 
 export async function POST(req: NextRequest) {
@@ -38,24 +34,22 @@ export async function POST(req: NextRequest) {
     const { error } = await db.from("farm_outs").update({ status: "cancelled", updated_at: new Date().toISOString() }).eq("id", body.id);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     const dateStr = row.ride_date;
-    const when = [blacklaneDate(dateStr), prettyTime(row.ride_time)].filter(Boolean).join(" ");
-    const text = [
-      "Ride reassigned",
-      "This ride has been removed from your schedule.",
-      "",
-      "Ride details",
-      `Booking no: ${row.confirmation || ""}`,
-      "",
-      when,
-      "",
-      `From ${row.pickup || ""}`,
-      `To ${row.dropoff || ""}`,
-      "",
-      `Customer: ${row.guest_name || ""}`,
-    ].join("\n");
+    const html = `
+      <p style="font-weight:700;">Ride reassigned</p>
+      <p>This ride has been removed from your schedule.</p>
+      ${rideDetailsHtml({
+        confirmation: row.confirmation,
+        dateLabel: blacklaneDate(dateStr),
+        time: prettyTime(row.ride_time),
+        pickup: row.pickup,
+        dropoff: row.dropoff,
+        name: row.guest_name,
+        flight: row.flight_number || row.flight,
+      })}
+    `;
     if (row.partner_email) {
       const subject = blacklaneSubject("Ride cancellation", row.confirmation || "", dateStr);
-      await sendCancel(row.partner_email, subject, text);
+      await sendCancel(row.partner_email, subject, html);
     }
     return NextResponse.json({ ok: true });
   }
@@ -82,25 +76,23 @@ export async function POST(req: NextRequest) {
   if (driver?.email) {
     const dateStr = isReturn ? booking.return_date : booking.ride_date;
     const timeStr = isReturn ? booking.return_time : booking.ride_time;
-    const when = [blacklaneDate(dateStr), prettyTime(timeStr)].filter(Boolean).join(" ");
     const guest = booking.clients || {};
     const conf = `${booking.confirmation || ""}${isReturn ? " return" : ""}`;
-    const text = [
-      "Ride reassigned",
-      "This ride has been removed from your schedule.",
-      "",
-      "Ride details",
-      `Booking no: ${conf}`,
-      "",
-      when,
-      "",
-      `From ${(isReturn ? booking.return_pickup : booking.pickup) || ""}`,
-      `To ${(isReturn ? booking.return_dropoff : booking.dropoff) || ""}`,
-      "",
-      `Customer: ${guest.full_name || ""}`,
-    ].join("\n");
+    const html = `
+      <p style="font-weight:700;">Ride reassigned</p>
+      <p>This ride has been removed from your schedule.</p>
+      ${rideDetailsHtml({
+        confirmation: conf,
+        dateLabel: blacklaneDate(dateStr),
+        time: prettyTime(timeStr),
+        pickup: isReturn ? booking.return_pickup : booking.pickup,
+        dropoff: isReturn ? booking.return_dropoff : booking.dropoff,
+        name: guest.full_name,
+        flight: isReturn ? booking.return_flight_number : booking.flight_number,
+      })}
+    `;
     const subject = blacklaneSubject("Ride cancellation", conf, dateStr);
-    await sendCancel(driver.email, subject, text);
+    await sendCancel(driver.email, subject, html);
   }
   return NextResponse.json({ ok: true, emailed: Boolean(driver?.email) });
 }
