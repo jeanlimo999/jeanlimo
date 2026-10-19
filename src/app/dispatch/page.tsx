@@ -465,8 +465,24 @@ export default function DispatchPage() {
             <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" placeholder="Passenger name" value={trip.name} onChange={(e) => setTrip({ ...trip, name: e.target.value })} />
             <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" placeholder="Phone" value={trip.phone} onChange={(e) => setTrip({ ...trip, phone: e.target.value })} />
             <div className="grid grid-cols-2 gap-2">
-              <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" type="date" value={trip.date} onChange={(e) => setTrip({ ...trip, date: e.target.value })} />
-              <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" type="time" value={trip.time} onChange={(e) => setTrip({ ...trip, time: e.target.value })} />
+              <input
+                className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2"
+                type={trip.date ? "date" : "text"}
+                placeholder="Date"
+                value={trip.date}
+                onFocus={(e) => { e.currentTarget.type = "date"; }}
+                onBlur={(e) => { if (!e.currentTarget.value) e.currentTarget.type = "text"; }}
+                onChange={(e) => setTrip({ ...trip, date: e.target.value })}
+              />
+              <input
+                className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2"
+                type={trip.time ? "time" : "text"}
+                placeholder="Time"
+                value={trip.time}
+                onFocus={(e) => { e.currentTarget.type = "time"; }}
+                onBlur={(e) => { if (!e.currentTarget.value) e.currentTarget.type = "text"; }}
+                onChange={(e) => setTrip({ ...trip, time: e.target.value })}
+              />
             </div>
             <AddressInput id="manual-pickup" value={trip.pickup} onChange={(v) => setTrip({ ...trip, pickup: v })} placeholder="Pickup" className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" />
             <AddressInput id="manual-dropoff" value={trip.dropoff} onChange={(v) => setTrip({ ...trip, dropoff: v })} placeholder="Drop-off" className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" />
@@ -482,8 +498,8 @@ export default function DispatchPage() {
               </select>
               <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" placeholder="Fare $" value={trip.amount} onChange={(e) => setTrip({ ...trip, amount: e.target.value })} />
             </div>
-            <textarea className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" placeholder="Notes, gate code, who to bill" value={trip.notes} onChange={(e) => setTrip({ ...trip, notes: e.target.value })} />
-            <button className="rounded-xl bg-gradient-to-b from-[#E8D3B0] to-[#C4A574] py-3 font-semibold text-[#16110a]">Save trip</button>
+            <textarea className="w-full rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" placeholder="Notes, gate code, who to bill" value={trip.notes} onChange={(e) => setTrip({ ...trip, notes: e.target.value })} />
+            <button className="w-full rounded-xl bg-gradient-to-b from-[#E8D3B0] to-[#C4A574] py-3 font-semibold text-[#16110a]">Save trip</button>
           </form>
         )}
 
@@ -493,8 +509,24 @@ export default function DispatchPage() {
             <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" placeholder="Passenger name" value={trip.name} onChange={(e) => setTrip({ ...trip, name: e.target.value })} />
             <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" placeholder="Phone" value={trip.phone} onChange={(e) => setTrip({ ...trip, phone: e.target.value })} />
             <div className="grid grid-cols-2 gap-2">
-              <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" type="date" value={trip.date} onChange={(e) => setTrip({ ...trip, date: e.target.value })} />
-              <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" type="time" value={trip.time} onChange={(e) => setTrip({ ...trip, time: e.target.value })} />
+              <input
+                className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2"
+                type={trip.date ? "date" : "text"}
+                placeholder="Date"
+                value={trip.date}
+                onFocus={(e) => { e.currentTarget.type = "date"; }}
+                onBlur={(e) => { if (!e.currentTarget.value) e.currentTarget.type = "text"; }}
+                onChange={(e) => setTrip({ ...trip, date: e.target.value })}
+              />
+              <input
+                className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2"
+                type={trip.time ? "time" : "text"}
+                placeholder="Time"
+                value={trip.time}
+                onFocus={(e) => { e.currentTarget.type = "time"; }}
+                onBlur={(e) => { if (!e.currentTarget.value) e.currentTarget.type = "text"; }}
+                onChange={(e) => setTrip({ ...trip, time: e.target.value })}
+              />
             </div>
             <AddressInput id="edit-pickup" value={trip.pickup} onChange={(v) => setTrip({ ...trip, pickup: v })} placeholder="Pickup" className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" />
             <AddressInput id="edit-dropoff" value={trip.dropoff} onChange={(v) => setTrip({ ...trip, dropoff: v })} placeholder="Drop-off" className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" />
@@ -510,7 +542,7 @@ export default function DispatchPage() {
               </select>
               <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" placeholder="Fare $ (e.g. 150)" value={trip.amount} onChange={(e) => setTrip({ ...trip, amount: e.target.value })} />
             </div>
-            <textarea className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" placeholder="Notes, gate code, who to bill" value={trip.notes} onChange={(e) => setTrip({ ...trip, notes: e.target.value })} />
+            <textarea className="w-full rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" placeholder="Notes, gate code, who to bill" value={trip.notes} onChange={(e) => setTrip({ ...trip, notes: e.target.value })} />
             <div className="flex gap-2">
               <button className="flex-1 rounded-xl bg-gradient-to-b from-[#E8D3B0] to-[#C4A574] py-3 font-semibold text-[#16110a]">Update trip</button>
               <button type="button" onClick={() => { setEditingJob(null); setTrip({ name: "", phone: "", date: "", time: "", pickup: "", dropoff: "", flight: "", passengers: "", notes: "", vehicle: "sedan", amount: "" }); }} className="rounded-xl border border-white/10 px-4 py-3 text-sm text-[#9A9388]">Cancel</button>
