@@ -465,24 +465,14 @@ export default function DispatchPage() {
             <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" placeholder="Passenger name" value={trip.name} onChange={(e) => setTrip({ ...trip, name: e.target.value })} />
             <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" placeholder="Phone" value={trip.phone} onChange={(e) => setTrip({ ...trip, phone: e.target.value })} />
             <div className="grid grid-cols-2 gap-2">
-              <input
-                className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2"
-                type={trip.date ? "date" : "text"}
-                placeholder="Date"
-                value={trip.date}
-                onFocus={(e) => { e.currentTarget.type = "date"; }}
-                onBlur={(e) => { if (!e.currentTarget.value) e.currentTarget.type = "text"; }}
-                onChange={(e) => setTrip({ ...trip, date: e.target.value })}
-              />
-              <input
-                className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2"
-                type={trip.time ? "time" : "text"}
-                placeholder="Time"
-                value={trip.time}
-                onFocus={(e) => { e.currentTarget.type = "time"; }}
-                onBlur={(e) => { if (!e.currentTarget.value) e.currentTarget.type = "text"; }}
-                onChange={(e) => setTrip({ ...trip, time: e.target.value })}
-              />
+              <label className="block">
+                <span className="mb-1 block text-[11px] uppercase tracking-widest text-[#9A9388]">Date</span>
+                <input className="w-full rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" type="date" value={trip.date} onChange={(e) => setTrip({ ...trip, date: e.target.value })} />
+              </label>
+              <label className="block">
+                <span className="mb-1 block text-[11px] uppercase tracking-widest text-[#9A9388]">Time</span>
+                <input className="w-full rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" type="time" value={trip.time} onChange={(e) => setTrip({ ...trip, time: e.target.value })} />
+              </label>
             </div>
             <AddressInput id="manual-pickup" value={trip.pickup} onChange={(v) => setTrip({ ...trip, pickup: v })} placeholder="Pickup" className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" />
             <AddressInput id="manual-dropoff" value={trip.dropoff} onChange={(v) => setTrip({ ...trip, dropoff: v })} placeholder="Drop-off" className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" />
@@ -509,24 +499,14 @@ export default function DispatchPage() {
             <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" placeholder="Passenger name" value={trip.name} onChange={(e) => setTrip({ ...trip, name: e.target.value })} />
             <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" placeholder="Phone" value={trip.phone} onChange={(e) => setTrip({ ...trip, phone: e.target.value })} />
             <div className="grid grid-cols-2 gap-2">
-              <input
-                className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2"
-                type={trip.date ? "date" : "text"}
-                placeholder="Date"
-                value={trip.date}
-                onFocus={(e) => { e.currentTarget.type = "date"; }}
-                onBlur={(e) => { if (!e.currentTarget.value) e.currentTarget.type = "text"; }}
-                onChange={(e) => setTrip({ ...trip, date: e.target.value })}
-              />
-              <input
-                className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2"
-                type={trip.time ? "time" : "text"}
-                placeholder="Time"
-                value={trip.time}
-                onFocus={(e) => { e.currentTarget.type = "time"; }}
-                onBlur={(e) => { if (!e.currentTarget.value) e.currentTarget.type = "text"; }}
-                onChange={(e) => setTrip({ ...trip, time: e.target.value })}
-              />
+              <label className="block">
+                <span className="mb-1 block text-[11px] uppercase tracking-widest text-[#9A9388]">Date</span>
+                <input className="w-full rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" type="date" value={trip.date} onChange={(e) => setTrip({ ...trip, date: e.target.value })} />
+              </label>
+              <label className="block">
+                <span className="mb-1 block text-[11px] uppercase tracking-widest text-[#9A9388]">Time</span>
+                <input className="w-full rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" type="time" value={trip.time} onChange={(e) => setTrip({ ...trip, time: e.target.value })} />
+              </label>
             </div>
             <AddressInput id="edit-pickup" value={trip.pickup} onChange={(v) => setTrip({ ...trip, pickup: v })} placeholder="Pickup" className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" />
             <AddressInput id="edit-dropoff" value={trip.dropoff} onChange={(v) => setTrip({ ...trip, dropoff: v })} placeholder="Drop-off" className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" />
