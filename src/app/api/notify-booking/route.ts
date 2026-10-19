@@ -1,17 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import nodemailer from "nodemailer";
-import { formatDateTime } from "@/lib/booking";
+import { formatDateTime, blacklaneSubject, blacklaneDate } from "@/lib/booking";
 import { saveWebsiteBooking } from "@/lib/portal";
 
 const OWNER_EMAIL = process.env.BOOKING_NOTIFY_EMAIL || "cashtienlam@gmail.com";
 const SITE = "https://jeanlimo.com";
 
 function bookingText(b: any) {
+  const dateLabel = blacklaneDate(b.date);
   const lines = [
-    `Confirmation: ${b.confirmation || "N/A"}`,
-    `Name: ${b.name || ""}`,
-    `Phone: ${b.phone || ""}`,
-    `Email: ${b.email || ""}`,
+    "Ride details",
+    `Booking no: ${b.confirmation || "N/A"}`,
+    "",
+    dateLabel ? `${dateLabel} ${formatDateTime("", b.time) || b.time || ""}`.trim() : formatDateTime(b.date, b.time),
+    "",
+    `From ${b.pickup || ""}`,
+    `To ${b.dropoff || ""}`,
+    "",
     `Vehicle: ${b.vehicle || ""}`,
     `Type: ${
       String(b.type || "").toLowerCase() === "hourly"
@@ -20,12 +25,11 @@ function bookingText(b: any) {
           ? "round trip"
           : "transfer"
     }`,
-    "",
-    `Date / time: ${formatDateTime(b.date, b.time)}`,
+    `Name: ${b.name || ""}`,
+    `Phone: ${b.phone || ""}`,
+    `Email: ${b.email || ""}`,
     `Flight: ${b.flightNumber || ""}`,
     `Additional note: ${b.notes || ""}`,
-    `Pickup address: ${b.pickup || ""}`,
-    `Drop-off address: ${b.dropoff || ""}`,
   ];
 
   if (b.returnDate || b.returnTime || b.returnPickup || b.returnDropoff) {
@@ -96,13 +100,13 @@ export async function POST(req: NextRequest) {
       ? text
       : `THIS BOOKING IS NOT ON THE DISPATCH BOARD.\nReason: ${saved.error}\nAdd it with Add trip.\n\n${text}`;
 
+    const subject = blacklaneSubject("Ride confirmation", booking.confirmation, booking.date);
+
     await transporter.sendMail({
       from: `"Jean Limo" <${user}>`,
       to: OWNER_EMAIL,
       replyTo: booking.email || user,
-      subject: saved.saved
-        ? `New Jean Limo booking ${booking.confirmation}`
-        : `NOT ON BOARD ${booking.confirmation}`,
+      subject: saved.saved ? subject : `NOT ON BOARD ${booking.confirmation}`,
       text: ownerText,
     });
 
@@ -112,7 +116,7 @@ export async function POST(req: NextRequest) {
         from: `"Jean Limo" <${user}>`,
         to: String(booking.email),
         replyTo: OWNER_EMAIL,
-        subject: `Your Jean Limo confirmation ${booking.confirmation}`,
+        subject,
         text: `Thank you for booking Jean Limo.\n\n${text}`,
       });
       customerSent = true;
