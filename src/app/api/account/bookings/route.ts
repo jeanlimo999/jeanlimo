@@ -7,18 +7,31 @@ type DriverRow = { id: string; name?: string; phone?: string; vehicle?: string; 
 
 function withReturn(rows: any[]) {
   const out: any[] = [];
+  const seen = new Set<string>();
   for (const b of rows) {
+    const key = String(b.confirmation || b.id || "");
+    if (key && seen.has(key)) continue;
+    if (key) seen.add(key);
     out.push(b);
+
     if (b.return_date || b.return_pickup || b.return_dropoff) {
+      const returnKey = key + " return";
+      if (seen.has(returnKey)) continue;
+      seen.add(returnKey);
       out.push({
         ...b,
         id: (b.id || b.confirmation) + "-return",
-        confirmation: (b.confirmation || "") + " return",
+        confirmation: returnKey,
         ride_date: b.return_date || b.ride_date,
         ride_time: b.return_time || "",
         pickup: b.return_pickup || b.dropoff,
         dropoff: b.return_dropoff || b.pickup,
         flight_number: b.return_flight_number || "",
+        return_date: "",
+        return_time: "",
+        return_pickup: "",
+        return_dropoff: "",
+        return_flight_number: "",
         booking_id: b.id,
         is_return: true,
       });
