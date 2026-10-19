@@ -459,6 +459,101 @@ export default function DispatchPage() {
             <div className="mt-1 text-2xl font-semibold">{money(revenue.lifetime)}</div>
           </div>
         </div>
+        {manualOpen && (
+          <form onSubmit={addTrip} className="mt-4 space-y-2 rounded-2xl border border-white/10 bg-[#141416] p-4">
+            <div className="text-[11px] uppercase tracking-widest text-[#C4A574]">In-house trip</div>
+            <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" placeholder="Passenger name" value={trip.name} onChange={(e) => setTrip({ ...trip, name: e.target.value })} />
+            <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" placeholder="Phone" value={trip.phone} onChange={(e) => setTrip({ ...trip, phone: e.target.value })} />
+            <div className="grid grid-cols-2 gap-2">
+              <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" type="date" value={trip.date} onChange={(e) => setTrip({ ...trip, date: e.target.value })} />
+              <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" type="time" value={trip.time} onChange={(e) => setTrip({ ...trip, time: e.target.value })} />
+            </div>
+            <AddressInput id="manual-pickup" value={trip.pickup} onChange={(v) => setTrip({ ...trip, pickup: v })} placeholder="Pickup" className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" />
+            <AddressInput id="manual-dropoff" value={trip.dropoff} onChange={(v) => setTrip({ ...trip, dropoff: v })} placeholder="Drop-off" className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" />
+            <div className="grid grid-cols-2 gap-2">
+              <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" placeholder="Flight" value={trip.flight} onChange={(e) => setTrip({ ...trip, flight: e.target.value })} />
+              <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" placeholder="Passengers" value={trip.passengers} onChange={(e) => setTrip({ ...trip, passengers: e.target.value })} />
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <select className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" value={trip.vehicle} onChange={(e) => setTrip({ ...trip, vehicle: e.target.value })}>
+                <option value="sedan">Sedan</option>
+                <option value="suv">SUV</option>
+                <option value="sprinter">Sprinter</option>
+              </select>
+              <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" placeholder="Fare $" value={trip.amount} onChange={(e) => setTrip({ ...trip, amount: e.target.value })} />
+            </div>
+            <textarea className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" placeholder="Notes, gate code, who to bill" value={trip.notes} onChange={(e) => setTrip({ ...trip, notes: e.target.value })} />
+            <button className="rounded-xl bg-gradient-to-b from-[#E8D3B0] to-[#C4A574] py-3 font-semibold text-[#16110a]">Save trip</button>
+          </form>
+        )}
+
+        {editingJob && (
+          <form onSubmit={updateTrip} className="mt-4 space-y-2 rounded-2xl border border-white/10 bg-[#141416] p-4">
+            <div className="text-[11px] uppercase tracking-widest text-[#C4A574]">Edit trip</div>
+            <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" placeholder="Passenger name" value={trip.name} onChange={(e) => setTrip({ ...trip, name: e.target.value })} />
+            <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" placeholder="Phone" value={trip.phone} onChange={(e) => setTrip({ ...trip, phone: e.target.value })} />
+            <div className="grid grid-cols-2 gap-2">
+              <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" type="date" value={trip.date} onChange={(e) => setTrip({ ...trip, date: e.target.value })} />
+              <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" type="time" value={trip.time} onChange={(e) => setTrip({ ...trip, time: e.target.value })} />
+            </div>
+            <AddressInput id="edit-pickup" value={trip.pickup} onChange={(v) => setTrip({ ...trip, pickup: v })} placeholder="Pickup" className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" />
+            <AddressInput id="edit-dropoff" value={trip.dropoff} onChange={(v) => setTrip({ ...trip, dropoff: v })} placeholder="Drop-off" className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" />
+            <div className="grid grid-cols-2 gap-2">
+              <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" placeholder="Flight" value={trip.flight} onChange={(e) => setTrip({ ...trip, flight: e.target.value })} />
+              <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" placeholder="Passengers" value={trip.passengers} onChange={(e) => setTrip({ ...trip, passengers: e.target.value })} />
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <select className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" value={trip.vehicle} onChange={(e) => setTrip({ ...trip, vehicle: e.target.value })}>
+                <option value="sedan">Sedan</option>
+                <option value="suv">SUV</option>
+                <option value="sprinter">Sprinter</option>
+              </select>
+              <input className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" placeholder="Fare $ (e.g. 150)" value={trip.amount} onChange={(e) => setTrip({ ...trip, amount: e.target.value })} />
+            </div>
+            <textarea className="rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" placeholder="Notes, gate code, who to bill" value={trip.notes} onChange={(e) => setTrip({ ...trip, notes: e.target.value })} />
+            <div className="flex gap-2">
+              <button className="flex-1 rounded-xl bg-gradient-to-b from-[#E8D3B0] to-[#C4A574] py-3 font-semibold text-[#16110a]">Update trip</button>
+              <button type="button" onClick={() => { setEditingJob(null); setTrip({ name: "", phone: "", date: "", time: "", pickup: "", dropoff: "", flight: "", passengers: "", notes: "", vehicle: "sedan", amount: "" }); }} className="rounded-xl border border-white/10 px-4 py-3 text-sm text-[#9A9388]">Cancel</button>
+            </div>
+          </form>
+        )}
+
+
+        {rosterOpen && (
+          <div className="mt-4 rounded-2xl border border-white/10 bg-[#141416] p-4">
+            <div className="text-[11px] uppercase tracking-widest text-[#C4A574]">Roster</div>
+            {drivers.map((d) => (
+              <div key={d.id} onClick={() => editDriver(d)} className="mt-3 flex cursor-pointer items-center gap-3 border-t border-white/10 pt-3">
+                <div className="h-10 w-10 overflow-hidden rounded-full bg-[#1C1C20]">
+                  {d.photo_url ? <img src={d.photo_url} alt="" className="h-full w-full object-cover" /> : null}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-sm">{d.name}</div>
+                  <div className="truncate text-xs text-[#9A9388]">{d.phone} · PIN {d.pin}</div>
+                </div>
+                <label className="text-xs text-[#C4A574]">
+                  Photo
+                  <input type="file" accept="image/*" className="hidden" onChange={(e) => savePhoto(d.id, e.target.files?.[0])} />
+                </label>
+              </div>
+            ))}
+            <form onSubmit={addDriver} className="mt-4 space-y-2 border-t border-white/10 pt-4">
+              <input className="w-full rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" placeholder="Driver name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+              <input className="w-full rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" placeholder="Phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+              <input className="w-full rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" placeholder="PIN" value={form.pin} onChange={(e) => setForm({ ...form, pin: e.target.value })} />
+              <input className="w-full rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" placeholder="Email (optional)" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+              <select className="w-full rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2" value={form.vehicle} onChange={(e) => setForm({ ...form, vehicle: e.target.value })}>
+                <option value="sedan">Sedan</option>
+                <option value="suv">SUV</option>
+                <option value="sprinter">Sprinter</option>
+              </select>
+              <button className="rounded-xl bg-gradient-to-b from-[#E8D3B0] to-[#C4A574] py-3 font-semibold text-[#16110a]">{form.id ? "Update driver" : "Add driver"}</button>
+              {form.id && <button type="button" onClick={() => setForm({ id: "", name: "", phone: "", pin: "", email: "", vehicle: "sedan" })} className="text-sm text-[#9A9388]">Cancel edit</button>}
+            </form>
+          </div>
+        )}
+
+
         <div className="mt-4 flex gap-2">
           <button onClick={() => setTab("open")} className={`rounded-full px-4 py-2 text-sm ${tab === "open" ? "bg-[#E8D3B0] text-[#16110a]" : "border border-white/10 text-[#9A9388]"}`}>Open ({openJobs.length})</button>
           <button onClick={() => setTab("done")} className={`rounded-full px-4 py-2 text-sm ${tab === "done" ? "bg-[#E8D3B0] text-[#16110a]" : "border border-white/10 text-[#9A9388]"}`}>Completed ({doneJobs.length})</button>
@@ -495,3 +590,4 @@ export default function DispatchPage() {
     </div>
   );
 }
+
