@@ -13,28 +13,6 @@ type Client = {
 
 type Address = { id: string; label: string; address: string };
 
-
-function asRides(list: any[]) {
-  const out: any[] = [];
-  for (const b of list) {
-    out.push(b);
-    if (b.return_date || b.return_pickup || b.return_dropoff) {
-      out.push({
-        ...b,
-        id: (b.id || b.confirmation) + "-return",
-        confirmation: (b.confirmation || "") + " return",
-        ride_date: b.return_date || b.ride_date,
-        ride_time: b.return_time || "",
-        pickup: b.return_pickup || b.dropoff,
-        dropoff: b.return_dropoff || b.pickup,
-        flight_number: b.return_flight_number || "",
-        _return: true,
-      });
-    }
-  }
-  return out;
-}
-
 const fieldCls = "mt-1 w-full rounded-2xl border border-white/10 bg-[#171717] px-4 py-3 outline-none text-sm";
 
 export default function AccountPage() {
@@ -172,6 +150,8 @@ export default function AccountPage() {
     window.location.href = `/?${q.toString()}#quote`;
   };
 
+  const rides = tab === "upcoming" ? upcoming : history;
+
   return (
     <div className="min-h-screen bg-black text-white">
       <div className="mx-auto min-h-screen max-w-md bg-[#070707] pb-10">
@@ -263,13 +243,13 @@ export default function AccountPage() {
                 onClick={() => setTab("upcoming")}
                 className={`rounded-xl py-3 text-sm ${tab === "upcoming" ? "bg-gradient-to-r from-[#e3c17a] to-[#bc8d3d] text-black" : "text-zinc-300"}`}
               >
-                Upcoming ({asRides(upcoming).length})
+                Upcoming ({upcoming.length})
               </button>
               <button
                 onClick={() => setTab("past")}
                 className={`rounded-xl py-3 text-sm ${tab === "past" ? "bg-gradient-to-r from-[#e3c17a] to-[#bc8d3d] text-black" : "text-zinc-300"}`}
               >
-                Past Rides ({asRides(history).length})
+                Past Rides ({history.length})
               </button>
             </div>
 
@@ -305,7 +285,7 @@ export default function AccountPage() {
                 </div>
               </div>
             ) : (
-              asRides(tab === "upcoming" ? upcoming : history).map((b) => (
+              rides.map((b) => (
                 <RideCard
                   key={b.id || b.confirmation}
                   b={b}
