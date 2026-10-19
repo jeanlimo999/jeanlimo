@@ -231,6 +231,7 @@ export default function DispatchPage() {
       amount: j.amountCents ? String((j.amountCents / 100).toFixed(2)) : "",
     });
     setManualOpen(false);
+    setRosterOpen(false);
     setErr("");
     setMsg("Editing trip " + (j.confirmation || ""));
   }
@@ -433,9 +434,9 @@ export default function DispatchPage() {
         <div className="flex items-center justify-between">
           <div className="text-[13px] tracking-[0.16em] text-[#E8D3B0]">JEAN LIMO DISPATCH</div>
           <div className="flex gap-2">
-            <button onClick={() => setManualOpen(!manualOpen)} className="rounded-full border border-[#C4A574]/40 px-3 py-1 text-xs text-[#E8D3B0]">Add trip</button>
+            <button onClick={() => { setManualOpen(!manualOpen); setRosterOpen(false); setEditingJob(null); }} className="rounded-full border border-[#C4A574]/40 px-3 py-1 text-xs text-[#E8D3B0]">Add trip</button>
             <button onClick={() => load()} className="rounded-full border border-white/10 px-3 py-1 text-xs text-[#9A9388]">Refresh</button>
-            <button onClick={() => setRosterOpen(!rosterOpen)} className="rounded-full border border-white/10 px-3 py-1 text-xs text-[#9A9388]">Drivers</button>
+            <button onClick={() => { setRosterOpen(!rosterOpen); setManualOpen(false); setEditingJob(null); }} className="rounded-full border border-white/10 px-3 py-1 text-xs text-[#9A9388]">Drivers</button>
             <button
               onClick={async () => {
                 await fetch("/api/dispatch/logout", { method: "POST" });
