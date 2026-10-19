@@ -54,11 +54,15 @@ export function jeanLimoSubject(opts: {
 }
 
 function esc(s: any) {
+  const amp = "&" + "amp;";
+  const lt = "&" + "lt;";
+  const gt = "&" + "gt;";
+  const quot = "&" + "quot;";
   return String(s ?? "")
-    .replace(/&/g, "&")
-    .replace(/</g, "<")
-    .replace(/>/g, ">")
-    .replace(/"/g, """);
+    .replace(/&/g, amp)
+    .replace(/</g, lt)
+    .replace(/>/g, gt)
+    .replace(/"/g, quot);
 }
 
 /** HTML ride details: bold From/To, highlighted flight number */
