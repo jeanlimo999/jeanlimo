@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 import { supabaseAdmin } from "@/lib/supabase";
-import { formatDateTime } from "@/lib/booking";
+import { formatDateTime, blacklaneSubject, blacklaneDate } from "@/lib/booking";
 
 const SITE = "https://jeanlimo.com";
 const CRON_SECRET = process.env.CRON_SECRET || "";
@@ -18,28 +18,7 @@ function parseRideDateTime(date?: string, time?: string): Date | null {
   const match = String(time).match(/^(\d{1,2}):(\d{2})/);
   if (!match) return null;
   const [_, h, m] = match;
-  // Interpret as America/Chicago time
-  const iso = `${date}T${h.padStart(2, "0")}:${m}:00`;
   try {
-    const d = new Date(iso);
-    // Adjust so it represents Chicago local time as UTC for comparison
-    const chicagoOffset = new Date().toLocaleString("en-US", { timeZone: "America/Chicago", timeZoneName: "shortOffset" });
-    // Simpler reliable approach: create date in Chicago by using the offset
-    const formatter = new Intl.DateTimeFormat("en-US", {
-      timeZone: "America/Chicago",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: false,
-    });
-    // Build a date that, when viewed in Chicago, matches the ride time
-    const parts = formatter.formatToParts(new Date());
-    // Fallback: treat as local and correct with known offset (Chicago is UTC-5 or UTC-6)
-    const test = new Date(`${date}T${h.padStart(2, "0")}:${m}:00Z`);
-    // Approximate: subtract 5 or 6 hours. We'll use a practical window instead of exact TZ math.
     return new Date(`${date}T${h.padStart(2, "0")}:${m}:00`);
   } catch {
     return null;
@@ -52,11 +31,12 @@ function reminderText(b: any, client: any) {
     "",
     "This is a friendly reminder that your Jean Limo ride is scheduled for tomorrow.",
     "",
-    `Confirmation: ${b.confirmation}`,
-    `Date / Time: ${formatDateTime(b.ride_date, b.ride_time)}`,
+    "Ride details",
+    `Booking no: ${b.confirmation}`,
+    `Date / Time: ${blacklaneDate(b.ride_date)} ${formatDateTime("", b.ride_time) || b.ride_time || ""}`.trim(),
     `Vehicle: ${b.vehicle || ""}`,
-    `Pickup: ${b.pickup || ""}`,
-    `Drop-off: ${b.dropoff || ""}`,
+    `From ${b.pickup || ""}`,
+    `To ${b.dropoff || ""}`,
   ];
 
   if (b.return_date || b.return_pickup) {
@@ -152,15 +132,15 @@ export async function GET(req: NextRequest) {
     const pickup = parseRideDateTime(b.ride_date, b.ride_time);
     if (!pickup) continue;
 
-    // Practical window: roughly 22–26 hours from now (handles TZ approximation)
     if (pickup < windowStart || pickup > windowEnd) continue;
 
     try {
+      const subject = blacklaneSubject("Reminder", b.confirmation, b.ride_date);
       await transporter.sendMail({
         from: `"Jean Limo" <${user}>`,
         to: client.email,
         replyTo: process.env.BOOKING_NOTIFY_EMAIL || "cashtienlam@gmail.com",
-        subject: `Your Jean Limo ride is tomorrow — Confirmation ${b.confirmation}`,
+        subject,
         text: reminderText(b, client),
       });
 
