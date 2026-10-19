@@ -2,12 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 import { readDispatchSession } from "@/lib/session";
 import { supabaseAdmin } from "@/lib/supabase";
-import { blacklaneSubject, blacklaneDate, formatTimeDisplay } from "@/lib/booking";
+import { blacklaneSubject, blacklaneDate, formatTimeDisplay, rideDetailsHtml } from "@/lib/booking";
 
-function prettyDate(value?: string) {
-  const m = String(value || "").match(/^(\d{4})-(\d{2})-(\d{2})/);
-  return m ? `${m[2]}/${m[3]}/${m[1]}` : "";
-}
 function prettyTime(value?: string) {
   const m = String(value || "").match(/^(\d{1,2}):(\d{2})/);
   if (!m) return "";
@@ -32,23 +28,21 @@ async function emailDrivers(db: any, booking: any) {
   const hasReturn = Boolean(booking.return_date || booking.return_pickup);
   const pay = Math.round((hasReturn ? total / 2 : total) * 0.80);
   const dateStr = booking.ride_date;
-  const when = [blacklaneDate(dateStr), prettyTime(booking.ride_time)].filter(Boolean).join(" ");
-  const text = [
-    "You've been offered a ride",
-    "A job is available. Open the driver app and check Available.",
-    "",
-    "Ride details",
-    `Booking no: ${booking.confirmation || ""}`,
-    "",
-    when,
-    "",
-    `From ${booking.pickup || ""}`,
-    `To ${booking.dropoff || ""}`,
-    "",
-    `Pay: ${money(pay)}`,
-    "",
-    "https://jeanlimo.com/driver",
-  ].join("\n");
+
+  const html = `
+    <p style="font-weight:700;">You've been offered a ride</p>
+    <p>A job is available. Open the driver app and check Available.</p>
+    ${rideDetailsHtml({
+      confirmation: booking.confirmation,
+      dateLabel: blacklaneDate(dateStr),
+      time: prettyTime(booking.ride_time),
+      pickup: booking.pickup,
+      dropoff: booking.dropoff,
+      flight: booking.flight_number,
+      amount: `Pay: ${money(pay)}`,
+      extra: `<div style="margin-top:12px;"><a href="https://jeanlimo.com/driver">Open driver app</a></div>`,
+    })}
+  `;
 
   const subject = blacklaneSubject("Ride assignment", booking.confirmation || "", dateStr);
 
@@ -57,7 +51,7 @@ async function emailDrivers(db: any, booking: any) {
     from: `"Jean Limo" <${user}>`,
     to: emails.join(","),
     subject,
-    text,
+    html,
   });
   return emails.length;
 }
