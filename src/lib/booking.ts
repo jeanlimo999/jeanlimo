@@ -32,10 +32,25 @@ export function blacklaneDate(date?: string): string {
   return `${days[d.getDay()]} ${m[3]} ${months[parseInt(m[2], 10) - 1]} ${m[1]}`;
 }
 
-/** Blacklane-style subject: "Ride assignment (Booking number: JL-... Date: Sun 01 Nov 2026)" */
+/** Blacklane-style subject */
 export function blacklaneSubject(kind: string, confirmation: string, date?: string): string {
   const d = blacklaneDate(date) || "";
   return `${kind} (Booking number: ${confirmation || ""}${d ? ` Date: ${d}` : ""})`;
+}
+
+/** Jean Limo title: "7:00 AM Picking up Cash Lam Driver: John" or "2:30 PM Taking Cash Lam Driver: John" */
+export function jeanLimoSubject(opts: {
+  time?: string;
+  customer?: string;
+  driver?: string;
+  pickingUp?: boolean;
+}): string {
+  const time = String(opts.time || "").trim();
+  const action = opts.pickingUp === false ? "Taking" : "Picking up";
+  const name = String(opts.customer || "Guest").trim();
+  const driver = String(opts.driver || "").trim();
+  const driverPart = driver ? ` Driver: ${driver}` : "";
+  return `${time} ${action} ${name}${driverPart}`.replace(/\s+/g, " ").trim();
 }
 
 function esc(s: any) {
