@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import nodemailer from "nodemailer";
-import { formatDateTime, blacklaneSubject, blacklaneDate, rideDetailsHtml } from "@/lib/booking";
+import { formatDateTime, blacklaneDate, rideDetailsHtml, jeanLimoSubject } from "@/lib/booking";
 import { saveWebsiteBooking } from "@/lib/portal";
 
 const OWNER_EMAIL = process.env.BOOKING_NOTIFY_EMAIL || "cashtienlam@gmail.com";
@@ -96,7 +96,12 @@ export async function POST(req: NextRequest) {
       ? html
       : `<p style="color:#c00;font-weight:700;">THIS BOOKING IS NOT ON THE DISPATCH BOARD.<br/>Reason: ${saved.error}<br/>Add it with Add trip.</p>${html}`;
 
-    const subject = blacklaneSubject("Ride confirmation", booking.confirmation, booking.date);
+    const time = formatDateTime("", booking.time) || booking.time || "";
+    const subject = jeanLimoSubject({
+      time,
+      customer: booking.name,
+      pickingUp: true,
+    });
 
     await transporter.sendMail({
       from: `"Jean Limo" <${user}>`,
