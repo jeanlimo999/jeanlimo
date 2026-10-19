@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 import { readDispatchSession } from "@/lib/session";
 import { supabaseAdmin } from "@/lib/supabase";
-import { blacklaneSubject, blacklaneDate, formatTimeDisplay, rideDetailsHtml } from "@/lib/booking";
+import { blacklaneDate, formatTimeDisplay, rideDetailsHtml, jeanLimoSubject } from "@/lib/booking";
 
 function prettyTime(value?: string) {
   const m = String(value || "").match(/^(\d{1,2}):(\d{2})/);
@@ -28,6 +28,9 @@ async function emailDrivers(db: any, booking: any) {
   const hasReturn = Boolean(booking.return_date || booking.return_pickup);
   const pay = Math.round((hasReturn ? total / 2 : total) * 0.80);
   const dateStr = booking.ride_date;
+  const time = prettyTime(booking.ride_time);
+
+  const guestName = booking.clients?.full_name || booking.guest_name || "Guest";
 
   const html = `
     <p style="font-weight:700;">You've been offered a ride</p>
@@ -35,16 +38,21 @@ async function emailDrivers(db: any, booking: any) {
     ${rideDetailsHtml({
       confirmation: booking.confirmation,
       dateLabel: blacklaneDate(dateStr),
-      time: prettyTime(booking.ride_time),
+      time,
       pickup: booking.pickup,
       dropoff: booking.dropoff,
       flight: booking.flight_number,
+      name: guestName,
       amount: `Pay: ${money(pay)}`,
       extra: `<div style="margin-top:12px;"><a href="https://jeanlimo.com/driver">Open driver app</a></div>`,
     })}
   `;
 
-  const subject = blacklaneSubject("Ride assignment", booking.confirmation || "", dateStr);
+  const subject = jeanLimoSubject({
+    time,
+    customer: guestName,
+    pickingUp: true,
+  });
 
   const transporter = nodemailer.createTransport({ service: "gmail", auth: { user, pass } });
   await transporter.sendMail({
@@ -75,7 +83,7 @@ export async function POST(req: NextRequest) {
       .from("bookings")
       .update(patch)
       .eq("id", bookingId)
-      .select("*")
+      .select("*, clients(full_name)")
       .single();
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     const emailed = await emailDrivers(db, booking).catch(() => 0);
