@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 import { readDispatchSession } from "@/lib/session";
 import { supabaseAdmin } from "@/lib/supabase";
-import { formatDateTime, blacklaneSubject, blacklaneDate, rideDetailsHtml } from "@/lib/booking";
+import { formatDateTime, blacklaneDate, rideDetailsHtml, jeanLimoSubject } from "@/lib/booking";
 
 function code() {
   const n = Math.floor(1000 + Math.random() * 9000);
@@ -40,10 +40,11 @@ async function emailOwner(booking: {
       auth: { user, pass },
     });
 
+    const time = formatDateTime("", booking.time) || booking.time;
     const html = rideDetailsHtml({
       confirmation: booking.confirmation,
       dateLabel: blacklaneDate(booking.date),
-      time: formatDateTime("", booking.time),
+      time,
       pickup: booking.pickup,
       dropoff: booking.dropoff,
       vehicle: booking.vehicle,
@@ -55,7 +56,11 @@ async function emailOwner(booking: {
       extra: `<div style="margin-top:12px;">Manual in-house trip<br/>Jean Limo LLC<br/>Jeannie 281-917-0929 · Cash 281-917-0085</div>`,
     });
 
-    const subject = blacklaneSubject("Ride confirmation", booking.confirmation, booking.date);
+    const subject = jeanLimoSubject({
+      time,
+      customer: booking.name,
+      pickingUp: true,
+    });
 
     await transporter.sendMail({
       from: `"Jean Limo" <${user}>`,
