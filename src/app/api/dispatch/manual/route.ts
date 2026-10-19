@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 import { readDispatchSession } from "@/lib/session";
 import { supabaseAdmin } from "@/lib/supabase";
-import { formatDateTime } from "@/lib/booking";
+import { formatDateTime, blacklaneSubject, blacklaneDate } from "@/lib/booking";
 
 function code() {
   const n = Math.floor(1000 + Math.random() * 9000);
@@ -41,30 +41,34 @@ async function emailOwner(booking: {
     });
 
     const text = [
-      `Confirmation: ${booking.confirmation}`,
+      "Ride details",
+      `Booking no: ${booking.confirmation}`,
+      "",
+      `${blacklaneDate(booking.date)} ${formatDateTime("", booking.time)}`.trim(),
+      "",
+      `From ${booking.pickup}`,
+      `To ${booking.dropoff}`,
+      "",
+      `Vehicle: ${booking.vehicle}`,
       `Name: ${booking.name}`,
       `Phone: ${booking.phone}`,
-      `Vehicle: ${booking.vehicle}`,
-      `Type: transfer`,
-      "",
-      `Date / time: ${formatDateTime(booking.date, booking.time)}`,
       `Flight: ${booking.flight}`,
       `Passengers: ${booking.passengers}`,
       `Additional note: ${booking.notes}`,
-      `Pickup address: ${booking.pickup}`,
-      `Drop-off address: ${booking.dropoff}`,
       "",
       `Amount: ${booking.amount ? "$" + parseAmount(booking.amount).toFixed(2) : ""}`,
       `Notes: Manual in-house trip`,
       "",
       "Jean Limo LLC",
-      "Jeannie 281-917-0929 \u00b7 Cash 281-917-0085",
+      "Jeannie 281-917-0929 · Cash 281-917-0085",
     ].join("\n");
+
+    const subject = blacklaneSubject("Ride confirmation", booking.confirmation, booking.date);
 
     await transporter.sendMail({
       from: `"Jean Limo" <${user}>`,
       to,
-      subject: `New Jean Limo booking ${booking.confirmation}`,
+      subject,
       text,
     });
     return true;
