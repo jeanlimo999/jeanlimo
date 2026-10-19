@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 import { supabaseAdmin } from "@/lib/supabase";
-import { formatDateTime, blacklaneSubject, blacklaneDate } from "@/lib/booking";
+import { formatDateTime, blacklaneSubject, blacklaneDate, rideDetailsHtml } from "@/lib/booking";
 
 const SITE = "https://jeanlimo.com";
 const CRON_SECRET = process.env.CRON_SECRET || "";
@@ -10,7 +10,7 @@ function isInSendWindow() {
   const now = new Date();
   const chicago = new Date(now.toLocaleString("en-US", { timeZone: "America/Chicago" }));
   const hour = chicago.getHours();
-  return hour >= 9 && hour < 19; // 9:00 AM – 7:00 PM
+  return hour >= 9 && hour < 19;
 }
 
 function parseRideDateTime(date?: string, time?: string): Date | null {
@@ -25,45 +25,40 @@ function parseRideDateTime(date?: string, time?: string): Date | null {
   }
 }
 
-function reminderText(b: any, client: any) {
-  const lines = [
-    `Hi ${client.full_name || "there"},`,
-    "",
-    "This is a friendly reminder that your Jean Limo ride is scheduled for tomorrow.",
-    "",
-    "Ride details",
-    `Booking no: ${b.confirmation}`,
-    `Date / Time: ${blacklaneDate(b.ride_date)} ${formatDateTime("", b.ride_time) || b.ride_time || ""}`.trim(),
-    `Vehicle: ${b.vehicle || ""}`,
-    `From ${b.pickup || ""}`,
-    `To ${b.dropoff || ""}`,
-  ];
-
+function reminderHtml(b: any, client: any) {
+  let extra = "";
   if (b.return_date || b.return_pickup) {
-    lines.push(
-      "",
-      "Return trip",
-      `Date / Time: ${formatDateTime(b.return_date, b.return_time)}`,
-      `Return pickup: ${b.return_pickup || ""}`,
-      `Return drop-off: ${b.return_dropoff || ""}`
-    );
+    extra += `
+      <div style="margin-top:16px;font-weight:700;">Return trip</div>
+      <div>${formatDateTime(b.return_date, b.return_time)}</div>
+      <div style="margin:6px 0;"><strong>From</strong> ${String(b.return_pickup || "").replace(/</g, "<")}</div>
+      <div><strong>To</strong> ${String(b.return_dropoff || "").replace(/</g, "<")}</div>
+    `;
   }
+  extra += `
+    <div style="margin-top:16px;">
+      Need to make a change or cancel?<br/>
+      <a href="${SITE}/manage">Manage booking</a> · <a href="${SITE}/app">Mobile</a><br/><br/>
+      Questions? Call or text Jeannie at 281-917-0929.<br/><br/>
+      Thank you for choosing Jean Limo.<br/>
+      Jean Limo LLC · Houston, TX
+    </div>
+  `;
 
-  lines.push(
-    "",
-    "Need to make a change or cancel?",
-    "Manage your booking anytime:",
-    `${SITE}/manage`,
-    `Or open the mobile version: ${SITE}/app`,
-    "",
-    "Questions? Call or text Jeannie at 281-917-0929.",
-    "",
-    "Thank you for choosing Jean Limo.",
-    "Jean Limo LLC",
-    "Houston, TX"
-  );
-
-  return lines.join("\n");
+  return `
+    <p>Hi ${String(client.full_name || "there").replace(/</g, "<")},</p>
+    <p>This is a friendly reminder that your Jean Limo ride is scheduled for tomorrow.</p>
+    ${rideDetailsHtml({
+      confirmation: b.confirmation,
+      dateLabel: blacklaneDate(b.ride_date),
+      time: formatDateTime("", b.ride_time) || b.ride_time,
+      pickup: b.pickup,
+      dropoff: b.dropoff,
+      vehicle: b.vehicle,
+      flight: b.flight_number,
+      extra,
+    })}
+  `;
 }
 
 export async function GET(req: NextRequest) {
@@ -100,6 +95,7 @@ export async function GET(req: NextRequest) {
       vehicle,
       pickup,
       dropoff,
+      flight_number,
       return_date,
       return_time,
       return_pickup,
@@ -141,7 +137,7 @@ export async function GET(req: NextRequest) {
         to: client.email,
         replyTo: process.env.BOOKING_NOTIFY_EMAIL || "cashtienlam@gmail.com",
         subject,
-        text: reminderText(b, client),
+        html: reminderHtml(b, client),
       });
 
       await db
