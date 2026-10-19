@@ -38,6 +38,55 @@ export function blacklaneSubject(kind: string, confirmation: string, date?: stri
   return `${kind} (Booking number: ${confirmation || ""}${d ? ` Date: ${d}` : ""})`;
 }
 
+function esc(s: any) {
+  return String(s ?? "")
+    .replace(/&/g, "&")
+    .replace(/</g, "<")
+    .replace(/>/g, ">")
+    .replace(/"/g, """);
+}
+
+/** HTML ride details: bold From/To, highlighted flight number */
+export function rideDetailsHtml(opts: {
+  confirmation?: string;
+  dateLabel?: string;
+  time?: string;
+  pickup?: string;
+  dropoff?: string;
+  vehicle?: string;
+  type?: string;
+  name?: string;
+  phone?: string;
+  email?: string;
+  flight?: string;
+  notes?: string;
+  amount?: string;
+  extra?: string;
+}): string {
+  const flight = String(opts.flight || "").trim();
+  const flightHtml = flight
+    ? `<div style="margin:8px 0;"><span style="background:#fff3cd;color:#856404;padding:4px 8px;border-radius:4px;font-weight:700;">Flight: ${esc(flight)}</span></div>`
+    : "";
+
+  return `
+<div style="font-family:Arial,sans-serif;font-size:15px;line-height:1.45;color:#0f1319;">
+  <div style="font-weight:700;font-size:16px;margin-bottom:8px;">Ride details</div>
+  <div>Booking no: <strong>${esc(opts.confirmation || "")}</strong></div>
+  <div style="margin:6px 0;">${esc(opts.dateLabel || "")} ${esc(opts.time || "")}</div>
+  <div style="margin:10px 0;"><strong>From</strong> ${esc(opts.pickup || "")}</div>
+  <div style="margin:4px 0;"><strong>To</strong> ${esc(opts.dropoff || "")}</div>
+  ${flightHtml}
+  ${opts.vehicle ? `<div>Vehicle: ${esc(opts.vehicle)}</div>` : ""}
+  ${opts.type ? `<div>Type: ${esc(opts.type)}</div>` : ""}
+  ${opts.name ? `<div>Name: ${esc(opts.name)}</div>` : ""}
+  ${opts.phone ? `<div>Phone: ${esc(opts.phone)}</div>` : ""}
+  ${opts.email ? `<div>Email: ${esc(opts.email)}</div>` : ""}
+  ${opts.notes ? `<div style="margin-top:8px;">Note: ${esc(opts.notes)}</div>` : ""}
+  ${opts.amount ? `<div style="margin-top:8px;font-weight:700;">${esc(opts.amount)}</div>` : ""}
+  ${opts.extra || ""}
+</div>`.trim();
+}
+
 export function makeConfirmationNumber() {
   const d = new Date();
   const y = String(d.getFullYear()).slice(2);
