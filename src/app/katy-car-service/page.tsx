@@ -40,6 +40,18 @@ export default function Page() {
           body: "Transparent pricing, reliable timing, and a team that handles the details so your trip is straightforward. Book online for an instant quote.",
         },
       ]}
+      relatedLinks={[
+        { href: "/iah-airport-car-service", label: "IAH Airport" },
+        { href: "/hou-airport-car-service", label: "Hobby Airport" },
+        { href: "/houston-to-galveston", label: "Galveston Cruise" },
+        { href: "/energy-corridor-car-service", label: "Energy Corridor" },
+        { href: "/cypress-car-service", label: "Cypress" },
+        { href: "/fulshear-car-service", label: "Fulshear" },
+        { href: "/galleria-car-service", label: "Galleria" },
+        { href: "/downtown-houston-car-service", label: "Downtown" },
+        { href: "/houston-black-car-service", label: "Black Car" },
+        { href: "/houston-chauffeur-service", label: "Hourly Chauffeur" },
+      ]}
       faqs={[
         {
           q: "How long from Katy to IAH?",
