@@ -8,6 +8,12 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://jeanlimo.com/spring-car-service",
   },
+  openGraph: {
+    title: "Spring Car Service | Airport & Chauffeur | Jean Limo",
+    description:
+      "Private car service in Spring for IAH and Hobby airport transfers, corporate travel, and hourly chauffeur. Flat rates, professional drivers.",
+    url: "https://jeanlimo.com/spring-car-service",
+  },
 };
 
 export default function Page() {
