@@ -36,6 +36,18 @@ export default function Page() {
           body: "The Energy Corridor has a high concentration of offices and business travelers. We regularly handle airport runs and multi-stop corporate itineraries. IAH transfers typically take 35–50 minutes.",
         },
       ]}
+      relatedLinks={[
+        { href: "/iah-airport-car-service", label: "IAH Airport" },
+        { href: "/hou-airport-car-service", label: "Hobby Airport" },
+        { href: "/houston-black-car-service", label: "Black Car" },
+        { href: "/katy-car-service", label: "Katy" },
+        { href: "/galleria-car-service", label: "Galleria" },
+        { href: "/memorial-car-service", label: "Memorial" },
+        { href: "/downtown-houston-car-service", label: "Downtown" },
+        { href: "/spring-branch-car-service", label: "Spring Branch" },
+        { href: "/houston-chauffeur-service", label: "Hourly Chauffeur" },
+        { href: "/houston-sprinter-van-service", label: "Sprinter" },
+      ]}
       faqs={[
         {
           q: "Do you offer Energy Corridor to IAH service?",
