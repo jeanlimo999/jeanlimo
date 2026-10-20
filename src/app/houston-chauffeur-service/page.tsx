@@ -8,6 +8,12 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://jeanlimo.com/houston-chauffeur-service",
   },
+  openGraph: {
+    title: "Houston Hourly Chauffeur Service | Jean Limo",
+    description:
+      "As-directed hourly chauffeur service in Houston. 2-hour minimum, unlimited stops, professional drivers. Sedan, SUV, and Sprinter available.",
+    url: "https://jeanlimo.com/houston-chauffeur-service",
+  },
 };
 
 export default function Page() {
