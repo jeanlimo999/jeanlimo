@@ -36,6 +36,18 @@ export default function Page() {
           body: "The Galleria is a major business and retail hub. Many clients book for airport runs, hotel transfers, and hourly service that covers meetings plus shopping or dining. Typical IAH transfers take 25–40 minutes.",
         },
       ]}
+      relatedLinks={[
+        { href: "/iah-airport-car-service", label: "IAH Airport" },
+        { href: "/hou-airport-car-service", label: "Hobby Airport" },
+        { href: "/houston-black-car-service", label: "Black Car" },
+        { href: "/downtown-houston-car-service", label: "Downtown" },
+        { href: "/river-oaks-car-service", label: "River Oaks" },
+        { href: "/memorial-car-service", label: "Memorial" },
+        { href: "/tanglewood-car-service", label: "Tanglewood" },
+        { href: "/energy-corridor-car-service", label: "Energy Corridor" },
+        { href: "/houston-chauffeur-service", label: "Hourly Chauffeur" },
+        { href: "/houston-sprinter-van-service", label: "Sprinter" },
+      ]}
       faqs={[
         {
           q: "Do you pick up from Galleria hotels?",
