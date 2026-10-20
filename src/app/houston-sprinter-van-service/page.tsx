@@ -16,19 +16,51 @@ export const metadata: Metadata = {
   },
 };
 
+const serviceSchema = {
+  "@context": "https://schema.org",
+  "@type": "Service",
+  name: "Houston Sprinter Van Service",
+  description:
+    "Mercedes Sprinter van service in Houston for groups up to 14. Airport transfers, corporate events, and private travel with professional chauffeurs.",
+  provider: {
+    "@type": "LocalBusiness",
+    name: "Jean Limo LLC",
+    telephone: "+12819170085",
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: "11002 Myrtle Dr",
+      addressLocality: "Sugar Land",
+      addressRegion: "TX",
+      postalCode: "77498",
+      addressCountry: "US",
+    },
+  },
+  areaServed: {
+    "@type": "City",
+    name: "Houston",
+  },
+  serviceType: "Sprinter Van Service",
+};
+
 export default function Page() {
   return (
-    <ServicePage
-      kicker="Group travel"
-      title="Houston Sprinter Van Service"
-      intro="Move the whole group in one Mercedes Sprinter instead of splitting across cars. Jean Limo chauffeurs handle airport, cruise, wedding, and corporate groups up to 14 passengers."
-      points={[
-        "Up to 14 passengers and luggage space",
-        "Airport, cruise, wedding, and event groups",
-        "Hourly as-directed or point-to-point flat rates",
-        "One chauffeur, one vehicle, one confirmation",
-        "Professional, background-checked drivers",
-      ]}
-    />
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }}
+      />
+      <ServicePage
+        kicker="Group travel"
+        title="Houston Sprinter Van Service"
+        intro="Move the whole group in one Mercedes Sprinter instead of splitting across cars. Jean Limo chauffeurs handle airport, cruise, wedding, and corporate groups up to 14 passengers."
+        points={[
+          "Up to 14 passengers and luggage space",
+          "Airport, cruise, wedding, and event groups",
+          "Hourly as-directed or point-to-point flat rates",
+          "One chauffeur, one vehicle, one confirmation",
+          "Professional, background-checked drivers",
+        ]}
+      />
+    </>
   );
 }
