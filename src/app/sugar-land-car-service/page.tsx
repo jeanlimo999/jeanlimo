@@ -8,6 +8,12 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://jeanlimo.com/sugar-land-car-service",
   },
+  openGraph: {
+    title: "Sugar Land Car Service | Airport & Chauffeur | Jean Limo",
+    description:
+      "Private car service in Sugar Land for IAH, Hobby, and Galveston transfers, corporate travel, and hourly chauffeur. Flat rates, professional drivers.",
+    url: "https://jeanlimo.com/sugar-land-car-service",
+  },
 };
 
 export default function Page() {
