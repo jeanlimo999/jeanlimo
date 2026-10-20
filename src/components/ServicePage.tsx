@@ -7,6 +7,7 @@ export default function ServicePage({
   points,
   sections = [],
   faqs = [],
+  relatedLinks = [],
 }: {
   kicker: string;
   title: string;
@@ -14,6 +15,7 @@ export default function ServicePage({
   points: string[];
   sections?: { heading: string; body: string }[];
   faqs?: { q: string; a: string }[];
+  relatedLinks?: { href: string; label: string }[];
 }) {
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
@@ -46,6 +48,19 @@ export default function ServicePage({
             <p className="mt-3 text-zinc-300 leading-relaxed">{s.body}</p>
           </section>
         ))}
+
+        {relatedLinks.length > 0 && (
+          <section className="mt-10">
+            <h2 className="font-serif text-2xl text-yellow-500">Popular Service Areas</h2>
+            <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm">
+              {relatedLinks.map((link) => (
+                <Link key={link.href} href={link.href} className="text-yellow-500 hover:text-yellow-400">
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
         {faqs.length > 0 && (
           <section className="mt-12">
