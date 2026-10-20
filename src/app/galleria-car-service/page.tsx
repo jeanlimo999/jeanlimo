@@ -8,6 +8,12 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://jeanlimo.com/galleria-car-service",
   },
+  openGraph: {
+    title: "Houston Galleria Car Service | Jean Limo",
+    description:
+      "Private car and chauffeur service in the Galleria and Uptown area for airport transfers, shopping, corporate travel, and events. Flat rates and professional drivers.",
+    url: "https://jeanlimo.com/galleria-car-service",
+  },
 };
 
 export default function Page() {
