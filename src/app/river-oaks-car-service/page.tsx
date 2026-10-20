@@ -22,7 +22,7 @@ export default function Page() {
       kicker="River Oaks"
       title="River Oaks Luxury Chauffeur Service"
       intro="Discreet private car and chauffeur service for River Oaks residents and visitors. Jean Limo handles IAH and Hobby airport transfers, evenings out, and executive travel with professional drivers and clear pricing."
-      image="/fleet/sedan.jpg"
+      image="/river-oaks.jpg"
       highlight={{
         kicker: "Premium Residential Service",
         title: "Punctual, Low-Profile Transportation",
