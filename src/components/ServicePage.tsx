@@ -5,11 +5,15 @@ export default function ServicePage({
   title,
   intro,
   points,
+  sections = [],
+  faqs = [],
 }: {
   kicker: string;
   title: string;
   intro: string;
   points: string[];
+  sections?: { heading: string; body: string }[];
+  faqs?: { q: string; a: string }[];
 }) {
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
@@ -35,6 +39,28 @@ export default function ServicePage({
             </li>
           ))}
         </ul>
+
+        {sections.map((s) => (
+          <section key={s.heading} className="mt-10">
+            <h2 className="font-serif text-2xl text-yellow-500">{s.heading}</h2>
+            <p className="mt-3 text-zinc-300 leading-relaxed">{s.body}</p>
+          </section>
+        ))}
+
+        {faqs.length > 0 && (
+          <section className="mt-12">
+            <h2 className="font-serif text-2xl mb-4">Frequently Asked Questions</h2>
+            <div className="space-y-6">
+              {faqs.map((f) => (
+                <div key={f.q}>
+                  <h3 className="font-medium text-white">{f.q}</h3>
+                  <p className="mt-1 text-zinc-400 text-sm">{f.a}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
         <div className="mt-10 flex flex-wrap gap-3">
           <Link href="/#quote" className="rounded bg-yellow-500 px-6 py-3 font-semibold text-zinc-900">
             Get instant quote

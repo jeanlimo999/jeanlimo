@@ -4,20 +4,53 @@ import ServicePage from "@/components/ServicePage";
 export const metadata: Metadata = {
   title: "IAH Airport Car Service Houston | Jean Limo",
   description:
-    "Private car service to George Bush Intercontinental Airport (IAH). Flat-rate sedan, SUV, and Sprinter transfers with flight tracking.",
+    "Private IAH airport car service with flight monitoring and meet & greet. Flat-rate sedan, SUV, and Sprinter transfers across Greater Houston. Book online.",
+  alternates: {
+    canonical: "https://jeanlimo.com/iah-airport-car-service",
+  },
 };
 
 export default function Page() {
   return (
     <ServicePage
       kicker="IAH airport"
-      title="IAH Airport Car Service"
-      intro="Book a private chauffeur to or from George Bush Intercontinental Airport. Jean Limo monitors flights when you share your number and meets you at arrivals or your hotel."
+      title="IAH Airport Car Service Houston"
+      intro="Private IAH airport car service with professional chauffeurs, flight monitoring, and flat-rate pricing. Jean Limo provides door-to-door transfers to and from George Bush Intercontinental Airport for business travelers, families, and groups across Greater Houston. Whether you are arriving on an international flight or departing from Terminals A–E, we coordinate your pickup based on your actual flight details so you are not left waiting."
       points={[
         "Door-to-door IAH pickup and drop-off",
-        "Sedan, SUV, or Sprinter",
-        "Meet and greet available",
-        "Flat-rate pricing from the online quote",
+        "Flight monitoring when you share your flight number",
+        "Meet and greet available at arrivals or baggage claim",
+        "Business Sedan, Business SUV, or Sprinter Van",
+        "Flat rates with gratuity and fuel included on most Greater Houston trips",
+        "24/7 dispatch and professional, background-checked chauffeurs",
+      ]}
+      sections={[
+        {
+          heading: "How IAH Airport Transfers Work",
+          body: "Share your flight number and addresses when booking. We monitor the flight for delays or early arrivals. Your chauffeur meets you at the designated location with clear instructions. Enjoy a direct, comfortable ride in a clean late-model vehicle.",
+        },
+        {
+          heading: "Service Area",
+          body: "We regularly serve travelers going to and from The Woodlands, Sugar Land, Katy, Downtown Houston, the Galleria, Texas Medical Center, Spring, Tomball, and surrounding communities.",
+        },
+      ]}
+      faqs={[
+        {
+          q: "Do you track flights?",
+          a: "Yes. Provide your flight number and we monitor it so your chauffeur can adjust for delays or early arrivals.",
+        },
+        {
+          q: "Is meet & greet available?",
+          a: "Yes. We can meet you inside the terminal or at baggage claim.",
+        },
+        {
+          q: "How much does IAH transportation cost?",
+          a: "Rates are flat and based on distance. Gratuity and fuel are included on standard Greater Houston trips. Get an instant quote online.",
+        },
+        {
+          q: "How far in advance should I book?",
+          a: "Book as soon as your travel is confirmed. Same-day requests are often possible.",
+        },
       ]}
     />
   );

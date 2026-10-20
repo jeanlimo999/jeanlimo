@@ -2,9 +2,12 @@ import type { Metadata } from "next";
 import ServicePage from "@/components/ServicePage";
 
 export const metadata: Metadata = {
-  title: "Houston Black Car Service | Jean Limo",
+  title: "Houston Black Car Service | Private Chauffeur | Jean Limo",
   description:
-    "Private Houston black car service with sedan and SUV chauffeurs for airport, corporate, and event travel across Greater Houston.",
+    "Houston black car service for airport runs, corporate travel, and nights out. Business sedans and SUVs with flat rates and professional chauffeurs.",
+  alternates: {
+    canonical: "https://jeanlimo.com/houston-black-car-service",
+  },
 };
 
 export default function Page() {
@@ -12,12 +15,34 @@ export default function Page() {
     <ServicePage
       kicker="Houston black car"
       title="Houston Black Car Service"
-      intro="Jean Limo LLC provides private black car transportation throughout Greater Houston. Choose a business sedan or SUV with a professional chauffeur for airport runs, meetings, and nights out."
+      intro="Jean Limo provides private black car service throughout Greater Houston. Choose a business sedan or SUV with a professional, background-checked chauffeur for airport transfers, corporate meetings, client entertainment, or personal travel. Every ride is confirmed by dispatch and priced clearly before you book."
       points={[
-        "Sedan or SUV with a dedicated chauffeur",
-        "Flat rates inside Greater Houston",
-        "IAH, Hobby, Downtown, Sugar Land, and The Woodlands",
-        "Licensed, insured, and confirmed by dispatch",
+        "Business sedans and full-size SUVs",
+        "Flat rates with gratuity and fuel included (Greater Houston)",
+        "Airport transfers to IAH and Hobby",
+        "Corporate and executive travel",
+        "24/7 dispatch and no surge pricing",
+        "Licensed, insured, and background-checked chauffeurs",
+      ]}
+      sections={[
+        {
+          heading: "Ideal For",
+          body: "Airport runs, corporate roadshows, client meetings and dinners, nights out, and point-to-point trips across the city.",
+        },
+      ]}
+      faqs={[
+        {
+          q: "What vehicles do you use for black car service?",
+          a: "Business sedans (Mercedes E-Class, BMW 5 Series or similar) and full-size SUVs (Suburban, Yukon XL or similar).",
+        },
+        {
+          q: "Is gratuity included?",
+          a: "Yes, on standard point-to-point rates within Greater Houston.",
+        },
+        {
+          q: "Do you offer hourly black car service?",
+          a: "Yes. See our hourly chauffeur service for as-directed bookings.",
+        },
       ]}
     />
   );

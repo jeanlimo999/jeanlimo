@@ -2,22 +2,42 @@ import type { Metadata } from "next";
 import ServicePage from "@/components/ServicePage";
 
 export const metadata: Metadata = {
-  title: "Hobby Airport Car Service HOU | Jean Limo",
+  title: "Hobby Airport Car Service Houston (HOU) | Jean Limo",
   description:
-    "Private car service to William P. Hobby Airport (HOU). Chauffeured sedan, SUV, and Sprinter transfers across Houston.",
+    "Reliable Hobby Airport (HOU) car service with professional chauffeurs. Flat rates, flight tracking, and door-to-door transfers in Houston. Instant quote.",
+  alternates: {
+    canonical: "https://jeanlimo.com/hou-airport-car-service",
+  },
 };
 
 export default function Page() {
   return (
     <ServicePage
       kicker="Hobby airport"
-      title="HOU Airport Car Service"
-      intro="Jean Limo runs private transfers to and from William P. Hobby Airport. Give us your flight details and we time the car to arrivals or your home pickup."
+      title="Hobby Airport Car Service Houston (HOU)"
+      intro="Private car service to and from William P. Hobby Airport (HOU). Jean Limo offers flat-rate transfers with professional chauffeurs, flight monitoring, and door-to-door service across Greater Houston. Hobby is convenient for many Houston travelers — we make the ground portion of your trip just as straightforward."
       points={[
-        "Hobby Airport door-to-door service",
-        "Useful for Southwest and domestic flights",
-        "Luggage help and curb or meet-and-greet options",
-        "Same flat-rate quote as the homepage",
+        "Door-to-door Hobby Airport pickup and drop-off",
+        "Flight monitoring when you provide your flight number",
+        "Business Sedan, Business SUV, or Sprinter Van",
+        "Flat rates with gratuity and fuel included on most local trips",
+        "Professional chauffeurs and 24/7 dispatch",
+      ]}
+      sections={[
+        {
+          heading: "Popular Routes from Hobby",
+          body: "Hobby to Downtown Houston, the Galleria / Uptown, Texas Medical Center, Sugar Land, Katy, and Port of Galveston.",
+        },
+      ]}
+      faqs={[
+        {
+          q: "Do you serve all terminals at Hobby?",
+          a: "Yes.",
+        },
+        {
+          q: "Can I book a round trip?",
+          a: "Yes. You can book both directions in one reservation.",
+        },
       ]}
     />
   );
