@@ -60,6 +60,18 @@ export default function Page() {
           "One chauffeur, one vehicle, one confirmation",
           "Professional, background-checked drivers",
         ]}
+        relatedLinks={[
+          { href: "/the-woodlands-car-service", label: "The Woodlands" },
+          { href: "/sugar-land-car-service", label: "Sugar Land" },
+          { href: "/katy-car-service", label: "Katy" },
+          { href: "/downtown-houston-car-service", label: "Downtown" },
+          { href: "/galleria-car-service", label: "Galleria" },
+          { href: "/energy-corridor-car-service", label: "Energy Corridor" },
+          { href: "/clear-lake-car-service", label: "Clear Lake" },
+          { href: "/pearland-car-service", label: "Pearland" },
+          { href: "/spring-car-service", label: "Spring" },
+          { href: "/cypress-car-service", label: "Cypress" },
+        ]}
       />
     </>
   );
