@@ -8,6 +8,12 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://jeanlimo.com/houston-black-car-service",
   },
+  openGraph: {
+    title: "Houston Black Car Service | Private Chauffeur | Jean Limo",
+    description:
+      "Houston black car service for airport runs, corporate travel, and nights out. Business sedans and SUVs with flat rates and professional chauffeurs.",
+    url: "https://jeanlimo.com/houston-black-car-service",
+  },
 };
 
 export default function Page() {
