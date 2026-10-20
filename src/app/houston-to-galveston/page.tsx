@@ -67,6 +67,18 @@ export default function Page() {
             body: "Downtown Houston hotels, Galleria area hotels, Sugar Land, Katy, IAH and Hobby Airports, and The Woodlands.",
           },
         ]}
+        relatedLinks={[
+          { href: "/sugar-land-car-service", label: "Sugar Land" },
+          { href: "/katy-car-service", label: "Katy" },
+          { href: "/the-woodlands-car-service", label: "The Woodlands" },
+          { href: "/downtown-houston-car-service", label: "Downtown Houston" },
+          { href: "/galleria-car-service", label: "Galleria" },
+          { href: "/pearland-car-service", label: "Pearland" },
+          { href: "/clear-lake-car-service", label: "Clear Lake" },
+          { href: "/league-city-car-service", label: "League City" },
+          { href: "/missouri-city-car-service", label: "Missouri City" },
+          { href: "/stafford-car-service", label: "Stafford" },
+        ]}
         faqs={[
           {
             q: "How early should we leave for the cruise port?",
