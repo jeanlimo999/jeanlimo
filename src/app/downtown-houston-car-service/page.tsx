@@ -36,6 +36,18 @@ export default function Page() {
           body: "Downtown is a major business hub. We frequently serve office buildings, hotels, and the convention area. IAH transfers typically take 25–40 minutes depending on traffic."
         },
       ]}
+      relatedLinks={[
+        { href: "/iah-airport-car-service", label: "IAH Airport" },
+        { href: "/hou-airport-car-service", label: "Hobby Airport" },
+        { href: "/houston-to-galveston", label: "Galveston Cruise" },
+        { href: "/galleria-car-service", label: "Galleria" },
+        { href: "/montrose-car-service", label: "Montrose" },
+        { href: "/houston-heights-car-service", label: "Heights" },
+        { href: "/medical-center-car-service", label: "Medical Center" },
+        { href: "/energy-corridor-car-service", label: "Energy Corridor" },
+        { href: "/houston-black-car-service", label: "Black Car" },
+        { href: "/houston-chauffeur-service", label: "Hourly Chauffeur" },
+      ]}
       faqs={[
         {
           q: "Do you offer Downtown to IAH car service?",
