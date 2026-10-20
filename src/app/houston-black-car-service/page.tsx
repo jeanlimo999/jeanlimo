@@ -68,16 +68,16 @@ export default function Page() {
           },
         ]}
         relatedLinks={[
+          { href: "/iah-airport-car-service", label: "IAH Airport" },
+          { href: "/hou-airport-car-service", label: "Hobby Airport" },
+          { href: "/houston-chauffeur-service", label: "Hourly Chauffeur" },
+          { href: "/houston-sprinter-van-service", label: "Sprinter Van" },
+          { href: "/houston-to-galveston", label: "Galveston Cruise" },
           { href: "/river-oaks-car-service", label: "River Oaks" },
           { href: "/memorial-car-service", label: "Memorial" },
           { href: "/galleria-car-service", label: "Galleria" },
           { href: "/downtown-houston-car-service", label: "Downtown" },
           { href: "/energy-corridor-car-service", label: "Energy Corridor" },
-          { href: "/west-university-car-service", label: "West University" },
-          { href: "/tanglewood-car-service", label: "Tanglewood" },
-          { href: "/bellaire-car-service", label: "Bellaire" },
-          { href: "/montrose-car-service", label: "Montrose" },
-          { href: "/houston-heights-car-service", label: "Heights" },
         ]}
         faqs={[
           {
