@@ -8,6 +8,12 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://jeanlimo.com/fulshear-car-service",
   },
+  openGraph: {
+    title: "Fulshear Car Service | Airport & Chauffeur | Jean Limo",
+    description:
+      "Private car service in Fulshear for Hobby and IAH airport transfers, corporate travel, and hourly chauffeur. Flat rates, professional drivers.",
+    url: "https://jeanlimo.com/fulshear-car-service",
+  },
 };
 
 export default function Page() {
