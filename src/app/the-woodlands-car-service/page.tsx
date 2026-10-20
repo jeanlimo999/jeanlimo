@@ -40,6 +40,18 @@ export default function Page() {
           body: "Clear pricing before you book, flight monitoring for airport trips, and a professional team that knows the area. Get an instant quote online or call dispatch.",
         },
       ]}
+      relatedLinks={[
+        { href: "/iah-airport-car-service", label: "IAH Airport" },
+        { href: "/hou-airport-car-service", label: "Hobby Airport" },
+        { href: "/houston-to-galveston", label: "Galveston Cruise" },
+        { href: "/spring-car-service", label: "Spring" },
+        { href: "/tomball-car-service", label: "Tomball" },
+        { href: "/conroe-car-service", label: "Conroe" },
+        { href: "/humble-car-service", label: "Humble" },
+        { href: "/kingwood-car-service", label: "Kingwood" },
+        { href: "/champions-car-service", label: "Champions" },
+        { href: "/houston-chauffeur-service", label: "Hourly Chauffeur" },
+      ]}
       faqs={[
         {
           q: "How long does it take from The Woodlands to IAH?",
