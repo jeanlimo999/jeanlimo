@@ -56,7 +56,7 @@ export default function Page() {
         points={[
           "Door-to-door Sugar Land to IAH transfers",
           "Flight monitoring for arrivals and departures",
-          "Typical drive time 35–50 minutes depending on traffic",
+          "Typical drive time 50–60 minutes depending on traffic",
           "Business Sedan, Business SUV, or Sprinter Van",
           "Flat rates with gratuity and fuel included on most trips",
           "Meet and greet available at IAH arrivals",
@@ -65,7 +65,7 @@ export default function Page() {
         sections={[
           {
             heading: "Sugar Land to IAH Route",
-            body: "Most trips from Sugar Land to IAH take 35–50 minutes depending on time of day and traffic on the Southwest Freeway and Beltway 8. We time pickups for departures with appropriate buffer and monitor inbound flights so your chauffeur is ready when you land. Common pickup areas include Sugar Land Town Square, First Colony, New Territory, and surrounding neighborhoods.",
+            body: "Most trips from Sugar Land to IAH take 50–60 minutes depending on time of day and traffic on the Southwest Freeway and Beltway 8. We time pickups for departures with appropriate buffer and monitor inbound flights so your chauffeur is ready when you land. Common pickup areas include Sugar Land Town Square, First Colony, New Territory, and surrounding neighborhoods.",
           },
           {
             heading: "Why Book Jean Limo for This Route",
@@ -87,7 +87,7 @@ export default function Page() {
         faqs={[
           {
             q: "How long does it take from Sugar Land to IAH?",
-            a: "Typically 35–50 minutes depending on traffic. We recommend allowing extra time during peak hours and monitor flights for arrivals.",
+            a: "Typically 50–60 minutes depending on traffic. We recommend allowing extra time during peak hours and monitor flights for arrivals.",
           },
           {
             q: "Do you track flights for Sugar Land pickups?",
