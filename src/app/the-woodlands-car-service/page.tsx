@@ -8,6 +8,12 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://jeanlimo.com/the-woodlands-car-service",
   },
+  openGraph: {
+    title: "The Woodlands Car Service | Airport & Chauffeur | Jean Limo",
+    description:
+      "Private car service in The Woodlands for IAH and Hobby airport transfers, corporate travel, and hourly chauffeur. Flat rates, professional drivers.",
+    url: "https://jeanlimo.com/the-woodlands-car-service",
+  },
 };
 
 export default function Page() {
