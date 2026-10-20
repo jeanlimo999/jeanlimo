@@ -8,6 +8,12 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://jeanlimo.com/atascocita-car-service",
   },
+  openGraph: {
+    title: "Atascocita Car Service | Airport & Chauffeur | Jean Limo",
+    description:
+      "Private car service in Atascocita for IAH and Hobby airport transfers, corporate travel, and hourly chauffeur. Flat rates, professional drivers.",
+    url: "https://jeanlimo.com/atascocita-car-service",
+  },
 };
 
 export default function Page() {
