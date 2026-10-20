@@ -36,6 +36,18 @@ export default function Page() {
           body: "Airport runs are frequent requests. Memorial to IAH typically takes 35–50 minutes depending on traffic and time of day. We also handle trips to the Galleria, Downtown, and Energy Corridor.",
         },
       ]}
+      relatedLinks={[
+        { href: "/iah-airport-car-service", label: "IAH Airport" },
+        { href: "/hou-airport-car-service", label: "Hobby Airport" },
+        { href: "/houston-black-car-service", label: "Black Car" },
+        { href: "/galleria-car-service", label: "Galleria" },
+        { href: "/energy-corridor-car-service", label: "Energy Corridor" },
+        { href: "/river-oaks-car-service", label: "River Oaks" },
+        { href: "/tanglewood-car-service", label: "Tanglewood" },
+        { href: "/downtown-houston-car-service", label: "Downtown" },
+        { href: "/houston-chauffeur-service", label: "Hourly Chauffeur" },
+        { href: "/houston-sprinter-van-service", label: "Sprinter" },
+      ]}
       faqs={[
         {
           q: "How long from Memorial to IAH?",
