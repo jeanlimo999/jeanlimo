@@ -59,7 +59,7 @@ export default function Page() {
         },
         {
           q: "How far is Sugar Land from IAH?",
-          a: "Typically 35–50 minutes depending on traffic. Flight monitoring helps ensure your chauffeur is ready when you land.",
+          a: "Typically 50–60 minutes depending on traffic. Flight monitoring helps ensure your chauffeur is ready when you land.",
         },
         {
           q: "Is hourly service available in Sugar Land?",
