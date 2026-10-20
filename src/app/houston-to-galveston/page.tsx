@@ -8,6 +8,12 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://jeanlimo.com/houston-to-galveston",
   },
+  openGraph: {
+    title: "Houston to Galveston Cruise Transfer | Jean Limo",
+    description:
+      "Private transfers from Houston to Port of Galveston cruise terminals. Timed pickups, luggage space, SUV and Sprinter options. Flat rates.",
+    url: "https://jeanlimo.com/houston-to-galveston",
+  },
 };
 
 export default function Page() {
