@@ -8,6 +8,12 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://jeanlimo.com/energy-corridor-car-service",
   },
+  openGraph: {
+    title: "Energy Corridor Corporate Transportation | Jean Limo",
+    description:
+      "Private car and chauffeur service in the Energy Corridor for corporate travel, airport transfers, and executive transportation. Flat rates and professional drivers.",
+    url: "https://jeanlimo.com/energy-corridor-car-service",
+  },
 };
 
 export default function Page() {
