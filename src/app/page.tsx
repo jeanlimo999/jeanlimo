@@ -18,6 +18,53 @@ export const metadata: Metadata = {
   },
 };
 
+const serviceLinks = [
+  { href: "/iah-airport-car-service", label: "IAH" },
+  { href: "/hou-airport-car-service", label: "Hobby" },
+  { href: "/houston-black-car-service", label: "Black Car" },
+  { href: "/houston-to-galveston", label: "Galveston" },
+  { href: "/houston-chauffeur-service", label: "Hourly" },
+  { href: "/houston-sprinter-van-service", label: "Sprinter" },
+  { href: "/pricing", label: "Pricing" },
+];
+
+const locationLinks = [
+  { href: "/the-woodlands-car-service", label: "The Woodlands" },
+  { href: "/sugar-land-car-service", label: "Sugar Land" },
+  { href: "/katy-car-service", label: "Katy" },
+  { href: "/river-oaks-car-service", label: "River Oaks" },
+  { href: "/memorial-car-service", label: "Memorial" },
+  { href: "/galleria-car-service", label: "Galleria" },
+  { href: "/west-university-car-service", label: "West University" },
+  { href: "/downtown-houston-car-service", label: "Downtown" },
+  { href: "/tanglewood-car-service", label: "Tanglewood" },
+  { href: "/energy-corridor-car-service", label: "Energy Corridor" },
+  { href: "/bellaire-car-service", label: "Bellaire" },
+  { href: "/houston-heights-car-service", label: "Heights" },
+  { href: "/cypress-car-service", label: "Cypress" },
+  { href: "/pearland-car-service", label: "Pearland" },
+  { href: "/missouri-city-car-service", label: "Missouri City" },
+  { href: "/clear-lake-car-service", label: "Clear Lake" },
+  { href: "/kingwood-car-service", label: "Kingwood" },
+  { href: "/tomball-car-service", label: "Tomball" },
+  { href: "/spring-car-service", label: "Spring" },
+  { href: "/humble-car-service", label: "Humble" },
+  { href: "/atascocita-car-service", label: "Atascocita" },
+  { href: "/league-city-car-service", label: "League City" },
+  { href: "/friendswood-car-service", label: "Friendswood" },
+  { href: "/richmond-car-service", label: "Richmond" },
+  { href: "/montrose-car-service", label: "Montrose" },
+  { href: "/medical-center-car-service", label: "Medical Center" },
+  { href: "/spring-branch-car-service", label: "Spring Branch" },
+  { href: "/pasadena-car-service", label: "Pasadena" },
+  { href: "/baytown-car-service", label: "Baytown" },
+  { href: "/stafford-car-service", label: "Stafford" },
+  { href: "/fulshear-car-service", label: "Fulshear" },
+  { href: "/conroe-car-service", label: "Conroe" },
+  { href: "/jersey-village-car-service", label: "Jersey Village" },
+  { href: "/champions-car-service", label: "Champions" },
+];
+
 export default function Home() {
   return (
     <div className="bg-zinc-950 text-zinc-100 min-h-screen">
@@ -176,26 +223,28 @@ export default function Home() {
         </div>
       </section>
       <footer className="border-t border-yellow-600/10 py-10">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="font-serif text-yellow-500 text-lg">JEAN LIMO LLC</div>
-          <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-zinc-500 justify-center max-w-2xl">
-            <Link href="/iah-airport-car-service" className="hover:text-yellow-500">IAH</Link>
-            <Link href="/hou-airport-car-service" className="hover:text-yellow-500">Hobby</Link>
-            <Link href="/houston-black-car-service" className="hover:text-yellow-500">Black Car</Link>
-            <Link href="/houston-to-galveston" className="hover:text-yellow-500">Galveston</Link>
-            <Link href="/houston-chauffeur-service" className="hover:text-yellow-500">Hourly</Link>
-            <Link href="/the-woodlands-car-service" className="hover:text-yellow-500">The Woodlands</Link>
-            <Link href="/sugar-land-car-service" className="hover:text-yellow-500">Sugar Land</Link>
-            <Link href="/katy-car-service" className="hover:text-yellow-500">Katy</Link>
-            <Link href="/river-oaks-car-service" className="hover:text-yellow-500">River Oaks</Link>
-            <Link href="/memorial-car-service" className="hover:text-yellow-500">Memorial</Link>
-            <Link href="/galleria-car-service" className="hover:text-yellow-500">Galleria</Link>
-            <Link href="/west-university-car-service" className="hover:text-yellow-500">West University</Link>
-            <Link href="/downtown-houston-car-service" className="hover:text-yellow-500">Downtown</Link>
-            <Link href="/energy-corridor-car-service" className="hover:text-yellow-500">Energy Corridor</Link>
-            <Link href="/pricing" className="hover:text-yellow-500">Pricing</Link>
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
+            <div className="font-serif text-yellow-500 text-lg">JEAN LIMO LLC</div>
+            <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-zinc-500">
+              {serviceLinks.map((link) => (
+                <Link key={link.href} href={link.href} className="hover:text-yellow-500">
+                  {link.label}
+                </Link>
+              ))}
+            </div>
           </div>
-          <div className="text-xs text-zinc-600">© 2026 Jean Limo LLC. All rights reserved.</div>
+          <div className="border-t border-yellow-600/10 pt-6">
+            <p className="text-xs text-zinc-500 uppercase tracking-wider mb-3">Service Areas</p>
+            <div className="flex flex-wrap gap-x-3 gap-y-2 text-xs text-zinc-500">
+              {locationLinks.map((link) => (
+                <Link key={link.href} href={link.href} className="hover:text-yellow-500">
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+          <div className="text-xs text-zinc-600 mt-8 text-center md:text-right">© 2026 Jean Limo LLC. All rights reserved.</div>
         </div>
       </footer>
     </div>
