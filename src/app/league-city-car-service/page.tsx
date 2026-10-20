@@ -8,6 +8,12 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://jeanlimo.com/league-city-car-service",
   },
+  openGraph: {
+    title: "League City Car Service | Airport & Chauffeur | Jean Limo",
+    description:
+      "Private car service in League City for Hobby and IAH airport transfers, corporate travel, and hourly chauffeur. Flat rates, professional drivers.",
+    url: "https://jeanlimo.com/league-city-car-service",
+  },
 };
 
 export default function Page() {
