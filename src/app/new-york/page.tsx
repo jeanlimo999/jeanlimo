@@ -1,4 +1,20 @@
+import type { Metadata } from "next";
 import SiteHeader from "@/components/SiteHeader";
+
+export const metadata: Metadata = {
+  title: "New York & New Jersey Rate Card | Jean Limo",
+  description:
+    "Flat-rate black car, SUV, and Sprinter pricing for New York and New Jersey. See mile bands, hourly rates, and booking details.",
+  alternates: {
+    canonical: "https://jeanlimo.com/new-york",
+  },
+  openGraph: {
+    title: "New York & New Jersey Rate Card | Jean Limo",
+    description:
+      "Transparent flat rates for sedan, SUV, and Sprinter service in New York and New Jersey.",
+    url: "https://jeanlimo.com/new-york",
+  },
+};
 
 const rows = [
   ["0 – 10 mi", "$135", "$170", "$260"],
