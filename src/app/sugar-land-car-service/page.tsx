@@ -22,7 +22,7 @@ export default function Page() {
       kicker="Sugar Land"
       title="Sugar Land Car Service & Airport Transportation"
       intro="Jean Limo is based in Sugar Land and provides private car service for residents and businesses across southwest Houston. From IAH and Hobby airport transfers to Galveston cruise port runs and hourly chauffeur service, we know local traffic patterns in First Colony, Telfair, New Territory, and surrounding neighborhoods."
-      image="/fleet/sprinter.jpg"
+      image="/sugar-land.jpg"
       highlight={{
         kicker: "Local Airport & Group Service",
         title: "Sugar Land to IAH in 50–60 Minutes",
