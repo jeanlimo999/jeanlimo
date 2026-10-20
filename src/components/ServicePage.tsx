@@ -9,6 +9,8 @@ export default function ServicePage({
   faqs = [],
   relatedLinks = [],
   image,
+  serviceCards = [],
+  highlight,
 }: {
   kicker: string;
   title: string;
@@ -18,6 +20,8 @@ export default function ServicePage({
   faqs?: { q: string; a: string }[];
   relatedLinks?: { href: string; label: string }[];
   image?: string;
+  serviceCards?: { title: string; body: string }[];
+  highlight?: { kicker: string; title: string; body: string; cta: string; href: string };
 }) {
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
@@ -36,6 +40,12 @@ export default function ServicePage({
         <h1 className="mt-3 font-serif text-4xl leading-tight">{title}</h1>
         <p className="mt-5 text-lg text-zinc-300">{intro}</p>
 
+        <div className="mt-6">
+          <Link href="/#quote" className="inline-block rounded bg-yellow-500 px-6 py-3 font-semibold text-zinc-900">
+            Get Instant Quote
+          </Link>
+        </div>
+
         {image && (
           <div className="mt-8">
             <img
@@ -44,6 +54,34 @@ export default function ServicePage({
               className="w-full rounded-lg object-cover"
             />
           </div>
+        )}
+
+        {highlight && (
+          <div className="mt-8 rounded-xl bg-zinc-900 border border-yellow-500/30 p-6">
+            <p className="text-xs uppercase tracking-[0.2em] text-yellow-500">{highlight.kicker}</p>
+            <h2 className="mt-2 font-serif text-2xl text-white">{highlight.title}</h2>
+            <p className="mt-3 text-zinc-300">{highlight.body}</p>
+            <Link
+              href={highlight.href}
+              className="mt-5 inline-block w-full rounded bg-yellow-500 px-6 py-3 text-center font-semibold text-zinc-900"
+            >
+              {highlight.cta}
+            </Link>
+          </div>
+        )}
+
+        {serviceCards.length > 0 && (
+          <section className="mt-10">
+            <h2 className="font-serif text-2xl text-yellow-500">Our Transportation Services</h2>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              {serviceCards.map((card) => (
+                <div key={card.title} className="rounded-lg bg-zinc-900 p-4">
+                  <h3 className="font-semibold text-white">{card.title}</h3>
+                  <p className="mt-1 text-sm text-zinc-400">{card.body}</p>
+                </div>
+              ))}
+            </div>
+          </section>
         )}
 
         <ul className="mt-8 space-y-3 text-zinc-300">
