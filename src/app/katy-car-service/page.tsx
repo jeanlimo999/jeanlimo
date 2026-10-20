@@ -8,6 +8,12 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://jeanlimo.com/katy-car-service",
   },
+  openGraph: {
+    title: "Katy Car Service | Airport & Chauffeur | Jean Limo",
+    description:
+      "Private car service in Katy for IAH and Hobby airport transfers, corporate travel, and hourly chauffeur. Flat rates, professional drivers across west Houston.",
+    url: "https://jeanlimo.com/katy-car-service",
+  },
 };
 
 export default function Page() {
