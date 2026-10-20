@@ -8,6 +8,12 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://jeanlimo.com/pasadena-car-service",
   },
+  openGraph: {
+    title: "Pasadena Car Service | Airport & Chauffeur | Jean Limo",
+    description:
+      "Private car service in Pasadena for Hobby and IAH airport transfers, corporate travel, and hourly chauffeur. Flat rates, professional drivers.",
+    url: "https://jeanlimo.com/pasadena-car-service",
+  },
 };
 
 export default function Page() {
