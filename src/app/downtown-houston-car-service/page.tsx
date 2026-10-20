@@ -8,6 +8,12 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://jeanlimo.com/downtown-houston-car-service",
   },
+  openGraph: {
+    title: "Downtown Houston Executive Car Service | Jean Limo",
+    description:
+      "Private executive car and chauffeur service in Downtown Houston for airport transfers, corporate travel, and events. Flat rates and professional drivers.",
+    url: "https://jeanlimo.com/downtown-houston-car-service",
+  },
 };
 
 export default function Page() {
