@@ -22,7 +22,7 @@ export default function Page() {
       kicker="Katy"
       title="Katy Car Service"
       intro="Private car and chauffeur service for Katy and west Houston. Jean Limo specializes in airport transfers to IAH and Hobby, corporate transportation, and hourly service with clear pricing."
-      image="/katy.jpg"
+      image="/katy.png"
       highlight={{
         kicker: "West Houston Airport Runs",
         title: "Katy to IAH Typically 40–55 Minutes",
