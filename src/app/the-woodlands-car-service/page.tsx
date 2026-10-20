@@ -22,7 +22,7 @@ export default function Page() {
       kicker="The Woodlands"
       title="The Woodlands Car Service"
       intro="Private car and chauffeur service for The Woodlands residents and businesses. Jean Limo handles frequent IAH airport transfers, corporate travel, and hourly service across north Houston."
-      image="/fleet/sedan.jpg"
+      image="/woodlands.jpg"
       highlight={{
         kicker: "North Houston Airport Service",
         title: "The Woodlands to IAH in 25–35 Minutes",
