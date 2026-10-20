@@ -71,6 +71,18 @@ export default function Page() {
             body: "We regularly serve travelers going to and from The Woodlands, Sugar Land, Katy, Downtown Houston, the Galleria, Texas Medical Center, Spring, Tomball, and surrounding communities.",
           },
         ]}
+        relatedLinks={[
+          { href: "/the-woodlands-car-service", label: "The Woodlands" },
+          { href: "/sugar-land-car-service", label: "Sugar Land" },
+          { href: "/katy-car-service", label: "Katy" },
+          { href: "/downtown-houston-car-service", label: "Downtown Houston" },
+          { href: "/galleria-car-service", label: "Galleria" },
+          { href: "/medical-center-car-service", label: "Medical Center" },
+          { href: "/spring-car-service", label: "Spring" },
+          { href: "/tomball-car-service", label: "Tomball" },
+          { href: "/kingwood-car-service", label: "Kingwood" },
+          { href: "/humble-car-service", label: "Humble" },
+        ]}
         faqs={[
           {
             q: "Do you track flights?",
