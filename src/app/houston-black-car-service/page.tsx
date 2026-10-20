@@ -67,6 +67,18 @@ export default function Page() {
             body: "Airport runs, corporate roadshows, client meetings and dinners, nights out, and point-to-point trips across the city.",
           },
         ]}
+        relatedLinks={[
+          { href: "/river-oaks-car-service", label: "River Oaks" },
+          { href: "/memorial-car-service", label: "Memorial" },
+          { href: "/galleria-car-service", label: "Galleria" },
+          { href: "/downtown-houston-car-service", label: "Downtown" },
+          { href: "/energy-corridor-car-service", label: "Energy Corridor" },
+          { href: "/west-university-car-service", label: "West University" },
+          { href: "/tanglewood-car-service", label: "Tanglewood" },
+          { href: "/bellaire-car-service", label: "Bellaire" },
+          { href: "/montrose-car-service", label: "Montrose" },
+          { href: "/houston-heights-car-service", label: "Heights" },
+        ]}
         faqs={[
           {
             q: "What vehicles do you use for black car service?",
