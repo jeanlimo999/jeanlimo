@@ -4,14 +4,14 @@ import ServicePage from "@/components/ServicePage";
 export const metadata: Metadata = {
   title: "Galleria Car Service & Sprinter Van | Jean Limo",
   description:
-    "Luxury Galleria car service in Houston. Book private airport transfers, executive transportation, Mercedes Sprinter vans and group travel with Jean Limo.",
+    "Luxury Galleria car service, Houston airport transfers, Mercedes-Benz Sprinter vans and large group transportation. Get a private chauffeur quote.",
   alternates: {
     canonical: "https://jeanlimo.com/galleria-car-service",
   },
   openGraph: {
     title: "Galleria Car Service & Sprinter Van | Jean Limo",
     description:
-      "Luxury Galleria car service in Houston. Book private airport transfers, executive transportation, Mercedes Sprinter vans and group travel with Jean Limo.",
+      "Luxury Galleria car service, Houston airport transfers, Mercedes-Benz Sprinter vans and large group transportation. Get a private chauffeur quote.",
     url: "https://jeanlimo.com/galleria-car-service",
   },
 };
