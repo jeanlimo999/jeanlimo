@@ -8,6 +8,12 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://jeanlimo.com/spring-branch-car-service",
   },
+  openGraph: {
+    title: "Spring Branch Car Service | Airport & Chauffeur | Jean Limo",
+    description:
+      "Private car service in Spring Branch for IAH and Hobby airport transfers, corporate travel, and hourly chauffeur. Flat rates, professional drivers.",
+    url: "https://jeanlimo.com/spring-branch-car-service",
+  },
 };
 
 export default function Page() {
