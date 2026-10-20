@@ -8,6 +8,12 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://jeanlimo.com/champions-car-service",
   },
+  openGraph: {
+    title: "Champions Car Service | Airport & Chauffeur | Jean Limo",
+    description:
+      "Private car service in Champions for IAH and Hobby airport transfers, corporate travel, and hourly chauffeur. Flat rates, professional drivers.",
+    url: "https://jeanlimo.com/champions-car-service",
+  },
 };
 
 export default function Page() {
