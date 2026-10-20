@@ -67,16 +67,16 @@ export default function Page() {
           },
         ]}
         relatedLinks={[
+          { href: "/iah-airport-car-service", label: "IAH Airport" },
+          { href: "/houston-black-car-service", label: "Black Car Service" },
+          { href: "/houston-chauffeur-service", label: "Hourly Chauffeur" },
+          { href: "/houston-sprinter-van-service", label: "Sprinter Van" },
+          { href: "/houston-to-galveston", label: "Galveston Cruise" },
           { href: "/sugar-land-car-service", label: "Sugar Land" },
           { href: "/pearland-car-service", label: "Pearland" },
-          { href: "/missouri-city-car-service", label: "Missouri City" },
           { href: "/clear-lake-car-service", label: "Clear Lake" },
-          { href: "/league-city-car-service", label: "League City" },
-          { href: "/friendswood-car-service", label: "Friendswood" },
-          { href: "/pasadena-car-service", label: "Pasadena" },
-          { href: "/downtown-houston-car-service", label: "Downtown Houston" },
+          { href: "/downtown-houston-car-service", label: "Downtown" },
           { href: "/galleria-car-service", label: "Galleria" },
-          { href: "/medical-center-car-service", label: "Medical Center" },
         ]}
         faqs={[
           {
