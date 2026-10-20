@@ -8,6 +8,12 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://jeanlimo.com/memorial-car-service",
   },
+  openGraph: {
+    title: "Memorial Houston Car Service | Jean Limo",
+    description:
+      "Private car service in Memorial and Memorial Villages for airport transfers, corporate travel, and hourly chauffeur. Professional drivers and flat rates.",
+    url: "https://jeanlimo.com/memorial-car-service",
+  },
 };
 
 export default function Page() {
