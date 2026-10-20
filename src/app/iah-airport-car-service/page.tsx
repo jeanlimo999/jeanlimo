@@ -8,6 +8,12 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://jeanlimo.com/iah-airport-car-service",
   },
+  openGraph: {
+    title: "IAH Airport Car Service Houston | Jean Limo",
+    description:
+      "Private IAH airport car service with flight monitoring and meet & greet. Flat-rate sedan, SUV, and Sprinter transfers across Greater Houston. Book online.",
+    url: "https://jeanlimo.com/iah-airport-car-service",
+  },
 };
 
 export default function Page() {
