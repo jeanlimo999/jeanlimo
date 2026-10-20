@@ -22,7 +22,7 @@ export default function Page() {
       kicker="Galleria / Uptown"
       title="Houston Galleria Car Service & Sprinter Van Transportation"
       intro="Luxury Black Car Service • Airport Transfers • Group Transportation. Experience premium chauffeur service in Houston’s Galleria and Uptown district with Jean Limo. From private airport transfers and executive travel to weddings, corporate events, and large group transportation, we provide professional chauffeurs and comfortable luxury vehicles for every occasion."
-      image="/galleria-skyline.jpg"
+      image="/fleet/sprinter.jpg"
       highlight={{
         kicker: "Luxury Group Transportation",
         title: "Big Group? Ride Together in Style.",
