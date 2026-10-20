@@ -8,6 +8,12 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://jeanlimo.com/medical-center-car-service",
   },
+  openGraph: {
+    title: "Medical Center Car Service | Airport & Chauffeur | Jean Limo",
+    description:
+      "Private car service in the Texas Medical Center for IAH and Hobby airport transfers, patient and visitor transport, and hourly chauffeur. Flat rates, professional drivers.",
+    url: "https://jeanlimo.com/medical-center-car-service",
+  },
 };
 
 export default function Page() {
