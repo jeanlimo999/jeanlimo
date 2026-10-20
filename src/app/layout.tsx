@@ -7,17 +7,65 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-playfair" });
 
 export const metadata: Metadata = {
-  title: "Houston Black Car, Airport & Private Chauffeur Service | Jean Limo",
+  metadataBase: new URL("https://jeanlimo.com"),
+  title: {
+    default: "Houston Black Car, Airport & Private Chauffeur Service | Jean Limo",
+    template: "%s | Jean Limo",
+  },
   description:
-    "Jean Limo offers private chauffeur, black car, airport and Sprinter service in Houston, including IAH, HOU, Sugar Land and Galveston transfers.",
+    "Jean Limo offers private chauffeur, black car, airport and Sprinter service in Houston, including IAH, HOU, Sugar Land and Galveston transfers. Flat rates, gratuity included.",
+  keywords: [
+    "Houston black car service",
+    "IAH airport car service",
+    "Hobby airport car service",
+    "Houston chauffeur service",
+    "Houston Sprinter van",
+    "Galveston cruise transfer",
+    "private chauffeur Houston",
+  ],
+  authors: [{ name: "Jean Limo LLC" }],
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://jeanlimo.com",
+    siteName: "Jean Limo",
+    title: "Houston Black Car, Airport & Private Chauffeur Service | Jean Limo",
+    description:
+      "Private chauffeur, black car, SUV and Sprinter service in Greater Houston. Flat-rate IAH & Hobby airport transfers, Galveston cruises, and hourly chauffeur.",
+    images: [
+      {
+        url: "/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Jean Limo Houston black car and airport service",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Houston Black Car & Airport Chauffeur Service | Jean Limo",
+    description:
+      "Private chauffeur and black car service in Houston. Flat rates for IAH, Hobby, Galveston, and hourly service.",
+    images: ["/og-image.jpg"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  alternates: {
+    canonical: "https://jeanlimo.com",
+  },
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
     title: "Jean Limo",
     statusBarStyle: "black-translucent",
-  },
-  alternates: {
-    canonical: "https://jeanlimo.com",
   },
 };
 
