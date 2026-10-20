@@ -8,6 +8,12 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://jeanlimo.com/bellaire-car-service",
   },
+  openGraph: {
+    title: "Bellaire Airport Car Service | Jean Limo",
+    description:
+      "Private car service in Bellaire for IAH and Hobby airport transfers, corporate travel, and events. Professional chauffeurs and flat rates.",
+    url: "https://jeanlimo.com/bellaire-car-service",
+  },
 };
 
 export default function Page() {
