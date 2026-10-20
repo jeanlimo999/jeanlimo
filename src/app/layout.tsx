@@ -34,7 +34,7 @@ export const metadata: Metadata = {
       "Private chauffeur, black car, SUV and Sprinter service in Greater Houston. Flat-rate IAH & Hobby airport transfers, Galveston cruises, and hourly chauffeur.",
     images: [
       {
-        url: "/og-image.jpg",
+        url: "/logo.jpg",
         width: 1200,
         height: 630,
         alt: "Jean Limo Houston black car and airport service",
@@ -46,7 +46,7 @@ export const metadata: Metadata = {
     title: "Houston Black Car & Airport Chauffeur Service | Jean Limo",
     description:
       "Private chauffeur and black car service in Houston. Flat rates for IAH, Hobby, Galveston, and hourly service.",
-    images: ["/og-image.jpg"],
+    images: ["/logo.jpg"],
   },
   robots: {
     index: true,
