@@ -8,6 +8,12 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://jeanlimo.com/stafford-car-service",
   },
+  openGraph: {
+    title: "Stafford Car Service | Airport & Chauffeur | Jean Limo",
+    description:
+      "Private car service in Stafford for Hobby and IAH airport transfers, corporate travel, and hourly chauffeur. Flat rates, professional drivers.",
+    url: "https://jeanlimo.com/stafford-car-service",
+  },
 };
 
 export default function Page() {
