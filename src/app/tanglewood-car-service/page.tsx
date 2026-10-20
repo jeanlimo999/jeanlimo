@@ -8,6 +8,12 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://jeanlimo.com/tanglewood-car-service",
   },
+  openGraph: {
+    title: "Tanglewood Private Chauffeur | Jean Limo",
+    description:
+      "Private chauffeur service in Tanglewood for airport transfers, events, and personal travel. Professional drivers and flat rates in this Houston neighborhood.",
+    url: "https://jeanlimo.com/tanglewood-car-service",
+  },
 };
 
 export default function Page() {
