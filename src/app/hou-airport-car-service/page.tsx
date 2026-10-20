@@ -8,6 +8,12 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://jeanlimo.com/hou-airport-car-service",
   },
+  openGraph: {
+    title: "Hobby Airport Car Service Houston (HOU) | Jean Limo",
+    description:
+      "Reliable Hobby Airport (HOU) car service with professional chauffeurs. Flat rates, flight tracking, and door-to-door transfers in Houston. Instant quote.",
+    url: "https://jeanlimo.com/hou-airport-car-service",
+  },
 };
 
 export default function Page() {
