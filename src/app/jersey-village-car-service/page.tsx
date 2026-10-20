@@ -8,6 +8,12 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://jeanlimo.com/jersey-village-car-service",
   },
+  openGraph: {
+    title: "Jersey Village Car Service | Airport & Chauffeur | Jean Limo",
+    description:
+      "Private car service in Jersey Village for IAH and Hobby airport transfers, corporate travel, and hourly chauffeur. Flat rates, professional drivers.",
+    url: "https://jeanlimo.com/jersey-village-car-service",
+  },
 };
 
 export default function Page() {
