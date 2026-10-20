@@ -9,6 +9,7 @@ const pages = [
   "/houston-sprinter-van-service",
   "/houston-chauffeur-service",
   "/sugar-land-to-iah",
+  "/sugar-land-to-hou",
   "/the-woodlands-car-service",
   "/sugar-land-car-service",
   "/katy-car-service",
