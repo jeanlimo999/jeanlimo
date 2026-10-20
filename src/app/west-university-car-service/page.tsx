@@ -8,6 +8,12 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://jeanlimo.com/west-university-car-service",
   },
+  openGraph: {
+    title: "West University Luxury Car Service | Jean Limo",
+    description:
+      "Private chauffeur and car service in West University for airport transfers, events, and corporate travel. Professional drivers and transparent pricing.",
+    url: "https://jeanlimo.com/west-university-car-service",
+  },
 };
 
 export default function Page() {
