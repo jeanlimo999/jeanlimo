@@ -8,6 +8,12 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://jeanlimo.com/tomball-car-service",
   },
+  openGraph: {
+    title: "Tomball Car Service | Airport & Chauffeur | Jean Limo",
+    description:
+      "Private car service in Tomball for IAH and Hobby airport transfers, corporate travel, and hourly chauffeur. Flat rates, professional drivers.",
+    url: "https://jeanlimo.com/tomball-car-service",
+  },
 };
 
 export default function Page() {
