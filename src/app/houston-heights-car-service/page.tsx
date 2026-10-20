@@ -8,6 +8,12 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://jeanlimo.com/houston-heights-car-service",
   },
+  openGraph: {
+    title: "Houston Heights Car Service | Jean Limo",
+    description:
+      "Private car and chauffeur service in the Houston Heights for airport transfers, events, and local travel. Flat rates and professional drivers.",
+    url: "https://jeanlimo.com/houston-heights-car-service",
+  },
 };
 
 export default function Page() {
