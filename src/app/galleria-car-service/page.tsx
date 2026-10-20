@@ -21,33 +21,40 @@ export default function Page() {
     <ServicePage
       kicker="Galleria / Uptown"
       title="Houston Galleria Car Service & Sprinter Van Transportation"
-      intro="Luxury airport transfers, executive transportation, and group travel in Galleria / Uptown Houston. Experience reliable, professional transportation with Jean Limo. From airport pickups and business meetings to shopping trips, private events, and large group transportation, our chauffeurs serve Houston’s Galleria and Uptown area with luxury sedans, SUVs, and Mercedes-Benz Sprinter vans."
+      intro="Experience luxury car service and Mercedes-Benz Sprinter transportation in Houston’s Galleria and Uptown district. From private airport transfers and executive travel to weddings, corporate events, and large group transportation, Jean Limo provides professional chauffeurs and comfortable vehicles for every occasion."
       image="/fleet/sprinter.jpg"
+      highlight={{
+        kicker: "Luxury Group Transportation",
+        title: "Big Group? Ride Together in Style.",
+        body: "Mercedes-Benz Sprinter transportation for corporate teams, airport groups, weddings, concerts, and special events throughout Houston.",
+        cta: "Get a Sprinter Quote",
+        href: "/#quote",
+      }}
+      serviceCards={[
+        { title: "Airport Transfers", body: "Private transfers to IAH and Hobby." },
+        { title: "Luxury Black Car Service", body: "Executive sedans and SUVs." },
+        { title: "Sprinter Van Service", body: "Comfortable group transportation." },
+        { title: "Group Transportation", body: "Conferences, weddings, and events." },
+        { title: "Corporate Transportation", body: "Meetings and executive travel." },
+        { title: "Hourly Chauffeur Service", body: "Shopping, dining, and multiple stops." },
+      ]}
       points={[
-        "Airport transfers to IAH and Hobby",
-        "Luxury black car service with sedans and SUVs",
-        "Mercedes-Benz Sprinter van service for groups",
-        "Group transportation for events, weddings, and corporate teams",
-        "Corporate and executive transportation",
-        "Hourly chauffeur service for multiple stops",
-        "Flat rates and professional chauffeurs",
+        "Luxury Sedans • SUVs • Mercedes-Benz Sprinter Vans",
+        "Professional chauffeurs and transparent pricing",
+        "Pickups from Galleria hotels, offices, and residences",
       ]}
       sections={[
         {
-          heading: "Our Transportation Services",
-          body: "Airport Transfers — Private transportation to and from George Bush Intercontinental Airport (IAH) and William P. Hobby Airport (HOU). Luxury Black Car Service — Premium sedans and SUVs for executives, business travelers, and private clients. Mercedes-Benz Sprinter Van Service — Spacious, comfortable transportation for families, corporate teams, and larger groups. Group Transportation — Convenient travel for conferences, conventions, weddings, celebrations, and special events. Corporate Transportation — Professional chauffeur service for meetings, executives, and business events. Hourly Chauffeur Service — Flexible transportation for shopping, dining, multiple appointments, and custom itineraries.",
-        },
-        {
           heading: "Mercedes Sprinter Van & Large Group Transportation",
-          body: "Travel Together. Arrive in Style. Planning a group trip in Houston? Our Mercedes-Benz Sprinter transportation is ideal for larger parties who want to travel together comfortably without booking multiple cars. Perfect for corporate groups and executive teams, airport transfers with multiple passengers and luggage, wedding parties and private celebrations, family outings and group shopping trips, convention and conference transportation, concerts, sporting events, and special occasions. Request a Sprinter quote for your group, luggage, and itinerary.",
+          body: "Planning a group trip? Our Mercedes-Benz Sprinter is ideal for larger parties who want to travel together without booking multiple cars. Perfect for corporate teams, airport transfers with luggage, wedding parties, family outings, conventions, concerts, and special occasions.",
         },
         {
           heading: "Why Choose Jean Limo in the Galleria",
-          body: "Enjoy professional chauffeurs, clean luxury vehicles, convenient airport transportation, and flexible pickup arrangements throughout Houston’s Galleria and Uptown district. Whether you’re staying at a luxury hotel, attending a business meeting, shopping at The Galleria, or arranging transportation for a larger group, Jean Limo makes travel easier.",
+          body: "Professional chauffeurs, clean luxury vehicles, and flexible pickup arrangements throughout the Galleria and Uptown district. Whether you are staying at a luxury hotel, attending a meeting, shopping at The Galleria, or arranging group transportation, we make the trip straightforward.",
         },
         {
           heading: "Galleria & Uptown Locations We Serve",
-          body: "The Galleria Shopping Center, The Post Oak Hotel, The Westin Galleria, Hyatt Regency Houston/Galleria, Uptown Park, Post Oak Boulevard, River Oaks, and Tanglewood. We also provide service connecting the Galleria with Downtown Houston, Memorial, the Energy Corridor, Sugar Land, IAH Airport, and Hobby Airport.",
+          body: "The Galleria Shopping Center, The Post Oak Hotel, The Westin Galleria, Hyatt Regency Houston/Galleria, Uptown Park, Post Oak Boulevard, River Oaks, and Tanglewood. We also connect the Galleria with Downtown Houston, Memorial, the Energy Corridor, Sugar Land, IAH, and Hobby.",
         },
       ]}
       relatedLinks={[
