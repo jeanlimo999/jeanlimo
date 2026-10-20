@@ -72,16 +72,16 @@ export default function Page() {
           },
         ]}
         relatedLinks={[
+          { href: "/hou-airport-car-service", label: "Hobby Airport" },
+          { href: "/houston-black-car-service", label: "Black Car Service" },
+          { href: "/houston-chauffeur-service", label: "Hourly Chauffeur" },
+          { href: "/houston-sprinter-van-service", label: "Sprinter Van" },
+          { href: "/houston-to-galveston", label: "Galveston Cruise" },
           { href: "/the-woodlands-car-service", label: "The Woodlands" },
           { href: "/sugar-land-car-service", label: "Sugar Land" },
           { href: "/katy-car-service", label: "Katy" },
-          { href: "/downtown-houston-car-service", label: "Downtown Houston" },
+          { href: "/downtown-houston-car-service", label: "Downtown" },
           { href: "/galleria-car-service", label: "Galleria" },
-          { href: "/medical-center-car-service", label: "Medical Center" },
-          { href: "/spring-car-service", label: "Spring" },
-          { href: "/tomball-car-service", label: "Tomball" },
-          { href: "/kingwood-car-service", label: "Kingwood" },
-          { href: "/humble-car-service", label: "Humble" },
         ]}
         faqs={[
           {
