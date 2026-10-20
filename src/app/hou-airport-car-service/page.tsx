@@ -66,6 +66,18 @@ export default function Page() {
             body: "Hobby to Downtown Houston, the Galleria / Uptown, Texas Medical Center, Sugar Land, Katy, and Port of Galveston.",
           },
         ]}
+        relatedLinks={[
+          { href: "/sugar-land-car-service", label: "Sugar Land" },
+          { href: "/pearland-car-service", label: "Pearland" },
+          { href: "/missouri-city-car-service", label: "Missouri City" },
+          { href: "/clear-lake-car-service", label: "Clear Lake" },
+          { href: "/league-city-car-service", label: "League City" },
+          { href: "/friendswood-car-service", label: "Friendswood" },
+          { href: "/pasadena-car-service", label: "Pasadena" },
+          { href: "/downtown-houston-car-service", label: "Downtown Houston" },
+          { href: "/galleria-car-service", label: "Galleria" },
+          { href: "/medical-center-car-service", label: "Medical Center" },
+        ]}
         faqs={[
           {
             q: "Do you serve all terminals at Hobby?",
