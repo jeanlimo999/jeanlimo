@@ -22,7 +22,7 @@ export default function Page() {
       kicker="Memorial"
       title="Memorial Houston Car Service"
       intro="Private chauffeur service for Memorial and the Memorial Villages. Jean Limo provides airport transportation to IAH and Hobby, corporate travel, and hourly service for residents and businesses in this established Houston area."
-      image="/fleet/sedan.jpg"
+      image="/memorial.jpg"
       highlight={{
         kicker: "Memorial to IAH",
         title: "Typically 35–50 Minutes",
