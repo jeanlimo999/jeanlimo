@@ -8,6 +8,12 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://jeanlimo.com/clear-lake-car-service",
   },
+  openGraph: {
+    title: "Clear Lake Car Service | Airport & Chauffeur | Jean Limo",
+    description:
+      "Private car service in Clear Lake for Hobby and IAH airport transfers, NASA area, corporate travel, and hourly chauffeur. Flat rates, professional drivers.",
+    url: "https://jeanlimo.com/clear-lake-car-service",
+  },
 };
 
 export default function Page() {
