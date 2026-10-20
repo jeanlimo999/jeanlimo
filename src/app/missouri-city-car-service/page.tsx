@@ -8,6 +8,12 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://jeanlimo.com/missouri-city-car-service",
   },
+  openGraph: {
+    title: "Missouri City Car Service | Airport & Chauffeur | Jean Limo",
+    description:
+      "Private car service in Missouri City for Hobby and IAH airport transfers, corporate travel, and hourly chauffeur. Flat rates, professional drivers.",
+    url: "https://jeanlimo.com/missouri-city-car-service",
+  },
 };
 
 export default function Page() {
