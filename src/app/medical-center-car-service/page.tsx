@@ -2,16 +2,16 @@ import type { Metadata } from "next";
 import ServicePage from "@/components/ServicePage";
 
 export const metadata: Metadata = {
-  title: "Medical Center Car Service | Airport & Chauffeur | Jean Limo",
+  title: "Texas Medical Center Car Service | Jean Limo",
   description:
-    "Private car service in the Texas Medical Center for IAH and Hobby airport transfers, patient and visitor transport, and hourly chauffeur. Flat rates, professional drivers.",
+    "Private car service in the Texas Medical Center for IAH and Hobby airport transfers, patient and visitor transportation, and hourly chauffeur.",
   alternates: {
     canonical: "https://jeanlimo.com/medical-center-car-service",
   },
   openGraph: {
-    title: "Medical Center Car Service | Airport & Chauffeur | Jean Limo",
+    title: "Texas Medical Center Car Service | Jean Limo",
     description:
-      "Private car service in the Texas Medical Center for IAH and Hobby airport transfers, patient and visitor transport, and hourly chauffeur. Flat rates, professional drivers.",
+      "Private car service in the Texas Medical Center for airport transfers and patient transportation.",
     url: "https://jeanlimo.com/medical-center-car-service",
   },
 };
@@ -20,39 +20,48 @@ export default function Page() {
   return (
     <ServicePage
       kicker="Medical Center"
-      title="Medical Center Car Service"
-      intro="Jean Limo provides private car and chauffeur service for the Texas Medical Center area. We handle frequent IAH and Hobby airport transfers, patient and visitor transportation, corporate travel, and hourly service with professional chauffeurs and transparent flat rates."
+      title="Texas Medical Center Car Service"
+      intro="Private car and chauffeur service for the Texas Medical Center area. Jean Limo handles airport transfers, patient and visitor transportation, and hourly service around one of the world’s largest medical complexes."
+      image="/fleet/sedan.jpg"
+      highlight={{
+        kicker: "Medical Center Airport Transfers",
+        title: "Medical Center to IAH in 30–45 Minutes",
+        body: "Reliable timing for appointments and flights. Flight monitoring available for airport arrivals.",
+        cta: "Get Instant Quote",
+        href: "/#quote",
+      }}
+      serviceCards={[
+        { title: "Airport Transfers", body: "IAH and Hobby from the Medical Center." },
+        { title: "Patient & Visitor Transport", body: "Appointments and hospital visits." },
+        { title: "Hourly Service", body: "Multiple stops for medical or business needs." },
+        { title: "Sedan & SUV", body: "Comfortable private vehicles." },
+        { title: "Sprinter for Groups", body: "Family or group transportation." },
+        { title: "Nearby Areas", body: "Downtown, Galleria, and Midtown." },
+      ]}
       points={[
-        "Reliable IAH and Hobby airport transfers from the Medical Center",
+        "Airport transfers to IAH and Hobby",
         "Patient and visitor transportation",
-        "Business sedan, SUV, and Sprinter options",
-        "Hourly chauffeur service for meetings or appointments",
-        "Flat rates with gratuity and fuel included on most local trips",
-        "24/7 dispatch and background-checked chauffeurs",
+        "Sedan, SUV, and Sprinter options",
+        "Hourly chauffeur available",
+        "Professional drivers",
       ]}
       sections={[
         {
-          heading: "Popular Services from the Medical Center",
-          body: "Most clients book airport runs, transportation for medical appointments, and hourly service for multiple stops around the Texas Medical Center and surrounding areas.",
-        },
-        {
-          heading: "Why Book Jean Limo in the Medical Center",
-          body: "Clear pricing before you book, flight monitoring for airport trips, and a professional team experienced with the Medical Center area. Get an instant quote online or call dispatch.",
+          heading: "Service Around the Medical Center",
+          body: "We regularly handle airport runs and transportation for medical appointments. Typical drive time to IAH is 30–45 minutes depending on traffic. We also connect the Medical Center with Downtown, the Galleria, and both airports.",
         },
       ]}
+      relatedLinks={[
+        { href: "/iah-airport-car-service", label: "IAH Airport" },
+        { href: "/hou-airport-car-service", label: "Hobby Airport" },
+        { href: "/downtown-houston-car-service", label: "Downtown" },
+        { href: "/galleria-car-service", label: "Galleria" },
+        { href: "/houston-chauffeur-service", label: "Hourly Chauffeur" },
+      ]}
       faqs={[
-        {
-          q: "How long does it take from the Medical Center to IAH?",
-          a: "Usually 30–45 minutes depending on time of day and traffic. We monitor flights so your chauffeur arrives at the right time.",
-        },
-        {
-          q: "Do you serve the Medical Center for hourly chauffeur service?",
-          a: "Yes. Hourly service is available with a 2-hour minimum and unlimited stops within Greater Houston.",
-        },
-        {
-          q: "Can I book a round trip from the Medical Center to the airport?",
-          a: "Yes. Book both directions in one reservation.",
-        },
+        { q: "How long from the Medical Center to IAH?", a: "Usually 30–45 minutes depending on traffic." },
+        { q: "Do you offer transportation for medical appointments?", a: "Yes. We handle patient and visitor transportation around the Medical Center." },
+        { q: "Can I book a round trip to the airport?", a: "Yes. Book both directions in one reservation." },
       ]}
     />
   );
