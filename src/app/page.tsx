@@ -1,6 +1,22 @@
+import type { Metadata } from "next";
 import QuoteWidget from "@/components/QuoteWidget";
 import SiteHeader from "@/components/SiteHeader";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Houston Black Car, Airport & Private Chauffeur Service | Jean Limo",
+  description:
+    "Jean Limo offers private chauffeur, black car, SUV and Sprinter service in Greater Houston. Flat-rate IAH & Hobby airport transfers, Galveston cruises, hourly chauffeur, and corporate travel.",
+  alternates: {
+    canonical: "https://jeanlimo.com",
+  },
+  openGraph: {
+    title: "Houston Black Car, Airport & Private Chauffeur Service | Jean Limo",
+    description:
+      "Private chauffeur, black car, SUV and Sprinter service in Greater Houston. Flat-rate IAH & Hobby airport transfers, Galveston cruises, and hourly chauffeur.",
+    url: "https://jeanlimo.com",
+  },
+};
 
 export default function Home() {
   return (
