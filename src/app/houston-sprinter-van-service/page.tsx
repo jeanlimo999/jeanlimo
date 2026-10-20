@@ -61,16 +61,16 @@ export default function Page() {
           "Professional, background-checked drivers",
         ]}
         relatedLinks={[
+          { href: "/iah-airport-car-service", label: "IAH Airport" },
+          { href: "/hou-airport-car-service", label: "Hobby Airport" },
+          { href: "/houston-black-car-service", label: "Black Car Service" },
+          { href: "/houston-chauffeur-service", label: "Hourly Chauffeur" },
+          { href: "/houston-to-galveston", label: "Galveston Cruise" },
           { href: "/the-woodlands-car-service", label: "The Woodlands" },
           { href: "/sugar-land-car-service", label: "Sugar Land" },
           { href: "/katy-car-service", label: "Katy" },
           { href: "/downtown-houston-car-service", label: "Downtown" },
           { href: "/galleria-car-service", label: "Galleria" },
-          { href: "/energy-corridor-car-service", label: "Energy Corridor" },
-          { href: "/clear-lake-car-service", label: "Clear Lake" },
-          { href: "/pearland-car-service", label: "Pearland" },
-          { href: "/spring-car-service", label: "Spring" },
-          { href: "/cypress-car-service", label: "Cypress" },
         ]}
       />
     </>
