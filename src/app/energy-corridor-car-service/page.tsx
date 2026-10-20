@@ -4,14 +4,14 @@ import ServicePage from "@/components/ServicePage";
 export const metadata: Metadata = {
   title: "Energy Corridor Corporate Transportation | Jean Limo",
   description:
-    "Private car and chauffeur service in the Energy Corridor for corporate travel, airport transfers, and executive transportation. Flat rates and professional drivers.",
+    "Private car and chauffeur service in the Energy Corridor for corporate travel, airport transfers, and executive transportation.",
   alternates: {
     canonical: "https://jeanlimo.com/energy-corridor-car-service",
   },
   openGraph: {
     title: "Energy Corridor Corporate Transportation | Jean Limo",
     description:
-      "Private car and chauffeur service in the Energy Corridor for corporate travel, airport transfers, and executive transportation. Flat rates and professional drivers.",
+      "Private car service in the Energy Corridor for corporate travel and airport transfers.",
     url: "https://jeanlimo.com/energy-corridor-car-service",
   },
 };
@@ -21,42 +21,47 @@ export default function Page() {
     <ServicePage
       kicker="Energy Corridor"
       title="Energy Corridor Corporate Transportation"
-      intro="Jean Limo provides private car and chauffeur service focused on the Energy Corridor. We handle corporate transportation, airport transfers to IAH and Hobby, and executive travel for businesses and professionals in the area."
+      intro="Private car and chauffeur service focused on the Energy Corridor. Jean Limo handles corporate transportation, airport transfers to IAH and Hobby, and executive travel for businesses and professionals along the corridor."
+      image="/fleet/sedan.jpg"
+      highlight={{
+        kicker: "Corporate Focus",
+        title: "Airport Runs and Multi-Stop Itineraries",
+        body: "Frequent requests include Energy Corridor to IAH (typically 35–50 minutes) and hourly service for meetings across the area.",
+        cta: "Get Instant Quote",
+        href: "/#quote",
+      }}
+      serviceCards={[
+        { title: "Corporate Transportation", body: "Executive and business travel in the corridor." },
+        { title: "IAH & Hobby", body: "Airport transfers for business travelers." },
+        { title: "Hourly Service", body: "Multiple stops for meetings and roadshows." },
+        { title: "Sedan & SUV", body: "Professional vehicles for individuals and small teams." },
+        { title: "Sprinter for Groups", body: "One vehicle for larger corporate groups." },
+        { title: "Nearby Coverage", body: "Katy, Memorial, and west Houston." },
+      ]}
       points={[
-        "Corporate and executive transportation in the Energy Corridor",
+        "Corporate and executive transportation",
         "IAH and Hobby airport transfers",
-        "Business sedan, SUV, and Sprinter options",
-        "Hourly chauffeur service for meetings and roadshows",
-        "Flat rates with gratuity and fuel included on most local trips",
-        "Professional chauffeurs and 24/7 dispatch",
+        "Sedan, SUV, and Sprinter options",
+        "Hourly chauffeur for meetings",
+        "Professional drivers",
       ]}
       sections={[
         {
-          heading: "Corporate Focus",
-          body: "The Energy Corridor has a high concentration of offices and business travelers. We regularly handle airport runs and multi-stop corporate itineraries. IAH transfers typically take 35–50 minutes.",
+          heading: "Why the Energy Corridor",
+          body: "High concentration of offices and business travelers. We regularly handle airport runs and multi-stop corporate itineraries. IAH transfers typically take 35–50 minutes depending on traffic.",
         },
       ]}
       relatedLinks={[
         { href: "/iah-airport-car-service", label: "IAH Airport" },
         { href: "/hou-airport-car-service", label: "Hobby Airport" },
-        { href: "/houston-black-car-service", label: "Black Car" },
         { href: "/katy-car-service", label: "Katy" },
-        { href: "/galleria-car-service", label: "Galleria" },
         { href: "/memorial-car-service", label: "Memorial" },
-        { href: "/downtown-houston-car-service", label: "Downtown" },
-        { href: "/spring-branch-car-service", label: "Spring Branch" },
+        { href: "/galleria-car-service", label: "Galleria" },
         { href: "/houston-chauffeur-service", label: "Hourly Chauffeur" },
-        { href: "/houston-sprinter-van-service", label: "Sprinter" },
       ]}
       faqs={[
-        {
-          q: "Do you offer Energy Corridor to IAH service?",
-          a: "Yes. This is a frequent request for corporate travelers.",
-        },
-        {
-          q: "Is hourly service available for meetings?",
-          a: "Yes. Hourly chauffeur service works well for multiple stops in the corridor and surrounding areas.",
-        },
+        { q: "Do you offer Energy Corridor to IAH service?", a: "Yes. This is a frequent request for corporate travelers. Typical time is 35–50 minutes." },
+        { q: "Is hourly service available for meetings?", a: "Yes. Hourly chauffeur service works well for multiple stops." },
       ]}
     />
   );

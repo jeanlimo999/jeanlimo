@@ -4,14 +4,14 @@ import ServicePage from "@/components/ServicePage";
 export const metadata: Metadata = {
   title: "Memorial Houston Car Service | Jean Limo",
   description:
-    "Private car service in Memorial and Memorial Villages for airport transfers, corporate travel, and hourly chauffeur. Professional drivers and flat rates.",
+    "Private car service in Memorial and Memorial Villages for airport transfers, corporate travel, and hourly chauffeur.",
   alternates: {
     canonical: "https://jeanlimo.com/memorial-car-service",
   },
   openGraph: {
     title: "Memorial Houston Car Service | Jean Limo",
     description:
-      "Private car service in Memorial and Memorial Villages for airport transfers, corporate travel, and hourly chauffeur. Professional drivers and flat rates.",
+      "Private car service in Memorial for airport transfers and corporate travel.",
     url: "https://jeanlimo.com/memorial-car-service",
   },
 };
@@ -21,42 +21,47 @@ export default function Page() {
     <ServicePage
       kicker="Memorial"
       title="Memorial Houston Car Service"
-      intro="Jean Limo offers private chauffeur service for Memorial and the Memorial Villages area. We provide reliable airport transportation to IAH and Hobby, corporate travel, and as-directed hourly service for residents and businesses in this established Houston neighborhood."
+      intro="Private chauffeur service for Memorial and the Memorial Villages. Jean Limo provides airport transportation to IAH and Hobby, corporate travel, and hourly service for residents and businesses in this established Houston area."
+      image="/fleet/sedan.jpg"
+      highlight={{
+        kicker: "Memorial to IAH",
+        title: "Typically 35–50 Minutes",
+        body: "Airport runs are a common request. We monitor flights and time pickups with appropriate buffer.",
+        cta: "Get Instant Quote",
+        href: "/#quote",
+      }}
+      serviceCards={[
+        { title: "Airport Transfers", body: "IAH and Hobby from Memorial and Memorial Villages." },
+        { title: "Corporate Travel", body: "Executive transportation for local businesses." },
+        { title: "Hourly Service", body: "Multiple stops across Memorial and nearby areas." },
+        { title: "Galleria & Downtown", body: "Point-to-point service to major Houston destinations." },
+        { title: "Sedan, SUV, Sprinter", body: "Vehicle options for individuals and groups." },
+        { title: "Local Knowledge", body: "Chauffeurs familiar with the area." },
+      ]}
       points={[
-        "IAH and Hobby airport transfers from Memorial",
+        "Airport transfers from Memorial",
         "Corporate and executive transportation",
-        "Business sedan, SUV, and Sprinter options",
-        "Hourly chauffeur service available",
-        "Flat rates with gratuity and fuel included on most local trips",
-        "Professional chauffeurs familiar with the area",
+        "Sedan, SUV, and Sprinter options",
+        "Hourly chauffeur available",
+        "Professional drivers",
       ]}
       sections={[
         {
           heading: "Common Routes",
-          body: "Airport runs are frequent requests. Memorial to IAH typically takes 35–50 minutes depending on traffic and time of day. We also handle trips to the Galleria, Downtown, and Energy Corridor.",
+          body: "Memorial to IAH typically takes 35–50 minutes depending on traffic. We also handle trips to the Galleria, Downtown, Energy Corridor, and River Oaks.",
         },
       ]}
       relatedLinks={[
         { href: "/iah-airport-car-service", label: "IAH Airport" },
         { href: "/hou-airport-car-service", label: "Hobby Airport" },
-        { href: "/houston-black-car-service", label: "Black Car" },
         { href: "/galleria-car-service", label: "Galleria" },
         { href: "/energy-corridor-car-service", label: "Energy Corridor" },
         { href: "/river-oaks-car-service", label: "River Oaks" },
-        { href: "/tanglewood-car-service", label: "Tanglewood" },
-        { href: "/downtown-houston-car-service", label: "Downtown" },
         { href: "/houston-chauffeur-service", label: "Hourly Chauffeur" },
-        { href: "/houston-sprinter-van-service", label: "Sprinter" },
       ]}
       faqs={[
-        {
-          q: "How long from Memorial to IAH?",
-          a: "Usually 35–50 minutes depending on traffic. Flight monitoring helps with arrivals.",
-        },
-        {
-          q: "Do you serve Memorial Villages?",
-          a: "Yes. We cover Memorial and the surrounding villages area.",
-        },
+        { q: "How long from Memorial to IAH?", a: "Usually 35–50 minutes depending on traffic." },
+        { q: "Do you serve Memorial Villages?", a: "Yes. We cover Memorial and the surrounding villages area." },
       ]}
     />
   );

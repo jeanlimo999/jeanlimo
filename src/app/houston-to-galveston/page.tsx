@@ -2,16 +2,16 @@ import type { Metadata } from "next";
 import ServicePage from "@/components/ServicePage";
 
 export const metadata: Metadata = {
-  title: "Houston to Galveston Cruise Transfer | Jean Limo",
+  title: "Houston to Galveston Cruise Transportation | Jean Limo",
   description:
-    "Private transfers from Houston to Port of Galveston cruise terminals. Timed pickups, luggage space, SUV and Sprinter options. Flat rates.",
+    "Private transfers from Houston to the Port of Galveston cruise terminals. Timed pickups, luggage space, SUV and Sprinter options.",
   alternates: {
     canonical: "https://jeanlimo.com/houston-to-galveston",
   },
   openGraph: {
-    title: "Houston to Galveston Cruise Transfer | Jean Limo",
+    title: "Houston to Galveston Cruise Transportation | Jean Limo",
     description:
-      "Private transfers from Houston to Port of Galveston cruise terminals. Timed pickups, luggage space, SUV and Sprinter options. Flat rates.",
+      "Private transfers from Houston to Port of Galveston cruise terminals with luggage space.",
     url: "https://jeanlimo.com/houston-to-galveston",
   },
 };
@@ -19,9 +19,9 @@ export const metadata: Metadata = {
 const serviceSchema = {
   "@context": "https://schema.org",
   "@type": "Service",
-  name: "Houston to Galveston Cruise Transfer",
+  name: "Houston to Galveston Cruise Transportation",
   description:
-    "Private transfers from Houston to Port of Galveston cruise terminals. Timed pickups, luggage space, SUV and Sprinter options.",
+    "Private transfers from Houston to Port of Galveston cruise terminals.",
   provider: {
     "@type": "LocalBusiness",
     name: "Jean Limo LLC",
@@ -35,63 +35,60 @@ const serviceSchema = {
       addressCountry: "US",
     },
   },
-  areaServed: {
-    "@type": "City",
-    name: "Houston",
-  },
+  areaServed: { "@type": "City", name: "Houston" },
   serviceType: "Cruise Transfer",
 };
 
 export default function Page() {
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }}
-      />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }} />
       <ServicePage
-        kicker="Galveston cruise"
-        title="Houston to Galveston Cruise Transfer"
-        intro="Private transfers from Houston-area hotels, homes, and airports to the Port of Galveston cruise terminals. Jean Limo times your pickup to the ship’s boarding window and provides vehicles with space for luggage. We also handle return transfers after disembarkation."
+        kicker="Galveston Cruise"
+        title="Houston to Galveston Cruise Transportation"
+        intro="Private transfers from Houston-area homes, hotels, and airports to the Port of Galveston cruise terminals. Jean Limo times pickups to your ship’s boarding window and provides vehicles with space for luggage."
+        image="/fleet/sprinter.jpg"
+        highlight={{
+          kicker: "Timed for Your Ship",
+          title: "Door-to-Terminal Cruise Transfers",
+          body: "Share your boarding time when booking. We suggest a pickup window with buffer and handle return transfers after disembarkation.",
+          cta: "Get Instant Quote",
+          href: "/#quote",
+        }}
+        serviceCards={[
+          { title: "Port of Galveston", body: "Direct transfers to the cruise terminals." },
+          { title: "Luggage Space", body: "SUV and Sprinter options for multiple suitcases." },
+          { title: "Airport Connections", body: "Pickups from IAH and Hobby." },
+          { title: "Hotel & Home Pickups", body: "Downtown, Galleria, Sugar Land, Katy, and more." },
+          { title: "Group Transfers", body: "Sprinter for families and larger parties." },
+          { title: "Return Service", body: "Book your return after the cruise." },
+        ]}
         points={[
-          "Timed pickups based on your ship’s schedule",
-          "Space for multiple suitcases",
-          "SUV and Sprinter options for families and groups",
+          "Timed pickups based on ship schedule",
+          "Space for luggage",
+          "SUV and Sprinter options",
           "Flat-rate pricing",
-          "Door-to-terminal service",
-          "Pickups from IAH, Hobby, hotels, and homes",
+          "Pickups from airports, hotels, and homes",
         ]}
         sections={[
           {
             heading: "Common Pickup Points",
-            body: "Downtown Houston hotels, Galleria area hotels, Sugar Land, Katy, IAH and Hobby Airports, and The Woodlands.",
+            body: "Downtown Houston hotels, Galleria area, Sugar Land, Katy, IAH, Hobby, and The Woodlands.",
           },
         ]}
         relatedLinks={[
           { href: "/iah-airport-car-service", label: "IAH Airport" },
           { href: "/hou-airport-car-service", label: "Hobby Airport" },
-          { href: "/houston-black-car-service", label: "Black Car Service" },
           { href: "/houston-sprinter-van-service", label: "Sprinter Van" },
-          { href: "/houston-chauffeur-service", label: "Hourly Chauffeur" },
           { href: "/sugar-land-car-service", label: "Sugar Land" },
           { href: "/katy-car-service", label: "Katy" },
-          { href: "/the-woodlands-car-service", label: "The Woodlands" },
           { href: "/downtown-houston-car-service", label: "Downtown" },
           { href: "/galleria-car-service", label: "Galleria" },
         ]}
         faqs={[
-          {
-            q: "How early should we leave for the cruise port?",
-            a: "Share your ship’s boarding time when booking and we will suggest a pickup window with appropriate buffer.",
-          },
-          {
-            q: "Can you pick up from both Houston airports?",
-            a: "Yes. We regularly do IAH and Hobby to Galveston transfers.",
-          },
-          {
-            q: "Do you offer group transportation?",
-            a: "Yes. Our Sprinter van seats up to 14 passengers with luggage.",
-          },
+          { q: "How early should we leave for the cruise port?", a: "Share your ship’s boarding time and we will suggest a pickup window with buffer." },
+          { q: "Can you pick up from both Houston airports?", a: "Yes. We regularly do IAH and Hobby to Galveston transfers." },
+          { q: "Do you offer group transportation to Galveston?", a: "Yes. Sprinter vans are available for groups with luggage." },
         ]}
       />
     </>
