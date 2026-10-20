@@ -162,12 +162,15 @@ export default function Home() {
       <footer className="border-t border-yellow-600/10 py-10">
         <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="font-serif text-yellow-500 text-lg">JEAN LIMO LLC</div>
-          <div className="flex flex-wrap gap-4 text-sm text-zinc-500">
+          <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-zinc-500 justify-center">
             <Link href="/iah-airport-car-service" className="hover:text-yellow-500">IAH</Link>
             <Link href="/hou-airport-car-service" className="hover:text-yellow-500">Hobby</Link>
             <Link href="/houston-black-car-service" className="hover:text-yellow-500">Black Car</Link>
             <Link href="/houston-to-galveston" className="hover:text-yellow-500">Galveston</Link>
             <Link href="/houston-chauffeur-service" className="hover:text-yellow-500">Hourly</Link>
+            <Link href="/the-woodlands-car-service" className="hover:text-yellow-500">The Woodlands</Link>
+            <Link href="/sugar-land-car-service" className="hover:text-yellow-500">Sugar Land</Link>
+            <Link href="/katy-car-service" className="hover:text-yellow-500">Katy</Link>
             <Link href="/pricing" className="hover:text-yellow-500">Pricing</Link>
           </div>
           <div className="text-xs text-zinc-600">© 2026 Jean Limo LLC. All rights reserved.</div>
