@@ -16,6 +16,37 @@ export const metadata: Metadata = {
     title: "Jean Limo",
     statusBarStyle: "black-translucent",
   },
+  alternates: {
+    canonical: "https://jeanlimo.com",
+  },
+};
+
+const localBusinessSchema = {
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  name: "Jean Limo LLC",
+  description: "Private chauffeur, black car, and Sprinter service in Greater Houston.",
+  url: "https://jeanlimo.com",
+  telephone: "+12819170085",
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: "11002 Myrtle Dr",
+    addressLocality: "Sugar Land",
+    addressRegion: "TX",
+    postalCode: "77498",
+    addressCountry: "US",
+  },
+  areaServed: {
+    "@type": "City",
+    name: "Houston",
+  },
+  priceRange: "$$",
+  openingHoursSpecification: {
+    "@type": "OpeningHoursSpecification",
+    dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+    opens: "00:00",
+    closes: "23:59",
+  },
 };
 
 export default function RootLayout({
@@ -34,6 +65,10 @@ function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 gtag('config', 'G-FSWPQKE7D9');`}
         </Script>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
+        />
       </head>
       <body className={`${inter.variable} ${playfair.variable} font-sans antialiased`}>
         {mapsKey ? (

@@ -1,5 +1,6 @@
 import QuoteWidget from "@/components/QuoteWidget";
 import SiteHeader from "@/components/SiteHeader";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -44,18 +45,18 @@ export default function Home() {
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
-              { icon: "✈️", title: "Airport Transfers", desc: "IAH & Hobby door-to-door. Flight monitoring available. Meet & greet options." },
-              { icon: "🚢", title: "Galveston Cruise", desc: "Timed transfers to the Port of Galveston with luggage assistance." },
-              { icon: "🏢", title: "Corporate & Executive", desc: "Discreet, reliable service for meetings, roadshows and client travel." },
-              { icon: "⏱️", title: "Hourly Chauffeur", desc: "As-directed service. 2-hour minimum. Unlimited stops in Greater Houston." },
-              { icon: "💍", title: "Weddings & Events", desc: "Polished arrivals for weddings, galas, concerts and special nights." },
-              { icon: "🛣️", title: "Long Distance", desc: "Houston to Austin, Dallas, San Antonio and beyond — simple per-mile pricing." },
+              { icon: "✈️", title: "Airport Transfers", desc: "IAH & Hobby door-to-door. Flight monitoring available. Meet & greet options.", href: "/iah-airport-car-service" },
+              { icon: "🚢", title: "Galveston Cruise", desc: "Timed transfers to the Port of Galveston with luggage assistance.", href: "/houston-to-galveston" },
+              { icon: "🏢", title: "Corporate & Executive", desc: "Discreet, reliable service for meetings, roadshows and client travel.", href: "/houston-black-car-service" },
+              { icon: "⏱️", title: "Hourly Chauffeur", desc: "As-directed service. 2-hour minimum. Unlimited stops in Greater Houston.", href: "/houston-chauffeur-service" },
+              { icon: "💍", title: "Weddings & Events", desc: "Polished arrivals for weddings, galas, concerts and special nights.", href: "/houston-black-car-service" },
+              { icon: "🛣️", title: "Long Distance", desc: "Houston to Austin, Dallas, San Antonio and beyond — simple per-mile pricing.", href: "/pricing" },
             ].map((s) => (
-              <div key={s.title} className="bg-zinc-900 border border-yellow-600/10 rounded-xl p-6 hover:border-yellow-600/30 transition">
+              <Link key={s.title} href={s.href} className="bg-zinc-900 border border-yellow-600/10 rounded-xl p-6 hover:border-yellow-600/30 transition block">
                 <div className="text-yellow-500 text-2xl mb-3">{s.icon}</div>
                 <h3 className="font-serif text-xl mb-2">{s.title}</h3>
                 <p className="text-zinc-400 text-sm">{s.desc}</p>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
@@ -161,7 +162,14 @@ export default function Home() {
       <footer className="border-t border-yellow-600/10 py-10">
         <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="font-serif text-yellow-500 text-lg">JEAN LIMO LLC</div>
-          <div className="text-sm text-zinc-500">Houston · Airport · Cruise · Chauffeur</div>
+          <div className="flex flex-wrap gap-4 text-sm text-zinc-500">
+            <Link href="/iah-airport-car-service" className="hover:text-yellow-500">IAH</Link>
+            <Link href="/hou-airport-car-service" className="hover:text-yellow-500">Hobby</Link>
+            <Link href="/houston-black-car-service" className="hover:text-yellow-500">Black Car</Link>
+            <Link href="/houston-to-galveston" className="hover:text-yellow-500">Galveston</Link>
+            <Link href="/houston-chauffeur-service" className="hover:text-yellow-500">Hourly</Link>
+            <Link href="/pricing" className="hover:text-yellow-500">Pricing</Link>
+          </div>
           <div className="text-xs text-zinc-600">© 2026 Jean Limo LLC. All rights reserved.</div>
         </div>
       </footer>
