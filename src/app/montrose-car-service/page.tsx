@@ -8,6 +8,12 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://jeanlimo.com/montrose-car-service",
   },
+  openGraph: {
+    title: "Montrose Car Service | Airport & Chauffeur | Jean Limo",
+    description:
+      "Private car service in Montrose for IAH and Hobby airport transfers, nightlife, corporate travel, and hourly chauffeur. Flat rates, professional drivers.",
+    url: "https://jeanlimo.com/montrose-car-service",
+  },
 };
 
 export default function Page() {
