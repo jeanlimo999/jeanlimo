@@ -8,6 +8,12 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://jeanlimo.com/river-oaks-car-service",
   },
+  openGraph: {
+    title: "River Oaks Car Service | Private Chauffeur | Jean Limo",
+    description:
+      "Private car and chauffeur service in River Oaks for airport transfers, corporate travel, and special events. Flat rates, professional drivers in Houston's luxury neighborhood.",
+    url: "https://jeanlimo.com/river-oaks-car-service",
+  },
 };
 
 export default function Page() {
