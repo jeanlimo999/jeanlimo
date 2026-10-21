@@ -25,7 +25,7 @@ export default function Page() {
       points={[
         "Business sedan from $110 inside the first distance band",
         "SUV from $130 · Sprinter from $250",
-        "Hourly: sedan $95 · SUV $125 · Sprinter $195 (2-hour minimum)",
+        "Hourly: sedan $85 · SUV $110 · Sprinter $175 (2-hour minimum)",
         "Over 100 miles billed per mile at published rates",
       ]}
     />

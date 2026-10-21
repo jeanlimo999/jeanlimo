@@ -54,7 +54,7 @@ export default function Page() {
         title="Houston Hourly Chauffeur Service"
         intro="As-directed hourly chauffeur service across Greater Houston. Your chauffeur stays with you for the duration of the booking, handling multiple stops for meetings, events, shopping, or a full day of travel."
         points={[
-          "Business Sedan $95/hr, Business SUV $125/hr, Sprinter $195/hr",
+          "Business Sedan $85/hr, Business SUV $110/hr, Sprinter $175/hr",
           "2-hour minimum",
           "Unlimited stops within Greater Houston",
           "Includes 20 miles per hour (overage $2.50/mile)",

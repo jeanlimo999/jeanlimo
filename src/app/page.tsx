@@ -196,9 +196,9 @@ export default function Home() {
           <div className="mt-12 max-w-2xl mx-auto bg-zinc-900 border border-yellow-600/20 rounded-xl p-6 md:p-8">
             <h3 className="font-serif text-2xl text-yellow-500 text-center mb-6">Hourly Rates · As Directed</h3>
             <div className="space-y-3">
-              <div className="flex justify-between items-center py-2 border-b border-zinc-800"><span>Business Sedan</span><span className="text-yellow-500 font-medium">$95 / hr</span></div>
-              <div className="flex justify-between items-center py-2 border-b border-zinc-800"><span>Business SUV</span><span className="text-yellow-500 font-medium">$125 / hr</span></div>
-              <div className="flex justify-between items-center py-2"><span>Sprinter Van</span><span className="text-yellow-500 font-medium">$195 / hr</span></div>
+              <div className="flex justify-between items-center py-2 border-b border-zinc-800"><span>Business Sedan</span><span className="text-yellow-500 font-medium">$85 / hr</span></div>
+              <div className="flex justify-between items-center py-2 border-b border-zinc-800"><span>Business SUV</span><span className="text-yellow-500 font-medium">$110 / hr</span></div>
+              <div className="flex justify-between items-center py-2"><span>Sprinter Van</span><span className="text-yellow-500 font-medium">$175 / hr</span></div>
             </div>
             <p className="text-center text-xs text-zinc-500 mt-5">2-hour minimum · Unlimited stops within Greater Houston<br />(includes 20 miles per hour · overage $2.50 per mile)</p>
           </div>
