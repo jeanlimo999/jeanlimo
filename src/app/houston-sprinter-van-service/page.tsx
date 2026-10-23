@@ -4,14 +4,14 @@ import ServicePage from "@/components/ServicePage";
 export const metadata: Metadata = {
   title: "Houston Mercedes-Benz Sprinter Van Rental with Driver | Jean Limo",
   description:
-    "Mercedes-Benz Sprinter van service in Houston with professional driver. Group airport transfers, weddings, conferences, and events. Up to 14 passengers. Book a Sprinter quote.",
+    "Mercedes-Benz Sprinter van service in Houston with a professional driver. Group airport transfers to IAH and Hobby, weddings, corporate events, and Galveston cruises. Up to 14 passengers. Book online.",
   alternates: {
     canonical: "https://jeanlimo.com/houston-sprinter-van-service",
   },
   openGraph: {
     title: "Houston Mercedes-Benz Sprinter Van Rental with Driver | Jean Limo",
     description:
-      "Mercedes-Benz Sprinter van service in Houston with professional driver for groups, airports, and events.",
+      "Mercedes-Benz Sprinter van service in Houston with a professional driver. Group airport transfers to IAH and Hobby, weddings, corporate events, and Galveston cruises. Up to 14 passengers.",
     url: "https://jeanlimo.com/houston-sprinter-van-service",
   },
 };
