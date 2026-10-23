@@ -4,7 +4,7 @@ import ServicePage from "@/components/ServicePage";
 export const metadata: Metadata = {
   title: "IAH Airport Black Car & Sprinter Transfers | Jean Limo",
   description:
-    "Private IAH airport car service with flight monitoring and meet & greet at Terminals A, B, C, and D. Sedan, SUV, and Sprinter transfers across Greater Houston. Book online.",
+    "Private IAH airport car service with flight monitoring and meet & greet at Terminals A, B, and C. Sedan, SUV, and Sprinter transfers across Greater Houston. Book online.",
   alternates: {
     canonical: "https://jeanlimo.com/iah-airport-car-service",
   },
@@ -21,7 +21,7 @@ const serviceSchema = {
   "@type": "Service",
   name: "IAH Airport Black Car & Sprinter Transfers",
   description:
-    "Private IAH airport car service with flight monitoring and meet & greet at Terminals A, B, C, and D. Flat-rate sedan, SUV, and Sprinter transfers across Greater Houston.",
+    "Private IAH airport car service with flight monitoring and meet & greet at Terminals A, B, and C. Flat-rate sedan, SUV, and Sprinter transfers across Greater Houston.",
   provider: {
     "@type": "LocalBusiness",
     name: "Jean Limo LLC",
@@ -52,7 +52,7 @@ export default function Page() {
       <ServicePage
         kicker="IAH Airport"
         title="IAH Airport Black Car & Sprinter Transfers"
-        intro="Private car service to and from George Bush Intercontinental Airport (IAH). Jean Limo monitors your flight when you share the number, provides flat-rate pricing, and offers sedan, SUV, or Sprinter options for individuals and groups. Meet and greet is available at Terminals A, B, C, and D."
+        intro="Private car service to and from George Bush Intercontinental Airport (IAH). Jean Limo monitors your flight when you share the number, provides flat-rate pricing, and offers sedan, SUV, or Sprinter options for individuals and groups. Meet and greet is available at Terminals A, B, and C."
         image="/fleet/suv.jpg"
         highlight={{
           kicker: "Flight Monitoring Included",
@@ -62,7 +62,7 @@ export default function Page() {
           href: "/#quote",
         }}
         serviceCards={[
-          { title: "Arrival Transfers", body: "Meet and greet available at Terminals A, B, C, and D (baggage claim)." },
+          { title: "Arrival Transfers", body: "Meet and greet available at Terminals A, B, and C (baggage claim)." },
           { title: "Departure Transfers", body: "Timed pickups with buffer for security and check-in." },
           { title: "Sedan & SUV", body: "Comfortable private travel for individuals and small groups." },
           { title: "Sprinter for Groups", body: "One vehicle for teams, families, or multiple passengers with luggage." },
@@ -71,7 +71,7 @@ export default function Page() {
         ]}
         points={[
           "Flight monitoring when you share your flight number",
-          "Meet and greet at Terminals A, B, C, and D",
+          "Meet and greet at Terminals A, B, and C",
           "Business Sedan, SUV, or Sprinter",
           "Flat rates on most Greater Houston trips",
           "Professional, background-checked chauffeurs",
@@ -80,7 +80,7 @@ export default function Page() {
         sections={[
           {
             heading: "Meet and Greet at IAH",
-            body: "Meet and greet is available at Terminals A, B, C, and D. Your chauffeur waits inside at baggage claim with a name sign so you can find each other easily after you collect your bags. For international arrivals that process through Terminal E, meet and greet inside the terminal is not available—your chauffeur will meet you outside at the designated arrivals curb after you clear customs.",
+            body: "Meet and greet is available at Terminals A, B, and C. Your chauffeur waits inside at baggage claim with a name sign so you can find each other easily after you collect your bags. For arrivals at Terminal D or international arrivals that process through Terminal E, meet and greet inside the terminal is not available—your chauffeur will meet you outside at the designated arrivals curb.",
           },
           {
             heading: "IAH Terminal Pickup Notes",
@@ -88,7 +88,7 @@ export default function Page() {
           },
           {
             heading: "How IAH Transfers Work",
-            body: "Book online or by phone with your flight details and addresses. We monitor the flight and confirm pickup instructions. For domestic flights, your chauffeur can meet you at baggage claim. For international arrivals via Terminal E, we coordinate a curbside pickup after customs. Your chauffeur arrives in a clean late-model vehicle ready for your destination.",
+            body: "Book online or by phone with your flight details and addresses. We monitor the flight and confirm pickup instructions. For domestic flights at Terminals A, B, or C, your chauffeur can meet you at baggage claim. For Terminal D or international arrivals via Terminal E, we coordinate a curbside pickup. Your chauffeur arrives in a clean late-model vehicle ready for your destination.",
           },
           {
             heading: "Popular Routes from IAH",
@@ -112,7 +112,7 @@ export default function Page() {
           },
           {
             q: "Where is meet and greet available at IAH?",
-            a: "Meet and greet is available at Terminals A, B, C, and D. Your chauffeur waits at baggage claim with a name sign. For international arrivals that exit through Terminal E, meet and greet inside the terminal is not offered—we meet you curbside after customs.",
+            a: "Meet and greet is available at Terminals A, B, and C. Your chauffeur waits at baggage claim with a name sign. For Terminal D or international arrivals that exit through Terminal E, meet and greet inside the terminal is not offered—we meet you curbside.",
           },
           {
             q: "Can I book a Sprinter from IAH?",
