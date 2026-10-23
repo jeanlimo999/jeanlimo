@@ -4,14 +4,14 @@ import ServicePage from "@/components/ServicePage";
 export const metadata: Metadata = {
   title: "IAH Airport Pickup Guide | Meet and Greet & Terminals | Jean Limo",
   description:
-    "IAH airport pickup guide for George Bush Intercontinental. Meet and greet at Terminals A, B, C, and D. Flight monitoring and curbside options for Terminal E international arrivals.",
+    "IAH airport pickup guide for George Bush Intercontinental. Meet and greet at Terminals A, B, and C. Flight monitoring and curbside options for Terminal D and Terminal E international arrivals.",
   alternates: {
     canonical: "https://jeanlimo.com/iah-pickup-guide",
   },
   openGraph: {
     title: "IAH Airport Pickup Guide | Jean Limo",
     description:
-      "IAH pickup guide with meet and greet details for Terminals A, B, C, and D.",
+      "IAH pickup guide with meet and greet details for Terminals A, B, and C.",
     url: "https://jeanlimo.com/iah-pickup-guide",
   },
 };
@@ -25,13 +25,13 @@ export default function Page() {
       image="/fleet/suv.jpg"
       highlight={{
         kicker: "Meet and Greet Available",
-        title: "Terminals A, B, C, and D",
-        body: "Your chauffeur can meet you inside at baggage claim with a name sign. For Terminal E international arrivals, pickup is curbside after customs.",
+        title: "Terminals A, B, and C",
+        body: "Your chauffeur can meet you inside at baggage claim with a name sign. For Terminal D or Terminal E international arrivals, pickup is curbside.",
         cta: "Book IAH Transfer",
         href: "/#quote",
       }}
       serviceCards={[
-        { title: "Domestic Arrivals", body: "Meet and greet at Terminals A, B, C, and D baggage claim." },
+        { title: "Domestic Arrivals", body: "Meet and greet at Terminals A, B, and C baggage claim." },
         { title: "International Arrivals", body: "Clear customs at Terminal E, then curbside pickup." },
         { title: "Flight Monitoring", body: "Share your flight number so we adjust for delays." },
         { title: "Departures", body: "Timed pickups with buffer for security and check-in." },
@@ -39,8 +39,8 @@ export default function Page() {
         { title: "Greater Houston", body: "Service to Sugar Land, Downtown, Galleria, and more." },
       ]}
       points={[
-        "Meet and greet at Terminals A, B, C, and D",
-        "Curbside pickup for Terminal E international arrivals",
+        "Meet and greet at Terminals A, B, and C",
+        "Curbside pickup for Terminal D and Terminal E international arrivals",
         "Flight monitoring when you share your flight number",
         "Sedan, SUV, and Sprinter options",
         "Flat rates on most Greater Houston trips",
@@ -48,7 +48,7 @@ export default function Page() {
       sections={[
         {
           heading: "Meet and Greet at IAH",
-          body: "Meet and greet is available at Terminals A, B, C, and D. Your chauffeur waits inside at baggage claim with a name sign so you can find each other after collecting bags. This is the smoothest option for domestic arrivals. For international arrivals that exit through Terminal E, inside meet and greet is not offered. Your chauffeur meets you at the designated arrivals curb after you clear customs.",
+          body: "Meet and greet is available at Terminals A, B, and C. Your chauffeur waits inside at baggage claim with a name sign so you can find each other after collecting bags. This is the smoothest option for domestic arrivals. For arrivals at Terminal D or international arrivals that exit through Terminal E, inside meet and greet is not offered. Your chauffeur meets you at the designated arrivals curb.",
         },
         {
           heading: "Terminal Notes",
@@ -56,7 +56,7 @@ export default function Page() {
         },
         {
           heading: "How to Book an IAH Transfer",
-          body: "Book online or by phone with your flight number, pickup or drop-off address, and passenger count. We monitor the flight and confirm instructions. For arrivals, specify if you want meet and greet (available at A, B, C, and D). Your chauffeur arrives in a clean late-model vehicle.",
+          body: "Book online or by phone with your flight number, pickup or drop-off address, and passenger count. We monitor the flight and confirm instructions. For arrivals, specify if you want meet and greet (available at A, B, and C). Your chauffeur arrives in a clean late-model vehicle.",
         },
       ]}
       relatedLinks={[
@@ -69,7 +69,7 @@ export default function Page() {
       faqs={[
         {
           q: "Where is meet and greet available at IAH?",
-          a: "Meet and greet is available at Terminals A, B, C, and D. For Terminal E international arrivals, pickup is curbside after customs.",
+          a: "Meet and greet is available at Terminals A, B, and C. For Terminal D or Terminal E international arrivals, pickup is curbside.",
         },
         {
           q: "Do you track flights?",
