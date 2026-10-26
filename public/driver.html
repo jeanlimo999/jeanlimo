@@ -141,7 +141,10 @@
           const left = parseFloat(thumb.style.left || '4');
           if (left < max() * 0.82) { thumb.style.left = '4px'; return; }
           try {
-            await api('/api/driver/status', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ bookingId: slide.dataset.id, status: slide.dataset.next, live_leg: slide.dataset.leg }) });
+            const result = await api('/api/driver/status', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ bookingId: slide.dataset.id, status: slide.dataset.next, live_leg: slide.dataset.leg }) });
+            const sms = result.sms || {};
+            const msg = ['customer: ' + (sms.customer || 'n/a'), 'owner: ' + (sms.owner || 'n/a')].join('\n');
+            alert('Status updated\n' + msg);
             if (slide.dataset.next === 'dropped_off') tab = 'done';
             await load();
           } catch (err) { alert(err.message || 'Could not update'); thumb.style.left = '4px'; }
