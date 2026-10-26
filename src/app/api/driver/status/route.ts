@@ -12,6 +12,7 @@ const CUSTOMER_MESSAGES: Record<string, (driver: string) => string> = {
 };
 
 const OWNER_MESSAGES: Record<string, (driver: string, customer: string) => string> = {
+  on_the_way: (driver, customer) => `Driver ${driver} is on the way for ${customer}`,
   onboard: (driver, customer) => `Passenger onboard with ${driver} — ${customer}`,
   dropped_off: (driver, customer) => `Dropped off — ${driver} finished ${customer}`,
 };
@@ -29,12 +30,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid status" }, { status: 400 });
   }
 
-  const { data: booking } = await db
+  const { data: booking, error: fetchErr } = await db
     .from("bookings")
     .select("id, assigned_driver_id, clients(phone, full_name)")
     .eq("id", bookingId)
     .maybeSingle();
 
+  if (fetchErr) console.error("Status fetch error:", fetchErr);
   if (!booking || booking.assigned_driver_id !== session.driverId) {
     return NextResponse.json({ error: "Job not assigned to you" }, { status: 403 });
   }
@@ -45,9 +47,10 @@ export async function POST(req: NextRequest) {
     .eq("id", bookingId);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  const client = Array.isArray(booking.clients) ? booking.clients[0] : booking.clients;
+  const clientRaw = booking.clients;
+  const client = Array.isArray(clientRaw) ? clientRaw[0] : clientRaw;
   const customerName = client?.full_name || "Customer";
-  const customerPhone = client?.phone;
+  const customerPhone = String(client?.phone || "").trim();
 
   const { data: driver } = await db
     .from("drivers")
@@ -56,17 +59,18 @@ export async function POST(req: NextRequest) {
     .maybeSingle();
   const driverName = driver?.name || "Driver";
 
-  // Customer texts only for on the way / at location
+  // Customer texts for on the way / at location
   if ((status === "on_the_way" || status === "on_location") && customerPhone) {
     const text = CUSTOMER_MESSAGES[status]?.(driverName) || `Status update from your Jean Limo driver ${driverName}.`;
-    await sendSms(customerPhone, text);
+    const result = await sendSms(customerPhone, text);
+    if (!result) console.error("Customer SMS failed for", status, customerPhone);
   }
 
-  // Owner texts for onboard and dropped off
-  if (status === "onboard" || status === "dropped_off") {
+  // Owner texts for on the way, onboard, and dropped off
+  if (status === "on_the_way" || status === "onboard" || status === "dropped_off") {
     const text = OWNER_MESSAGES[status]?.(driverName, customerName) || `${status} — ${driverName} / ${customerName}`;
     await sendSms(OWNER_PHONE, text);
   }
 
-  return NextResponse.json({ ok: true, tripStatus: status });
+  return NextResponse.json({ ok: true, tripStatus: status, customerPhone: customerPhone || null });
 }
