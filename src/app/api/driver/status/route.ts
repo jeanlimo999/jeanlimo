@@ -59,18 +59,28 @@ export async function POST(req: NextRequest) {
     .maybeSingle();
   const driverName = driver?.name || "Driver";
 
+  const smsResults: Record<string, any> = {};
+
   // Customer texts for on the way / at location
   if ((status === "on_the_way" || status === "on_location") && customerPhone) {
     const text = CUSTOMER_MESSAGES[status]?.(driverName) || `Status update from your Jean Limo driver ${driverName}.`;
     const result = await sendSms(customerPhone, text);
+    smsResults.customer = result ? "sent" : "failed";
     if (!result) console.error("Customer SMS failed for", status, customerPhone);
   }
 
   // Owner texts for on the way, onboard, and dropped off
   if (status === "on_the_way" || status === "onboard" || status === "dropped_off") {
     const text = OWNER_MESSAGES[status]?.(driverName, customerName) || `${status} — ${driverName} / ${customerName}`;
-    await sendSms(OWNER_PHONE, text);
+    const result = await sendSms(OWNER_PHONE, text);
+    smsResults.owner = result ? "sent" : "failed";
+    if (!result) console.error("Owner SMS failed for", status);
   }
 
-  return NextResponse.json({ ok: true, tripStatus: status, customerPhone: customerPhone || null });
+  return NextResponse.json({
+    ok: true,
+    tripStatus: status,
+    customerPhone: customerPhone || null,
+    sms: smsResults,
+  });
 }
