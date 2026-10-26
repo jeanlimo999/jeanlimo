@@ -1,18 +1,11 @@
 import { NextResponse } from "next/server";
-import { sendSms } from "@/lib/sms";
 
+// Public test endpoint disabled for security.
+// Anyone could previously hit this URL and trigger an SMS.
+// Remove this file entirely once testing is complete, or protect it with auth if you need it again.
 export async function GET() {
-  const to = "12819170085";
-  const text = "Jean Limo Telnyx test — SMS is working.";
-
-  const result = await sendSms(to, text);
-
-  if (!result) {
-    return NextResponse.json(
-      { ok: false, error: "SMS not sent (check TELNYX_API_KEY and TELNYX_FROM_NUMBER)" },
-      { status: 500 }
-    );
-  }
-
-  return NextResponse.json({ ok: true, to, result });
+  return NextResponse.json(
+    { ok: false, error: "Test SMS endpoint has been disabled" },
+    { status: 410 }
+  );
 }
