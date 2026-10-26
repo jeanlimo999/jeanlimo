@@ -4,12 +4,16 @@ import { supabaseAdmin } from "@/lib/supabase";
 import { sendSms } from "@/lib/sms";
 
 const ALLOWED = new Set(["on_the_way", "on_location", "onboard", "dropped_off"]);
+const OWNER_PHONE = "12819170085";
 
-const MESSAGES: Record<string, (driver: string) => string> = {
+const CUSTOMER_MESSAGES: Record<string, (driver: string) => string> = {
   on_the_way: (driver) => `Your Jean Limo driver ${driver} is on the way. We'll text you when we arrive.`,
   on_location: (driver) => `Your Jean Limo driver ${driver} has arrived at the pickup location.`,
-  onboard: (driver) => `Welcome aboard! Your ride with Jean Limo driver ${driver} has started.`,
-  dropped_off: (driver) => `Thank you for riding with Jean Limo. Your driver was ${driver}. Have a great day!`,
+};
+
+const OWNER_MESSAGES: Record<string, (driver: string, customer: string) => string> = {
+  onboard: (driver, customer) => `Passenger onboard with ${driver} — ${customer}`,
+  dropped_off: (driver, customer) => `Dropped off — ${driver} finished ${customer}`,
 };
 
 export async function POST(req: NextRequest) {
@@ -41,18 +45,27 @@ export async function POST(req: NextRequest) {
     .eq("id", bookingId);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  // Send SMS with driver name
   const client = Array.isArray(booking.clients) ? booking.clients[0] : booking.clients;
-  const phone = client?.phone;
-  if (phone) {
-    const { data: driver } = await db
-      .from("drivers")
-      .select("name")
-      .eq("id", session.driverId)
-      .maybeSingle();
-    const driverName = driver?.name || "your driver";
-    const text = MESSAGES[status]?.(driverName) || `Status update from your Jean Limo driver ${driverName}.`;
-    await sendSms(phone, text);
+  const customerName = client?.full_name || "Customer";
+  const customerPhone = client?.phone;
+
+  const { data: driver } = await db
+    .from("drivers")
+    .select("name")
+    .eq("id", session.driverId)
+    .maybeSingle();
+  const driverName = driver?.name || "Driver";
+
+  // Customer texts only for on the way / at location
+  if ((status === "on_the_way" || status === "on_location") && customerPhone) {
+    const text = CUSTOMER_MESSAGES[status]?.(driverName) || `Status update from your Jean Limo driver ${driverName}.`;
+    await sendSms(customerPhone, text);
+  }
+
+  // Owner texts for onboard and dropped off
+  if (status === "onboard" || status === "dropped_off") {
+    const text = OWNER_MESSAGES[status]?.(driverName, customerName) || `${status} — ${driverName} / ${customerName}`;
+    await sendSms(OWNER_PHONE, text);
   }
 
   return NextResponse.json({ ok: true, tripStatus: status });
