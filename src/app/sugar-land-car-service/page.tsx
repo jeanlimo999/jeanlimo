@@ -4,14 +4,14 @@ import ServicePage from "@/components/ServicePage";
 export const metadata: Metadata = {
   title: "Sugar Land Car Service & Airport Transportation | Jean Limo",
   description:
-    "Sugar Land car service for IAH and Hobby airport transfers, Galveston cruises, and local chauffeur. Jean Limo is based in Sugar Land. Book private transportation.",
+    "Sugar Land car service for IAH and Hobby airport transfers, Galveston cruises, and local chauffeur. Jean Limo is based in Sugar Land. Flat rates, flight monitoring, and professional drivers.",
   alternates: {
     canonical: "https://jeanlimo.com/sugar-land-car-service",
   },
   openGraph: {
     title: "Sugar Land Car Service & Airport Transportation | Jean Limo",
     description:
-      "Sugar Land car service for IAH and Hobby airport transfers, Galveston cruises, and local chauffeur. Jean Limo is based in Sugar Land.",
+      "Sugar Land car service for IAH and Hobby airport transfers, Galveston cruises, and local chauffeur. Based in Sugar Land.",
     url: "https://jeanlimo.com/sugar-land-car-service",
   },
 };
@@ -21,7 +21,7 @@ export default function Page() {
     <ServicePage
       kicker="Sugar Land"
       title="Sugar Land Car Service & Airport Transportation"
-      intro="Jean Limo is based in Sugar Land and provides private car service for residents and businesses across southwest Houston. From IAH and Hobby airport transfers to Galveston cruise port runs and hourly chauffeur service, we know local traffic patterns in First Colony, Telfair, New Territory, and surrounding neighborhoods."
+      intro="Jean Limo is based in Sugar Land and provides private chauffeur, black car, SUV, and Sprinter service for residents and businesses across southwest Houston. From IAH and Hobby airport transfers to Galveston cruise port runs and hourly chauffeur service, we know local traffic patterns in First Colony, Telfair, New Territory, and surrounding neighborhoods."
       image="/sugar-land.jpg"
       highlight={{
         kicker: "Local Airport & Group Service",
@@ -32,7 +32,7 @@ export default function Page() {
       }}
       serviceCards={[
         { title: "Sugar Land to IAH", body: "Private transfers with flight monitoring. Typical drive time 50–60 minutes." },
-        { title: "Sugar Land to Hobby", body: "Door-to-door service to William P. Hobby Airport." },
+        { title: "Sugar Land to Hobby", body: "Door-to-door service to William P. Hobby Airport. Often the closer airport for southwest Houston." },
         { title: "Galveston Cruise Transfers", body: "Timed transfers to the Port of Galveston with luggage space." },
         { title: "Local & Hourly Service", body: "Chauffeur for meetings, shopping, and multiple stops in Sugar Land." },
         { title: "Corporate Transportation", body: "Reliable service for local businesses and executive travel." },
@@ -45,15 +45,24 @@ export default function Page() {
         "Sedan, SUV, and Sprinter options",
         "Flat rates on most local trips",
         "24/7 dispatch",
+        "Flight monitoring on airport pickups",
       ]}
       sections={[
         {
           heading: "Neighborhoods We Serve in Sugar Land",
-          body: "First Colony, Telfair, New Territory, Sugar Land Town Square, Greatwood, and nearby communities. We also serve Missouri City, Stafford, Richmond, and Fulshear for airport and point-to-point trips.",
+          body: "First Colony, Telfair, New Territory, Sugar Land Town Square, Greatwood, Riverstone, and nearby communities. We also serve Missouri City, Stafford, Richmond, Fulshear, and parts of Fort Bend County for airport and point-to-point trips.",
         },
         {
           heading: "Why Book a Local Operator",
-          body: "As a Sugar Land-based company, we understand peak traffic on the Southwest Freeway and Beltway 8. Pickup times are set with realistic buffers so you arrive for flights or events without unnecessary waiting.",
+          body: "As a Sugar Land-based company, we understand peak traffic on the Southwest Freeway (US-59), Beltway 8, and Grand Parkway. Pickup times are set with realistic buffers so you arrive for flights or events without unnecessary waiting. Local knowledge helps us choose better routes when traffic builds.",
+        },
+        {
+          heading: "Popular Routes from Sugar Land",
+          body: "IAH (50–60 min), Hobby (25–40 min), Downtown Houston (25–40 min), Galleria (20–35 min), and Port of Galveston (50–70 min). Hobby is often the more convenient airport for Sugar Land residents. Exact times vary with traffic and time of day.",
+        },
+        {
+          heading: "What to Expect",
+          body: "Your chauffeur arrives in a clean late-model vehicle. For airport pickups, share your flight number so we can monitor it and adjust for delays. Gratuity and fuel are included in our flat rates on most local trips.",
         },
       ]}
       relatedLinks={[
@@ -74,16 +83,24 @@ export default function Page() {
           a: "Typically 50–60 minutes depending on traffic. We monitor flights and adjust pickup times accordingly.",
         },
         {
+          q: "Is Hobby closer than IAH from Sugar Land?",
+          a: "Usually yes. Hobby is often the shorter option for Sugar Land, Missouri City, and southwest Houston destinations.",
+        },
+        {
           q: "Do you offer Sugar Land to Galveston cruise transfers?",
           a: "Yes. We regularly handle timed transfers to the Port of Galveston with vehicles that have space for luggage.",
         },
         {
           q: "Is hourly service available in Sugar Land?",
-          a: "Yes. Book hourly chauffeur service with a 2-hour minimum for multiple stops.",
+          a: "Yes. Book hourly chauffeur service with a 2-hour minimum for multiple stops or as-directed travel.",
         },
         {
           q: "Can I book a Sprinter from Sugar Land?",
-          a: "Yes. Sprinter vans are available for group airport transfers and events.",
+          a: "Yes. Sprinter vans are available for group airport transfers, events, and larger parties.",
+        },
+        {
+          q: "Do you serve areas near Sugar Land?",
+          a: "Yes. We regularly serve Missouri City, Stafford, Richmond, Fulshear, and surrounding communities.",
         },
       ]}
     />
