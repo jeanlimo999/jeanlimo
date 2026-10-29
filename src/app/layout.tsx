@@ -22,6 +22,9 @@ export const metadata: Metadata = {
     "Houston Sprinter van",
     "Galveston cruise transfer",
     "private chauffeur Houston",
+    "Sugar Land car service",
+    "The Woodlands black car",
+    "Katy airport transportation",
   ],
   authors: [{ name: "Jean Limo LLC" }],
   openGraph: {
@@ -71,11 +74,16 @@ export const metadata: Metadata = {
 
 const localBusinessSchema = {
   "@context": "https://schema.org",
-  "@type": "LocalBusiness",
+  "@type": ["LocalBusiness", "TaxiService"],
   name: "Jean Limo LLC",
-  description: "Private chauffeur, black car, and Sprinter service in Greater Houston.",
+  alternateName: "Jean Limo",
+  description:
+    "Private chauffeur, black car, SUV and Sprinter van service based in Sugar Land serving Greater Houston. Flat-rate airport transfers to IAH and Hobby, Galveston cruise port runs, hourly chauffeur, and corporate transportation.",
   url: "https://jeanlimo.com",
   telephone: "+12819170085",
+  email: "info@jeanlimo.com",
+  image: "https://jeanlimo.com/og-image.jpg",
+  logo: "https://jeanlimo.com/logo.jpg",
   address: {
     "@type": "PostalAddress",
     streetAddress: "11002 Myrtle Dr",
@@ -84,16 +92,82 @@ const localBusinessSchema = {
     postalCode: "77498",
     addressCountry: "US",
   },
-  areaServed: {
-    "@type": "City",
-    name: "Houston",
+  geo: {
+    "@type": "GeoCoordinates",
+    latitude: 29.6197,
+    longitude: -95.6349,
   },
+  areaServed: [
+    { "@type": "City", name: "Houston" },
+    { "@type": "City", name: "Sugar Land" },
+    { "@type": "City", name: "The Woodlands" },
+    { "@type": "City", name: "Katy" },
+    { "@type": "City", name: "Missouri City" },
+    { "@type": "City", name: "Pearland" },
+    { "@type": "AdministrativeArea", name: "Greater Houston" },
+  ],
   priceRange: "$$",
+  paymentAccepted: "Cash, Credit Card, Debit Card",
+  currenciesAccepted: "USD",
   openingHoursSpecification: {
     "@type": "OpeningHoursSpecification",
-    dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+    dayOfWeek: [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+      "Sunday",
+    ],
     opens: "00:00",
     closes: "23:59",
+  },
+  hasOfferCatalog: {
+    "@type": "OfferCatalog",
+    name: "Jean Limo Services",
+    itemListElement: [
+      {
+        "@type": "Offer",
+        itemOffered: {
+          "@type": "Service",
+          name: "IAH Airport Transfers",
+          description: "Private black car and Sprinter service to and from George Bush Intercontinental Airport with flight monitoring.",
+        },
+      },
+      {
+        "@type": "Offer",
+        itemOffered: {
+          "@type": "Service",
+          name: "Hobby Airport Transfers",
+          description: "Door-to-door private chauffeur service to William P. Hobby Airport.",
+        },
+      },
+      {
+        "@type": "Offer",
+        itemOffered: {
+          "@type": "Service",
+          name: "Hourly Chauffeur Service",
+          description: "As-directed hourly black car, SUV, and Sprinter service in Greater Houston.",
+        },
+      },
+      {
+        "@type": "Offer",
+        itemOffered: {
+          "@type": "Service",
+          name: "Galveston Cruise Transfers",
+          description: "Timed private transfers to the Port of Galveston with luggage space.",
+        },
+      },
+      {
+        "@type": "Offer",
+        itemOffered: {
+          "@type": "Service",
+          name: "Sprinter Van Service",
+          description: "Mercedes-Benz Sprinter for groups, airport runs, and events.",
+        },
+      },
+    ],
   },
 };
 
