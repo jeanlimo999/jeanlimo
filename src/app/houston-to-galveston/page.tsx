@@ -4,14 +4,14 @@ import ServicePage from "@/components/ServicePage";
 export const metadata: Metadata = {
   title: "Houston to Galveston Cruise Transportation | Jean Limo",
   description:
-    "Private transfers from Houston to the Port of Galveston cruise terminals. Timed pickups, luggage space, SUV and Sprinter options.",
+    "Private transfers from Houston to the Port of Galveston cruise terminals. Timed pickups, luggage space, SUV and Sprinter options. From airports, hotels, and homes.",
   alternates: {
     canonical: "https://jeanlimo.com/houston-to-galveston",
   },
   openGraph: {
     title: "Houston to Galveston Cruise Transportation | Jean Limo",
     description:
-      "Private transfers from Houston to Port of Galveston cruise terminals with luggage space.",
+      "Private transfers from Houston to Port of Galveston cruise terminals with luggage space and timed pickups.",
     url: "https://jeanlimo.com/houston-to-galveston",
   },
 };
@@ -21,7 +21,7 @@ const serviceSchema = {
   "@type": "Service",
   name: "Houston to Galveston Cruise Transportation",
   description:
-    "Private transfers from Houston to Port of Galveston cruise terminals.",
+    "Private transfers from Houston to Port of Galveston cruise terminals with timed pickups and luggage space.",
   provider: {
     "@type": "LocalBusiness",
     name: "Jean Limo LLC",
@@ -46,12 +46,12 @@ export default function Page() {
       <ServicePage
         kicker="Galveston Cruise"
         title="Houston to Galveston Cruise Transportation"
-        intro="Private transfers from Houston-area homes, hotels, and airports to the Port of Galveston cruise terminals. Jean Limo times pickups to your ship’s boarding window and provides vehicles with space for luggage."
+        intro="Private transfers from Houston-area homes, hotels, and airports to the Port of Galveston cruise terminals. Jean Limo times pickups to your ship’s boarding window and provides vehicles with space for luggage. We handle both outbound and return transfers after disembarkation."
         image="/fleet/sprinter.jpg"
         highlight={{
           kicker: "Timed for Your Ship",
           title: "Door-to-Terminal Cruise Transfers",
-          body: "Share your boarding time when booking. We suggest a pickup window with buffer and handle return transfers after disembarkation.",
+          body: "Share your boarding time when booking. We suggest a pickup window with buffer and handle return transfers after disembarkation. SUV and Sprinter options available for luggage.",
           cta: "Get Instant Quote",
           href: "/#quote",
         }}
@@ -65,15 +65,24 @@ export default function Page() {
         ]}
         points={[
           "Timed pickups based on ship schedule",
-          "Space for luggage",
+          "Space for luggage in SUV and Sprinter",
           "SUV and Sprinter options",
           "Flat-rate pricing",
           "Pickups from airports, hotels, and homes",
+          "Outbound and return transfers available",
         ]}
         sections={[
           {
             heading: "Common Pickup Points",
-            body: "Downtown Houston hotels, Galleria area, Sugar Land, Katy, IAH, Hobby, and The Woodlands.",
+            body: "Downtown Houston hotels, Galleria area, Sugar Land, Katy, The Woodlands, IAH, Hobby, and other Greater Houston locations. We regularly handle cruise transfers from homes and hotels across the region.",
+          },
+          {
+            heading: "Timing and Boarding",
+            body: "Share your ship name and boarding time when you book. We recommend a pickup window that accounts for traffic on I-45 and the Galveston Causeway. Most transfers from central Houston take 60–90 minutes depending on origin and traffic.",
+          },
+          {
+            heading: "Vehicle Recommendations",
+            body: "For 1–3 passengers with light luggage, a sedan works well. For more bags or up to 6 passengers, choose an SUV. For families or groups with significant luggage, a Sprinter van keeps everyone together and provides more space.",
           },
         ]}
         relatedLinks={[
@@ -86,9 +95,26 @@ export default function Page() {
           { href: "/galleria-car-service", label: "Galleria" },
         ]}
         faqs={[
-          { q: "How early should we leave for the cruise port?", a: "Share your ship’s boarding time and we will suggest a pickup window with buffer." },
-          { q: "Can you pick up from both Houston airports?", a: "Yes. We regularly do IAH and Hobby to Galveston transfers." },
-          { q: "Do you offer group transportation to Galveston?", a: "Yes. Sprinter vans are available for groups with luggage." },
+          {
+            q: "How early should we leave for the cruise port?",
+            a: "Share your ship’s boarding time and we will suggest a pickup window with buffer for traffic. Most groups leave with enough time to arrive comfortably before boarding begins.",
+          },
+          {
+            q: "Can you pick up from both Houston airports?",
+            a: "Yes. We regularly do IAH and Hobby to Galveston transfers, including for passengers connecting after a flight.",
+          },
+          {
+            q: "Do you offer group transportation to Galveston?",
+            a: "Yes. Sprinter vans are available for groups with luggage so the whole party can travel together.",
+          },
+          {
+            q: "Can I book a return transfer after the cruise?",
+            a: "Yes. You can book both directions or arrange the return after you have your disembarkation details.",
+          },
+          {
+            q: "How long is the drive from Houston to Galveston?",
+            a: "Typically 60–90 minutes from central Houston depending on traffic and exact pickup location. Sugar Land and south Houston origins are often shorter.",
+          },
         ]}
       />
     </>
