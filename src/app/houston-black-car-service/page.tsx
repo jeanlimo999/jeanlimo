@@ -4,7 +4,7 @@ import ServicePage from "@/components/ServicePage";
 export const metadata: Metadata = {
   title: "Houston Black Car Service | Private Chauffeur | Jean Limo",
   description:
-    "Houston black car service for airport runs, corporate travel, and nights out. Business sedans and SUVs with flat rates and professional chauffeurs.",
+    "Houston black car service for airport runs, corporate travel, and nights out. Business sedans and SUVs with flat rates and professional chauffeurs. Serving Greater Houston.",
   alternates: {
     canonical: "https://jeanlimo.com/houston-black-car-service",
   },
@@ -52,7 +52,7 @@ export default function Page() {
       <ServicePage
         kicker="Houston black car"
         title="Houston Black Car Service"
-        intro="Jean Limo provides private black car service throughout Greater Houston. Choose a business sedan or SUV with a professional, background-checked chauffeur for airport transfers, corporate meetings, client entertainment, or personal travel. Every ride is confirmed by dispatch and priced clearly before you book."
+        intro="Jean Limo provides private black car and chauffeur service throughout Greater Houston. Choose a business sedan or full-size SUV with a professional, background-checked chauffeur for airport transfers, corporate meetings, client entertainment, nights out, or personal travel. Every ride is confirmed by dispatch and priced clearly before you book."
         points={[
           "Business sedans and full-size SUVs",
           "Flat rates with gratuity and fuel included (Greater Houston)",
@@ -60,11 +60,20 @@ export default function Page() {
           "Corporate and executive travel",
           "24/7 dispatch and no surge pricing",
           "Licensed, insured, and background-checked chauffeurs",
+          "Door-to-door private service",
         ]}
         sections={[
           {
             heading: "Ideal For",
-            body: "Airport runs, corporate roadshows, client meetings and dinners, nights out, and point-to-point trips across the city.",
+            body: "Airport runs, corporate roadshows, client meetings and dinners, nights out, weddings, and point-to-point trips across the city. Black car service is a reliable alternative to rideshare when you want a professional driver, clean vehicle, and fixed price.",
+          },
+          {
+            heading: "Vehicle Options",
+            body: "Business sedans (Mercedes E-Class, BMW 5 Series, or similar) seat up to 3 passengers with luggage. Full-size SUVs (Chevrolet Suburban, GMC Yukon XL, or similar) seat up to 6 passengers and handle more bags. For larger groups, we also offer Mercedes-Benz Sprinter vans.",
+          },
+          {
+            heading: "Coverage Area",
+            body: "We serve Greater Houston including Downtown, the Galleria, River Oaks, Memorial, Sugar Land, The Woodlands, Katy, the Energy Corridor, Medical Center, and surrounding communities. Flat rates apply on most trips within the greater Houston area.",
           },
         ]}
         relatedLinks={[
@@ -82,15 +91,23 @@ export default function Page() {
         faqs={[
           {
             q: "What vehicles do you use for black car service?",
-            a: "Business sedans (Mercedes E-Class, BMW 5 Series or similar) and full-size SUVs (Suburban, Yukon XL or similar).",
+            a: "Business sedans (Mercedes E-Class, BMW 5 Series or similar) and full-size SUVs (Suburban, Yukon XL or similar). Sprinter vans are available for larger groups.",
           },
           {
             q: "Is gratuity included?",
-            a: "Yes, on standard point-to-point rates within Greater Houston.",
+            a: "Yes, on standard point-to-point rates within Greater Houston. Fuel is also included.",
           },
           {
             q: "Do you offer hourly black car service?",
-            a: "Yes. See our hourly chauffeur service for as-directed bookings.",
+            a: "Yes. Hourly chauffeur service is available with a 2-hour minimum for as-directed travel and multiple stops.",
+          },
+          {
+            q: "How is black car different from rideshare?",
+            a: "You get a professional, background-checked chauffeur, a clean late-model vehicle, a fixed price in advance, and confirmed service. There is no surge pricing.",
+          },
+          {
+            q: "Can I book for a corporate account or multiple trips?",
+            a: "Yes. Contact us for recurring or corporate transportation needs.",
           },
         ]}
       />
