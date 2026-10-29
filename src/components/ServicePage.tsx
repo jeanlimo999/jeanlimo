@@ -23,8 +23,30 @@ export default function ServicePage({
   serviceCards?: { title: string; body: string }[];
   highlight?: { kicker: string; title: string; body: string; cta: string; href: string };
 }) {
+  const faqSchema =
+    faqs.length > 0
+      ? {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: faqs.map((f) => ({
+            "@type": "Question",
+            name: f.q,
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: f.a,
+            },
+          })),
+        }
+      : null;
+
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
+      {faqSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+        />
+      )}
       <nav className="border-b border-yellow-600/20">
         <div className="mx-auto flex h-16 max-w-4xl items-center justify-between px-4">
           <Link href="/" className="font-serif tracking-wide text-yellow-400">
@@ -50,7 +72,7 @@ export default function ServicePage({
           <div className="mt-8">
             <img
               src={image}
-              alt="Jean Limo Mercedes Sprinter van"
+              alt={`${title} — Jean Limo`}
               className="w-full rounded-lg object-cover"
             />
           </div>
