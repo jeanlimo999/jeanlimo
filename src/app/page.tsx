@@ -65,6 +65,29 @@ const locationLinks = [
   { href: "/champions-car-service", label: "Champions" },
 ];
 
+const homeFaqs = [
+  {
+    q: "Do you offer flat rates for Houston airport transfers?",
+    a: "Yes. Most Greater Houston trips have flat rates with gratuity and fuel included. Get an instant quote online.",
+  },
+  {
+    q: "Do you monitor flights for IAH and Hobby pickups?",
+    a: "Yes. Share your flight number and we track it so your chauffeur can adjust for delays or early arrivals.",
+  },
+  {
+    q: "What vehicles are available?",
+    a: "Business Sedan, Business SUV, and Mercedes-Benz Sprinter Van. Capacity depends on passengers and luggage.",
+  },
+  {
+    q: "Is hourly chauffeur service available?",
+    a: "Yes. Hourly service has a 2-hour minimum and includes unlimited stops within Greater Houston (subject to included mileage).",
+  },
+  {
+    q: "Do you serve Galveston cruise terminals?",
+    a: "Yes. We provide timed private transfers to the Port of Galveston with luggage space.",
+  },
+];
+
 export default function Home() {
   return (
     <div className="bg-zinc-950 text-zinc-100 min-h-screen">
@@ -204,7 +227,40 @@ export default function Home() {
           </div>
         </div>
       </section>
-      <section id="contact" className="py-20 md:py-28">
+
+      <section className="py-20 md:py-28">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <p className="text-yellow-500 tracking-[0.2em] text-xs uppercase mb-3">Serving Greater Houston</p>
+            <h2 className="font-serif text-3xl md:text-4xl">Private chauffeur service across Houston</h2>
+          </div>
+          <div className="space-y-8 text-zinc-300 leading-relaxed">
+            <p>
+              Jean Limo is a Sugar Land-based private chauffeur and black car service serving Greater Houston. We specialize in flat-rate airport transfers to George Bush Intercontinental Airport (IAH) and William P. Hobby Airport (HOU), timed Galveston cruise port runs, hourly chauffeur service, and corporate transportation.
+            </p>
+            <p>
+              Whether you need a business sedan for an executive meeting, an SUV for family travel, or a Mercedes-Benz Sprinter for a group, we provide professional, background-checked chauffeurs and clean late-model vehicles. Most local trips include gratuity and fuel in the quoted price.
+            </p>
+            <p>
+              We serve Downtown Houston, the Galleria, Sugar Land, The Woodlands, Katy, the Energy Corridor, the Texas Medical Center, River Oaks, Memorial, and many other communities across the region. Share your flight number for airport pickups and we will monitor it so your chauffeur can adjust for delays.
+            </p>
+          </div>
+
+          <div className="mt-16">
+            <h2 className="font-serif text-2xl md:text-3xl text-center mb-8">Frequently Asked Questions</h2>
+            <div className="space-y-6">
+              {homeFaqs.map((f) => (
+                <div key={f.q} className="border-b border-zinc-800 pb-6">
+                  <h3 className="font-medium text-white">{f.q}</h3>
+                  <p className="mt-2 text-zinc-400 text-sm">{f.a}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="contact" className="py-20 md:py-28 bg-zinc-900/40">
         <div className="max-w-4xl mx-auto px-4 text-center">
           <p className="text-yellow-500 tracking-[0.2em] text-xs uppercase mb-3">Ready when you are</p>
           <h2 className="font-serif text-3xl md:text-4xl mb-6">Your chauffeur is a call away</h2>
