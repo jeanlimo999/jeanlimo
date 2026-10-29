@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "IAH Airport Black Car & Sprinter Transfers | Jean Limo",
     description:
-      "Private IAH airport car service with flight monitoring and meet & greet. Sedan, SUV, and Sprinter transfers.",
+      "Private IAH airport car service with flight monitoring and meet & greet. Sedan, SUV, and Sprinter transfers across Greater Houston.",
     url: "https://jeanlimo.com/iah-airport-car-service",
   },
 };
@@ -52,7 +52,7 @@ export default function Page() {
       <ServicePage
         kicker="IAH Airport"
         title="IAH Airport Black Car & Sprinter Transfers"
-        intro="Private car service to and from George Bush Intercontinental Airport (IAH). Jean Limo monitors your flight when you share the number, provides flat-rate pricing, and offers sedan, SUV, or Sprinter options for individuals and groups. Meet and greet is available at Terminals A, B, and C."
+        intro="Private car service to and from George Bush Intercontinental Airport (IAH). Jean Limo monitors your flight when you share the number, provides flat-rate pricing, and offers sedan, SUV, or Sprinter options for individuals and groups. Meet and greet is available at Terminals A, B, and C. We serve Greater Houston including Sugar Land, The Woodlands, Downtown, Galleria, and surrounding areas."
         image="/fleet/suv.jpg"
         highlight={{
           kicker: "Flight Monitoring Included",
@@ -76,6 +76,7 @@ export default function Page() {
           "Flat rates on most Greater Houston trips",
           "Professional, background-checked chauffeurs",
           "Door-to-door service",
+          "Gratuity and fuel included on most local trips",
         ]}
         sections={[
           {
@@ -93,6 +94,10 @@ export default function Page() {
           {
             heading: "Popular Routes from IAH",
             body: "Sugar Land (50–60 min), Downtown (25–40 min), Galleria (25–40 min), The Woodlands (30–45 min), Katy (40–55 min), and Texas Medical Center. Exact times vary with traffic. We build realistic buffers into departure pickups and monitor arrivals so you are not left waiting.",
+          },
+          {
+            heading: "Tips for Smooth IAH Transfers",
+            body: "Share your flight number at booking. For international arrivals, allow extra time after landing for customs. If you have oversized luggage or a large group, mention it so we can recommend the right vehicle (SUV or Sprinter). Early morning and late-night flights are covered with 24/7 dispatch.",
           },
         ]}
         relatedLinks={[
@@ -116,15 +121,23 @@ export default function Page() {
           },
           {
             q: "Can I book a Sprinter from IAH?",
-            a: "Yes. Sprinter vans are available for group arrivals and departures.",
+            a: "Yes. Sprinter vans are available for group arrivals and departures with more passengers or luggage.",
           },
           {
             q: "How much does IAH transportation cost?",
-            a: "Rates are flat and based on distance. Get an instant quote online.",
+            a: "Rates are flat and based on distance. Get an instant quote online. Gratuity and fuel are included on most local trips.",
           },
           {
             q: "What if my flight is delayed?",
             a: "We monitor flights. If you share your flight number, we adjust pickup timing automatically for delays or early arrivals.",
+          },
+          {
+            q: "Do you offer round-trip IAH transfers?",
+            a: "Yes. You can book both directions in one reservation for convenience.",
+          },
+          {
+            q: "Is service available for early morning or late-night flights?",
+            a: "Yes. We operate 24/7 and regularly handle early and late IAH flights.",
           },
         ]}
       />
