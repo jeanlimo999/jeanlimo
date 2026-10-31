@@ -15,11 +15,11 @@ export default function SiteHeader() {
   }, []);
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 border-b border-yellow-600/20 bg-zinc-950/90 backdrop-blur-md">
+    <nav className="fixed top-0 left-0 right-0 z-50 border-b border-yellow-600/20 bg-zinc-950/95 backdrop-blur-md">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between md:h-20">
-          <a href="/" className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-yellow-500 font-serif text-xl font-bold text-yellow-400">
+          <a href="/" className="flex items-center gap-3 group">
+            <div className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-yellow-500 font-serif text-xl font-bold text-yellow-400 group-hover:border-yellow-400 transition">
               J
             </div>
             <div>
@@ -29,12 +29,12 @@ export default function SiteHeader() {
           </a>
 
           <div className="flex items-center gap-2 sm:gap-3">
-            <a href="/account" className="whitespace-nowrap px-2 text-xs text-zinc-300 hover:text-yellow-400 sm:text-sm">
+            <a href="/account" className="whitespace-nowrap px-3 text-xs text-zinc-300 hover:text-yellow-400 sm:text-sm transition">
               My trips
             </a>
             <a
               href="/#quote"
-              className="rounded bg-yellow-500 px-3 py-2 text-sm font-semibold text-zinc-900 hover:bg-yellow-400 sm:px-4"
+              className="rounded-lg bg-yellow-500 px-4 py-2.5 text-sm font-semibold text-zinc-900 hover:bg-yellow-400 transition shadow-sm"
             >
               Book Now
             </a>
@@ -44,21 +44,22 @@ export default function SiteHeader() {
                 aria-label="Menu"
                 aria-expanded={open}
                 onClick={() => setOpen((v) => !v)}
-                className="flex items-center gap-2 rounded-lg border border-white/10 px-3 py-2 text-sm text-zinc-100 hover:border-yellow-500/50 hover:text-yellow-400"
+                className="flex items-center gap-2 rounded-lg border border-white/15 px-3.5 py-2.5 text-sm text-zinc-100 hover:border-yellow-500/60 hover:text-yellow-400 transition"
               >
                 <span className="text-lg leading-none">{open ? "×" : "☰"}</span>
-                <span className="font-medium">Menu</span>
+                <span className="font-medium hidden sm:inline">Menu</span>
               </button>
               {open && (
-                <div className="absolute right-0 top-12 w-56 overflow-hidden rounded-xl border border-yellow-600/20 bg-zinc-950 py-1 shadow-2xl">
+                <div className="absolute right-0 top-14 w-64 overflow-hidden rounded-2xl border border-yellow-600/30 bg-zinc-950/98 py-2 shadow-2xl backdrop-blur-xl">
                   <MenuLink href="/#services" onClick={() => setOpen(false)}>Services</MenuLink>
                   <MenuLink href="/#fleet" onClick={() => setOpen(false)}>Fleet & Pricing</MenuLink>
                   <MenuLink href="https://maps.app.goo.gl/aDG8UD4nBddGKKmk6" onClick={() => setOpen(false)} external>
                     Reviews
                   </MenuLink>
                   <MenuLink href="/#contact" onClick={() => setOpen(false)}>Contact</MenuLink>
+                  <div className="my-2 border-t border-zinc-800" />
                   <MenuLink href="/account" onClick={() => setOpen(false)}>Client portal</MenuLink>
-                  <div className="px-4 pb-1 pt-3 text-[11px] uppercase tracking-[0.16em] text-[#C4A574]">Affiliate</div>
+                  <div className="px-5 pb-1 pt-3 text-[10px] uppercase tracking-[0.2em] text-yellow-600/80">Affiliate</div>
                   <MenuLink href="/partners" onClick={() => setOpen(false)}>Partners</MenuLink>
                   <MenuLink href="/driver.html" onClick={() => setOpen(false)}>Driver portal</MenuLink>
                   <MenuLink href="/dispatch" onClick={() => setOpen(false)}>Dispatcher portal</MenuLink>
@@ -88,7 +89,7 @@ function MenuLink({
       href={href}
       onClick={onClick}
       {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-      className="block px-4 py-3 text-sm text-zinc-200 hover:bg-yellow-500/10 hover:text-yellow-400"
+      className="block px-5 py-3 text-sm text-zinc-200 hover:bg-yellow-500/10 hover:text-yellow-400 transition"
     >
       {children}
     </a>
