@@ -58,7 +58,7 @@ export default function SiteHeader() {
                   </MenuLink>
                   <MenuLink href="/#contact" onClick={() => setOpen(false)}>Contact</MenuLink>
                   <div className="my-2 border-t border-zinc-800" />
-                  <MenuLink href="/account" onClick={() => setOpen(false)}>Client portal</MenuLink>
+                  <MenuLink href="https://jeanlimo.com/app" onClick={() => setOpen(false)}>Client portal</MenuLink>
                   <div className="px-5 pb-1 pt-3 text-[10px] uppercase tracking-[0.2em] text-yellow-600/80">Affiliate</div>
                   <MenuLink href="/partners" onClick={() => setOpen(false)}>Partners</MenuLink>
                   <MenuLink href="/driver.html" onClick={() => setOpen(false)}>Driver portal</MenuLink>
