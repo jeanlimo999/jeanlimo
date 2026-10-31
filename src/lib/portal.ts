@@ -144,8 +144,9 @@ export async function saveWebsiteBooking(booking: {
   return { saved: true, clientId: client.id };
 }
 
-export function bookingIsUpcoming(b: { status: string; ride_date: string; ride_time: string }) {
-  if (["cancelled", "completed"].includes(String(b.status || "").toLowerCase())) return false;
+export function bookingIsUpcoming(b: { status?: string; trip_status?: string; ride_date?: string; ride_time?: string }) {
+  const s = String(b.status || b.trip_status || "").toLowerCase().replace(/_/g, " ");
+  if (["cancelled", "canceled", "completed", "done"].some((x) => s.includes(x))) return false;
   if (!b.ride_date) return true;
   const t = b.ride_time && /^\d{1,2}:\d{2}/.test(b.ride_time) ? b.ride_time.slice(0, 5) : "23:59";
   const stamp = new Date(`${b.ride_date}T${t}:00`);
