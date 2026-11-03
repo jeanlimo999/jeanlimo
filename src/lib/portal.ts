@@ -144,14 +144,40 @@ export async function saveWebsiteBooking(booking: {
   return { saved: true, clientId: client.id };
 }
 
+/** Convert a ride date+time stored in America/Chicago to a UTC timestamp. */
+function chicagoToUtcMs(date: string, time: string): number {
+  const t = time && /^\d{1,2}:\d{2}/.test(time) ? time.slice(0, 5) : "23:59";
+  const [y, m, d] = date.split("-").map(Number);
+  const [hh, mm] = t.split(":").map(Number);
+  if (!y || !m || !d || Number.isNaN(hh) || Number.isNaN(mm)) return NaN;
+
+  // Probe the offset for this civil time in America/Chicago
+  const probe = new Date(Date.UTC(y, m - 1, d, hh, mm));
+  const fmt = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Chicago",
+    timeZoneName: "shortOffset",
+    hour12: false,
+  });
+  const parts = fmt.formatToParts(probe);
+  const tzPart = parts.find((p) => p.type === "timeZoneName")?.value || "GMT-6";
+  const match = tzPart.match(/GMT([+-]\d{1,2})(?::(\d{2}))?/);
+  const offsetHours = match ? Number(match[1]) : -6;
+  const offsetMins = match && match[2] ? Number(match[2]) : 0;
+  const offsetMs = (offsetHours * 60 + (offsetHours < 0 ? -offsetMins : offsetMins)) * 60 * 1000;
+
+  return Date.UTC(y, m - 1, d, hh, mm) - offsetMs;
+}
+
 export function bookingIsUpcoming(b: { status?: string; trip_status?: string; ride_date?: string; ride_time?: string }) {
   const s = String(b.status || b.trip_status || "").toLowerCase().replace(/_/g, " ");
   if (["cancelled", "canceled", "completed", "done"].some((x) => s.includes(x))) return false;
   if (!b.ride_date) return true;
-  const t = b.ride_time && /^\d{1,2}:\d{2}/.test(b.ride_time) ? b.ride_time.slice(0, 5) : "23:59";
-  const stamp = new Date(`${b.ride_date}T${t}:00`);
-  if (Number.isNaN(stamp.getTime())) return true;
-  return stamp.getTime() >= Date.now() - 2 * 60 * 60 * 1000;
+
+  const stampMs = chicagoToUtcMs(b.ride_date, b.ride_time || "");
+  if (Number.isNaN(stampMs)) return true;
+
+  // Keep the same 2-hour grace window after pickup
+  return stampMs >= Date.now() - 2 * 60 * 60 * 1000;
 }
 
 export { digits, last4, normEmail };
