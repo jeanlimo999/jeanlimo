@@ -144,17 +144,29 @@ export async function saveWebsiteBooking(booking: {
   return { saved: true, clientId: client.id };
 }
 
-/** Convert a ride date+time stored in America/Chicago to a UTC timestamp. */
-function chicagoToUtcMs(date: string, time: string): number {
+/** Map booking city / rate city to an IANA timezone. */
+function timezoneForCity(city?: string): string {
+  const c = String(city || "").toLowerCase();
+  if (c.includes("los angeles") || c.includes("la") || c.includes("california") || c.includes("pacific")) {
+    return "America/Los_Angeles";
+  }
+  if (c.includes("new york") || c.includes("new jersey") || c.includes("nyc") || c.includes("eastern")) {
+    return "America/New_York";
+  }
+  // Houston, Dallas, and everything else default to Central
+  return "America/Chicago";
+}
+
+/** Convert a ride date+time stored in the given IANA timezone to a UTC timestamp. */
+function zonedToUtcMs(date: string, time: string, timeZone: string): number {
   const t = time && /^\d{1,2}:\d{2}/.test(time) ? time.slice(0, 5) : "23:59";
   const [y, m, d] = date.split("-").map(Number);
   const [hh, mm] = t.split(":").map(Number);
   if (!y || !m || !d || Number.isNaN(hh) || Number.isNaN(mm)) return NaN;
 
-  // Probe the offset for this civil time in America/Chicago
   const probe = new Date(Date.UTC(y, m - 1, d, hh, mm));
   const fmt = new Intl.DateTimeFormat("en-US", {
-    timeZone: "America/Chicago",
+    timeZone,
     timeZoneName: "shortOffset",
     hour12: false,
   });
@@ -168,12 +180,19 @@ function chicagoToUtcMs(date: string, time: string): number {
   return Date.UTC(y, m - 1, d, hh, mm) - offsetMs;
 }
 
-export function bookingIsUpcoming(b: { status?: string; trip_status?: string; ride_date?: string; ride_time?: string }) {
+export function bookingIsUpcoming(b: {
+  status?: string;
+  trip_status?: string;
+  ride_date?: string;
+  ride_time?: string;
+  city?: string;
+}) {
   const s = String(b.status || b.trip_status || "").toLowerCase().replace(/_/g, " ");
   if (["cancelled", "canceled", "completed", "done"].some((x) => s.includes(x))) return false;
   if (!b.ride_date) return true;
 
-  const stampMs = chicagoToUtcMs(b.ride_date, b.ride_time || "");
+  const tz = timezoneForCity(b.city);
+  const stampMs = zonedToUtcMs(b.ride_date, b.ride_time || "", tz);
   if (Number.isNaN(stampMs)) return true;
 
   // Keep the same 2-hour grace window after pickup
