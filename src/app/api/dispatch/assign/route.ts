@@ -25,8 +25,7 @@ async function emailDrivers(db: any, booking: any) {
   if (!emails.length) return 0;
 
   const total = Number(booking.amount_cents || 0);
-  const hasReturn = Boolean(booking.return_date || booking.return_pickup);
-  const pay = Math.round((hasReturn ? total / 2 : total) * 0.80);
+  const pay = Math.round(total * 0.80);
   const dateStr = booking.ride_date;
   const time = prettyTime(booking.ride_time);
 
@@ -73,12 +72,8 @@ export async function POST(req: NextRequest) {
   const bookingId = String(body.bookingId || "");
   if (!bookingId) return NextResponse.json({ error: "Booking required" }, { status: 400 });
 
-  const leg = String(body.leg || "outbound");
-  const isReturn = leg === "return";
   if (body.auction) {
-    const patch = isReturn
-      ? { return_assigned_driver_id: null, return_trip_status: "auction", updated_at: new Date().toISOString() }
-      : { assigned_driver_id: null, trip_status: "auction", updated_at: new Date().toISOString() };
+    const patch = { assigned_driver_id: null, trip_status: "auction", updated_at: new Date().toISOString() };
     const { data: booking, error } = await db
       .from("bookings")
       .update(patch)
@@ -91,9 +86,7 @@ export async function POST(req: NextRequest) {
   }
 
   const driverId = body.driverId ? String(body.driverId) : null;
-  const patch = isReturn
-    ? { return_assigned_driver_id: driverId, return_trip_status: driverId ? "assigned" : "confirmed", updated_at: new Date().toISOString() }
-    : { assigned_driver_id: driverId, trip_status: driverId ? "assigned" : "confirmed", updated_at: new Date().toISOString() };
+  const patch = { assigned_driver_id: driverId, trip_status: driverId ? "assigned" : "confirmed", updated_at: new Date().toISOString() };
   const { error } = await db
     .from("bookings")
     .update(patch)

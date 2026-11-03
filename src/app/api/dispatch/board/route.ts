@@ -50,14 +50,15 @@ export async function GET() {
       if (day.startsWith(year)) revenue.year += amt;
     });
 
-    const jobs = (bookings || []).flatMap((row: any) => {
+    const jobs = (bookings || []).map((row: any) => {
       const guest = row.clients || {};
       const total = cents(row);
-      const hasReturn = Boolean(row.return_date || row.return_pickup);
-      const legCents = hasReturn ? Math.round(total / 2) : total;
-      const driverPayCents = Math.round(legCents * 0.80);
-      const base = {
+      const driverPayCents = Math.round(total * 0.80);
+      const pax = row.passengers || row.passenger_count || row.pax || "";
+      return {
         bookingId: row.id,
+        id: row.confirmation,
+        leg: row.is_return ? "return" : "outbound",
         guestName: guest.full_name || "Guest",
         guestPhone: guest.phone || "",
         vehicle: row.vehicle,
@@ -67,16 +68,6 @@ export async function GET() {
         amountCents: total,
         driverPayCents,
         city: row.city || "Houston",
-      };
-      const rawNotes = String(row.passenger_notes || row.notes || "");
-      const split = rawNotes.indexOf("Return:");
-      const outboundNotes = (split >= 0 ? rawNotes.slice(0, split) : rawNotes).replace(/\s*\|\s*$/, "").trim();
-      const returnNotes = split >= 0 ? rawNotes.slice(split + 7).trim() : "";
-      const pax = row.passengers || row.passenger_count || row.pax || "";
-      const list = [{
-        ...base,
-        id: row.confirmation,
-        leg: "outbound",
         when: [row.ride_date, row.ride_time].filter(Boolean).join(" "),
         rideDate: row.ride_date || "",
         rideTime: row.ride_time || "",
@@ -84,27 +75,8 @@ export async function GET() {
         dropoff: row.dropoff,
         flight: row.flight_number || "",
         passengers: pax === 0 || pax ? String(pax) : "",
-        notes: outboundNotes,
-      }];
-      if ((row.return_date || row.return_pickup) && row.return_trip_status !== "cancelled") {
-        list.push({
-          ...base,
-          assignedDriverId: row.return_assigned_driver_id || "",
-          tripStatus: row.return_trip_status || "confirmed",
-          id: row.confirmation + "-R",
-          leg: "return",
-          confirmation: row.confirmation + " return",
-          when: [row.return_date, row.return_time].filter(Boolean).join(" "),
-          rideDate: row.return_date || "",
-          rideTime: row.return_time || "",
-          pickup: row.return_pickup || row.dropoff,
-          dropoff: row.return_dropoff || row.pickup,
-          flight: row.return_flight_number || "",
-          passengers: pax === 0 || pax ? String(pax) : "",
-          notes: returnNotes,
-        });
-      }
-      return list;
+        notes: row.passenger_notes || row.notes || "",
+      };
     });
 
     return NextResponse.json({ drivers: drivers || [], jobs, revenue });

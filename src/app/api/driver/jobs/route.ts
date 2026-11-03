@@ -2,24 +2,18 @@ import { NextResponse } from "next/server";
 import { readDriverSession } from "@/lib/session";
 import { supabaseAdmin } from "@/lib/supabase";
 
-function toJobs(row: any, driverId: string) {
+function toJob(row: any, driverId: string) {
   const guest = row.clients || {};
-  const outboundMine = row.assigned_driver_id === driverId;
-  const returnMine = row.return_assigned_driver_id === driverId;
-  const outboundAuction = row.trip_status === "auction" && !row.assigned_driver_id;
-  const returnAuction = row.return_trip_status === "auction" && !row.return_assigned_driver_id;
-  if (!outboundMine && !returnMine && !outboundAuction && !returnAuction) return [];
+  const mine = row.assigned_driver_id === driverId;
+  const auction = row.trip_status === "auction" && !row.assigned_driver_id;
+  if (!mine && !auction) return null;
   const pax = row.passengers || row.passenger_count || row.pax || "";
-  const rawNotes = String(row.passenger_notes || row.notes || "");
-  const split = rawNotes.indexOf("Return:");
-  const outboundNotes = (split >= 0 ? rawNotes.slice(0, split) : rawNotes).replace(/\s*\|\s*$/, "").trim();
-  const returnNotes = split >= 0 ? rawNotes.slice(split + 7).trim() : "";
   const total = Number(row.amount_cents || 0);
-  const hasReturn = Boolean(row.return_date || row.return_pickup);
-  const legCents = hasReturn ? Math.round(total / 2) : total;
-  const driverPay = Math.round(legCents * 0.80) / 100;
-  const base = {
+  const driverPay = Math.round(total * 0.80) / 100;
+  return {
     bookingId: row.id,
+    id: row.confirmation,
+    live_leg: row.is_return ? "return" : "outbound",
     driverPay,
     guestName: guest.full_name || "Guest",
     guestPhone: guest.phone || "",
@@ -30,40 +24,15 @@ function toJobs(row: any, driverId: string) {
     last_lat: row.last_lat,
     last_lng: row.last_lng,
     passengers: pax === 0 || pax ? String(pax) : "",
+    when: [row.ride_date, row.ride_time].filter(Boolean).join(" "),
+    rideDate: row.ride_date || "",
+    rideTime: row.ride_time || "",
+    pickup: row.pickup,
+    dropoff: row.dropoff,
+    flight: row.flight_number || "",
+    notes: row.passenger_notes || row.notes || "",
+    available: auction,
   };
-  const jobs = [
-    {
-      ...base,
-      id: row.confirmation,
-      live_leg: "outbound",
-      when: [row.ride_date, row.ride_time].filter(Boolean).join(" "),
-      rideDate: row.ride_date || "",
-      rideTime: row.ride_time || "",
-      pickup: row.pickup,
-      dropoff: row.dropoff,
-      flight: row.flight_number || "",
-      notes: outboundNotes,
-    },
-  ];
-  if (row.return_date || row.return_pickup) {
-    jobs.push({
-      ...base,
-      id: row.confirmation + "-R",
-      confirmation: row.confirmation + " return",
-      live_leg: "return",
-      when: [row.return_date, row.return_time].filter(Boolean).join(" "),
-      rideDate: row.return_date || "",
-      rideTime: row.return_time || "",
-      pickup: row.return_pickup || row.dropoff,
-      dropoff: row.return_dropoff || row.pickup,
-      flight: row.return_flight_number || "",
-      notes: returnNotes,
-    });
-  }
-  return jobs.filter((job) => {
-    if (job.live_leg === "return") return returnMine || returnAuction;
-    return outboundMine || outboundAuction;
-  }).map((job) => ({ ...job, available: job.live_leg === "return" ? returnAuction : outboundAuction }));
 }
 
 export async function GET() {
@@ -73,14 +42,14 @@ export async function GET() {
   if (!db) return NextResponse.json({ error: "Supabase is not configured" }, { status: 500 });
 
   const [{ data, error }, { data: open, error: openErr }] = await Promise.all([
-    db.from("bookings").select("*, clients(full_name, phone, email)").or(`assigned_driver_id.eq.${session.driverId},return_assigned_driver_id.eq.${session.driverId}`).not("status", "eq", "cancelled").order("ride_date", { ascending: true }),
-    db.from("bookings").select("*, clients(full_name, phone, email)").or("trip_status.eq.auction,return_trip_status.eq.auction").not("status", "eq", "cancelled").order("ride_date", { ascending: true }),
+    db.from("bookings").select("*, clients(full_name, phone, email)").eq("assigned_driver_id", session.driverId).not("status", "eq", "cancelled").order("ride_date", { ascending: true }),
+    db.from("bookings").select("*, clients(full_name, phone, email)").eq("trip_status", "auction").is("assigned_driver_id", null).not("status", "eq", "cancelled").order("ride_date", { ascending: true }),
   ]);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   if (openErr) return NextResponse.json({ error: openErr.message }, { status: 500 });
 
-  const jobs = (data || []).flatMap((row) => toJobs(row, session.driverId));
-  const available = (open || []).flatMap((row) => toJobs(row, session.driverId).map((job) => ({ ...job, available: true })));
+  const jobs = (data || []).map((row) => toJob(row, session.driverId)).filter(Boolean);
+  const available = (open || []).map((row) => toJob(row, session.driverId)).filter(Boolean).map((job) => ({ ...job, available: true }));
   return NextResponse.json({
     driver: { id: session.driverId, name: session.name, phone: session.phone },
     jobs,

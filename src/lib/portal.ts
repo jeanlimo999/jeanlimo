@@ -20,6 +20,8 @@ export type BookingRow = {
   passenger_notes?: string;
   stripe_session_id?: string | null;
   city?: string;
+  is_return?: boolean;
+  parent_booking_id?: string | null;
 };
 
 export async function upsertClient(input: {
@@ -108,7 +110,11 @@ export async function saveWebsiteBooking(booking: {
     full_name: booking.name || "",
   });
 
-  const row = {
+  const hasReturn = Boolean(booking.returnDate || booking.returnPickup || booking.returnDropoff);
+  const totalCents = Math.round(Number(booking.amount || 0) * 100);
+  const legCents = hasReturn ? Math.round(totalCents / 2) : totalCents;
+
+  const outbound = {
     confirmation: String(booking.confirmation).toUpperCase(),
     client_id: client.id,
     status: booking.status || "confirmed",
@@ -119,28 +125,63 @@ export async function saveWebsiteBooking(booking: {
     pickup: booking.pickup || "",
     dropoff: booking.dropoff || "",
     flight_number: booking.flightNumber || "",
-    return_date: booking.returnDate || "",
-    return_time: booking.returnTime || "",
-    return_pickup: booking.returnPickup || "",
-    return_dropoff: booking.returnDropoff || "",
-    return_flight_number: booking.returnFlightNumber || "",
-    amount_cents: Math.round(Number(booking.amount || 0) * 100),
+    amount_cents: legCents,
     breakdown: booking.breakdown || "",
-    passenger_notes: [booking.notes, booking.returnNotes ? "Return: " + booking.returnNotes : ""].filter(Boolean).join(" | "),
+    passenger_notes: booking.notes || "",
     stripe_session_id: booking.stripe_session_id || null,
     city: booking.city || "Houston",
+    is_return: false,
+    parent_booking_id: null,
     updated_at: new Date().toISOString(),
   };
 
-  let { error } = await db.from("bookings").upsert(row, { onConflict: "confirmation" });
+  let { data: outboundRow, error } = await db.from("bookings").upsert(outbound, { onConflict: "confirmation" }).select("id").single();
   if (error && /column|schema/i.test(error.message || "")) {
-    const slim = { ...row };
+    const slim = { ...outbound };
     delete (slim as any).passenger_notes;
     delete (slim as any).city;
     delete (slim as any).stripe_session_id;
-    ({ error } = await db.from("bookings").upsert(slim, { onConflict: "confirmation" }));
+    delete (slim as any).is_return;
+    delete (slim as any).parent_booking_id;
+    ({ data: outboundRow, error } = await db.from("bookings").upsert(slim, { onConflict: "confirmation" }).select("id").single());
   }
   if (error) throw error;
+
+  if (hasReturn && outboundRow?.id) {
+    const returnRow = {
+      confirmation: String(booking.confirmation).toUpperCase() + " return",
+      client_id: client.id,
+      status: booking.status || "confirmed",
+      vehicle: booking.vehicle || "sedan",
+      trip_type: booking.type || "oneway",
+      ride_date: booking.returnDate || booking.date || "",
+      ride_time: booking.returnTime || "",
+      pickup: booking.returnPickup || booking.dropoff || "",
+      dropoff: booking.returnDropoff || booking.pickup || "",
+      flight_number: booking.returnFlightNumber || "",
+      amount_cents: legCents,
+      breakdown: booking.breakdown || "",
+      passenger_notes: booking.returnNotes || booking.notes || "",
+      stripe_session_id: booking.stripe_session_id || null,
+      city: booking.city || "Houston",
+      is_return: true,
+      parent_booking_id: outboundRow.id,
+      updated_at: new Date().toISOString(),
+    };
+
+    let { error: rErr } = await db.from("bookings").upsert(returnRow, { onConflict: "confirmation" });
+    if (rErr && /column|schema/i.test(rErr.message || "")) {
+      const slim = { ...returnRow };
+      delete (slim as any).passenger_notes;
+      delete (slim as any).city;
+      delete (slim as any).stripe_session_id;
+      delete (slim as any).is_return;
+      delete (slim as any).parent_booking_id;
+      ({ error: rErr } = await db.from("bookings").upsert(slim, { onConflict: "confirmation" }));
+    }
+    if (rErr) throw rErr;
+  }
+
   return { saved: true, clientId: client.id };
 }
 
