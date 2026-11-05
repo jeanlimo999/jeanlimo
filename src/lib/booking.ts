@@ -20,7 +20,7 @@ export function formatDateTime(date?: string, time?: string) {
   return [formatDateDisplay(date), formatTimeDisplay(time)].filter(Boolean).join("  ");
 }
 
-/** Blacklane-style date: "Sun 01 Nov 2026" */
+/** Date format for emails: "Wed 11/04/2026" */
 export function blacklaneDate(date?: string): string {
   if (!date) return "";
   const m = String(date).match(/^(\d{4})-(\d{2})-(\d{2})/);
@@ -28,8 +28,7 @@ export function blacklaneDate(date?: string): string {
   const d = new Date(`${m[1]}-${m[2]}-${m[3]}T12:00:00`);
   if (Number.isNaN(d.getTime())) return date;
   const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  return `${days[d.getDay()]} ${m[3]} ${months[parseInt(m[2], 10) - 1]} ${m[1]}`;
+  return `${days[d.getDay()]} ${m[2]}/${m[3]}/${m[1]}`;
 }
 
 /** Blacklane-style subject */
