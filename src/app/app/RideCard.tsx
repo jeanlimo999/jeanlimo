@@ -3,14 +3,13 @@
 import LiveMap from "./LiveMap";
 
 function prettyDate(d?: string) {
-  if (!d) return { mon: "", day: "", wk: "" };
-  const dt = new Date(d + "T12:00:00");
-  if (Number.isNaN(dt.getTime())) return { mon: d.slice(5, 7), day: d.slice(8, 10), wk: "" };
-  return {
-    mon: dt.toLocaleString("en-US", { month: "short" }).toUpperCase(),
-    day: String(dt.getDate()),
-    wk: dt.toLocaleString("en-US", { weekday: "short" }).toUpperCase(),
-  };
+  if (!d) return "";
+  const m = String(d).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!m) return d;
+  const dt = new Date(`${m[1]}-${m[2]}-${m[3]}T12:00:00`);
+  if (Number.isNaN(dt.getTime())) return d;
+  const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  return `${days[dt.getDay()]} ${m[2]}/${m[3]}/${m[1]}`;
 }
 function prettyTime(t?: string) {
   if (!t) return "";
@@ -54,7 +53,7 @@ export default function RideCard({
   onCancel?: () => void;
   onAgain?: () => void;
 }) {
-  const d = prettyDate(b.ride_date);
+  const dateLabel = prettyDate(b.ride_date);
   const status = String(b.trip_status || b.status || "confirmed").replaceAll("_", " ");
   const chauffeur = String(b.driverName || "").trim();
   const photo = String(b.driverPhoto || "").trim();
@@ -71,13 +70,9 @@ export default function RideCard({
     return (
       <div className="mt-3 rounded-2xl border border-white/10 bg-[#141414] p-4">
         <div className="flex gap-3">
-          <div className="w-14 text-center">
-            <div className="text-[11px] tracking-widest text-[#d8b56b]">{d.mon}</div>
-            <div className="text-2xl font-semibold">{d.day}</div>
-            <div className="text-[10px] text-zinc-500">{b.ride_date?.slice(0, 4) || ""}</div>
-          </div>
           <div className="flex-1">
-            <div className="text-sm font-medium">
+            <div className="text-sm font-medium text-[#d8b56b]">{dateLabel}</div>
+            <div className="mt-1 text-sm font-medium">
               {shortAddr(b.pickup)} → {shortAddr(b.dropoff)}
             </div>
             <div className="mt-1 text-xs text-zinc-400">
@@ -103,18 +98,13 @@ export default function RideCard({
           {status.toUpperCase()}
         </span>
       </div>
+      <div className="mt-3 text-sm font-medium text-[#d8b56b]">{dateLabel} · {prettyTime(b.ride_time)}</div>
       <div className="mt-4 flex gap-4">
-        <div className="w-14 text-center">
-          <div className="text-[11px] tracking-widest text-[#d8b56b]">{d.mon}</div>
-          <div className="text-3xl font-semibold leading-none">{d.day}</div>
-          <div className="mt-1 text-[10px] text-zinc-500">{d.wk}</div>
-        </div>
         <div className="relative flex-1 pl-3">
           <div className="absolute bottom-2 left-0 top-2 w-px bg-white/20" />
           <div className="absolute left-[-3px] top-1 h-2 w-2 rounded-full border border-[#d8b56b]" />
           <div className="absolute bottom-1 left-[-3px] h-2 w-2 rounded-full border border-[#d8b56b]" />
           <div className="text-sm">{shortAddr(b.pickup) || "Pickup"}</div>
-          <div className="text-xs text-zinc-400">{prettyTime(b.ride_time)}</div>
           <div className="mt-4 text-sm">{shortAddr(b.dropoff) || "Dropoff"}</div>
         </div>
       </div>
