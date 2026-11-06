@@ -96,12 +96,10 @@ export async function POST(req: NextRequest) {
       ? html
       : `<p style="color:#c00;font-weight:700;">THIS BOOKING IS NOT ON THE DISPATCH BOARD.<br/>Reason: ${saved.error}<br/>Add it with Add trip.</p>${html}`;
 
+    const dateLabel = blacklaneDate(booking.date);
     const time = formatDateTime("", booking.time) || booking.time || "";
-    const subject = jeanLimoSubject({
-      time,
-      customer: booking.name,
-      pickingUp: true,
-    });
+    const name = String(booking.name || "Guest").trim();
+    const subject = `New Jean Limo booking ${name} at ${dateLabel} ${time}`.replace(/\s+/g, " ").trim();
 
     await transporter.sendMail({
       from: `"Jean Limo" <${user}>`,
