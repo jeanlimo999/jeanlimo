@@ -13,6 +13,22 @@ const TIME_OPTIONS = Array.from({ length: 144 }, (_, i) => {
   return { value, label: `${h12}:${m} ${ampm}` };
 });
 
+function todayISO() {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+function isFutureDateTime(dateStr: string, timeStr: string, bufferMinutes = 30) {
+  if (!dateStr || !timeStr) return false;
+  const [hh, mm] = timeStr.split(":").map(Number);
+  const dt = new Date(`${dateStr}T${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}:00`);
+  const minAllowed = new Date(Date.now() + bufferMinutes * 60 * 1000);
+  return dt.getTime() >= minAllowed.getTime();
+}
+
 export default function ManagePage() {
   const [confirmation, setConfirmation] = useState("");
   const [phone, setPhone] = useState("");
@@ -70,6 +86,16 @@ export default function ManagePage() {
   const request = async (action: "change" | "cancel") => {
     setError("");
     setMessage("");
+    if (action === "change") {
+      if (newDate && newTime && !isFutureDateTime(newDate, newTime, 30)) {
+        setError("New pickup date and time must be at least 30 minutes in the future.");
+        return;
+      }
+      if (returnDate && returnTime && !isFutureDateTime(returnDate, returnTime, 30)) {
+        setError("Return date and time must be at least 30 minutes in the future.");
+        return;
+      }
+    }
     setLoading(true);
     try {
       const res = await fetch("/api/booking", {
@@ -205,13 +231,23 @@ export default function ManagePage() {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs text-zinc-400 mb-1">Date</label>
-                    <input type="date" value={newDate} onChange={(e) => setNewDate(e.target.value)} className="w-full bg-zinc-700 border border-zinc-600 rounded-lg px-3 py-2 text-sm" />
+                    <input type="date" value={newDate} onChange={(e) => setNewDate(e.target.value)} min={todayISO()} className="w-full bg-zinc-700 border border-zinc-600 rounded-lg px-3 py-2 text-sm" />
                   </div>
                   <div>
                     <label className="block text-xs text-zinc-400 mb-1">Time</label>
                     <select value={newTime} onChange={(e) => setNewTime(e.target.value)} className="w-full bg-zinc-700 border border-zinc-600 rounded-lg px-3 py-2 text-sm">
                       <option value="">Select time</option>
-                      {TIME_OPTIONS.map((t) => (
+                      {TIME_OPTIONS.filter((t) => {
+                        if (!newDate) return true;
+                        const today = todayISO();
+                        if (newDate > today) return true;
+                        if (newDate < today) return false;
+                        const [hh, mm] = t.value.split(":").map(Number);
+                        const now = new Date();
+                        const slot = new Date(now);
+                        slot.setHours(hh, mm, 0, 0);
+                        return slot.getTime() >= now.getTime() + 30 * 60 * 1000;
+                      }).map((t) => (
                         <option key={t.value} value={t.value}>{t.label}</option>
                       ))}
                     </select>
@@ -234,13 +270,23 @@ export default function ManagePage() {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs text-zinc-400 mb-1">Return date</label>
-                    <input type="date" value={returnDate} onChange={(e) => setReturnDate(e.target.value)} className="w-full bg-zinc-700 border border-zinc-600 rounded-lg px-3 py-2 text-sm" />
+                    <input type="date" value={returnDate} onChange={(e) => setReturnDate(e.target.value)} min={todayISO()} className="w-full bg-zinc-700 border border-zinc-600 rounded-lg px-3 py-2 text-sm" />
                   </div>
                   <div>
                     <label className="block text-xs text-zinc-400 mb-1">Return time</label>
                     <select value={returnTime} onChange={(e) => setReturnTime(e.target.value)} className="w-full bg-zinc-700 border border-zinc-600 rounded-lg px-3 py-2 text-sm">
                       <option value="">Select time</option>
-                      {TIME_OPTIONS.map((t) => (
+                      {TIME_OPTIONS.filter((t) => {
+                        if (!returnDate) return true;
+                        const today = todayISO();
+                        if (returnDate > today) return true;
+                        if (returnDate < today) return false;
+                        const [hh, mm] = t.value.split(":").map(Number);
+                        const now = new Date();
+                        const slot = new Date(now);
+                        slot.setHours(hh, mm, 0, 0);
+                        return slot.getTime() >= now.getTime() + 30 * 60 * 1000;
+                      }).map((t) => (
                         <option key={t.value} value={t.value}>{t.label}</option>
                       ))}
                     </select>
