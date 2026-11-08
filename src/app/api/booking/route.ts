@@ -8,6 +8,18 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-06-20",
 });
 
+function isFutureDateTime(dateStr?: string, timeStr?: string, bufferMinutes = 30): boolean {
+  if (!dateStr || !timeStr) return false;
+  const m = String(timeStr).match(/^(\d{1,2}):(\d{2})/);
+  if (!m) return false;
+  const hh = parseInt(m[1], 10);
+  const mm = parseInt(m[2], 10);
+  const dt = new Date(`${dateStr}T${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}:00`);
+  if (Number.isNaN(dt.getTime())) return false;
+  const minAllowed = new Date(Date.now() + bufferMinutes * 60 * 1000);
+  return dt.getTime() >= minAllowed.getTime();
+}
+
 async function assignedDriver(confirmation: string) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
@@ -93,6 +105,22 @@ export async function POST(req: NextRequest) {
     if (phone && booking.phone.replace(/\D/g, "").slice(-4) !== phone.slice(-4)) {
       return NextResponse.json({ error: "Phone does not match this booking" }, { status: 403 });
     }
+
+    if (action === "change") {
+      if (newDate && newTime && !isFutureDateTime(newDate, newTime, 30)) {
+        return NextResponse.json(
+          { error: "New pickup date and time must be at least 30 minutes in the future." },
+          { status: 400 }
+        );
+      }
+      if (returnDate && returnTime && !isFutureDateTime(returnDate, returnTime, 30)) {
+        return NextResponse.json(
+          { error: "Return date and time must be at least 30 minutes in the future." },
+          { status: 400 }
+        );
+      }
+    }
+
     await stripe.checkout.sessions.update(session.id, {
       metadata: {
         ...session.metadata,
