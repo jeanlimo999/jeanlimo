@@ -1,4 +1,4 @@
-use client;
+"use client";
 
 import { useEffect, useState } from "react";
 import AddressInput from "@/components/AddressInput";
@@ -435,85 +435,80 @@ export default function DispatchPage() {
             <button onClick={() => { setManualOpen(!manualOpen); setRosterOpen(false); setEditingJob(null); }} className="rounded-full border border-[#C4A574]/40 px-3 py-1 text-xs text-[#E8D3B0]">Add trip</button>
             <button onClick={() => load()} className="rounded-full border border-white/10 px-3 py-1 text-xs text-[#9A9388]">Refresh</button>
             <button onClick={() => { setRosterOpen(!rosterOpen); setManualOpen(false); setEditingJob(null); }} className="rounded-full border border-white/10 px-3 py-1 text-xs text-[#9A9388]">Drivers</button>
-            <button
-              onClick={async () => {
-                await fetch("/api/dispatch/logout", { method: "POST" });
-                setAuthed(false);
-                setWho("");
-              }}
-              className="rounded-full border border-white/10 px-3 py-1 text-xs text-[#9A9388]"
-            >
-              Sign out
-            </button>
           </div>
         </div>
-        <h1 className="mt-4 text-3xl font-semibold">{who || "Dispatch"}</h1>
-        <div className="mt-4 grid grid-cols-2 gap-2 text-center text-sm">
-          <div className="rounded-2xl border border-white/10 bg-[#141416] p-3">
-            <div className="text-[#9A9388]">Today</div>
-            <div className="text-2xl font-semibold">{nToday}</div>
-          </div>
-          <div className="rounded-2xl border border-white/10 bg-[#141416] p-3">
-            <div className="text-[#9A9388]">Upcoming</div>
-            <div className="text-2xl font-semibold">{nUp}</div>
-          </div>
-          <div className="rounded-2xl border border-white/10 bg-[#141416] p-3">
-            <div className="text-[#9A9388]">Week</div>
-            <div className="text-lg font-semibold">{money(revenue.week)}</div>
-          </div>
-          <div className="rounded-2xl border border-white/10 bg-[#141416] p-3">
-            <div className="text-[#9A9388]">Month</div>
-            <div className="text-lg font-semibold">{money(revenue.month)}</div>
-          </div>
+        <div className="mt-4 text-sm text-[#9A9388]">Signed in as {who || "owner"}</div>
+        {err && <p className="mt-3 text-sm text-red-400">{err}</p>}
+        {msg && <p className="mt-3 text-sm text-emerald-400">{msg}</p>}
+        <div className="mt-4 grid grid-cols-4 gap-2 text-center text-xs">
+          <div className="rounded-xl border border-white/10 bg-[#141416] py-3"><div className="text-[#9A9388]">Today</div><div className="text-lg font-medium text-[#E8D3B0]">{nToday}</div></div>
+          <div className="rounded-xl border border-white/10 bg-[#141416] py-3"><div className="text-[#9A9388]">Upcoming</div><div className="text-lg font-medium text-[#E8D3B0]">{nUp}</div></div>
+          <div className="rounded-xl border border-white/10 bg-[#141416] py-3"><div className="text-[#9A9388]">Open</div><div className="text-lg font-medium text-[#E8D3B0]">{openJobs.length}</div></div>
+          <div className="rounded-xl border border-white/10 bg-[#141416] py-3"><div className="text-[#9A9388]">Done</div><div className="text-lg font-medium text-[#E8D3B0]">{doneJobs.length}</div></div>
+        </div>
+        <div className="mt-4 grid grid-cols-4 gap-2 text-center text-xs">
+          <div className="rounded-xl border border-white/10 bg-[#141416] py-3"><div className="text-[#9A9388]">Week</div><div className="text-sm font-medium text-[#E8D3B0]">{money(revenue.week)}</div></div>
+          <div className="rounded-xl border border-white/10 bg-[#141416] py-3"><div className="text-[#9A9388]">Month</div><div className="text-sm font-medium text-[#E8D3B0]">{money(revenue.month)}</div></div>
+          <div className="rounded-xl border border-white/10 bg-[#141416] py-3"><div className="text-[#9A9388]">Year</div><div className="text-sm font-medium text-[#E8D3B0]">{money(revenue.year)}</div></div>
+          <div className="rounded-xl border border-white/10 bg-[#141416] py-3"><div className="text-[#9A9388]">Lifetime</div><div className="text-sm font-medium text-[#E8D3B0]">{money(revenue.lifetime)}</div></div>
+        </div>
+        <div className="mt-5 flex gap-2">
+          <button onClick={() => setTab("open")} className={`flex-1 rounded-full py-2 text-sm ${tab === "open" ? "bg-[#E8D3B0] text-[#16110a]" : "border border-white/10 text-[#9A9388]"}`}>Open</button>
+          <button onClick={() => setTab("done")} className={`flex-1 rounded-full py-2 text-sm ${tab === "done" ? "bg-[#E8D3B0] text-[#16110a]" : "border border-white/10 text-[#9A9388]"}`}>Done</button>
+          <button onClick={() => setTab("partners")} className={`flex-1 rounded-full py-2 text-sm ${tab === "partners" ? "bg-[#E8D3B0] text-[#16110a]" : "border border-white/10 text-[#9A9388]"}`}>Partners</button>
         </div>
         {manualOpen && (
           <form onSubmit={addTrip} className="mt-4 space-y-3 rounded-2xl border border-white/10 bg-[#141416] p-4">
-            <div className="text-sm font-medium">Add manual trip</div>
-            <input className={inputCls} placeholder="Customer name" value={trip.name} onChange={(e) => setTrip({ ...trip, name: e.target.value })} required />
+            <div className="text-sm text-[#E8D3B0]">Add manual trip</div>
+            <input className={inputCls} placeholder="Customer name" value={trip.name} onChange={(e) => setTrip({ ...trip, name: e.target.value })} />
             <input className={inputCls} placeholder="Phone" value={trip.phone} onChange={(e) => setTrip({ ...trip, phone: e.target.value })} />
-            <input className={inputCls} type="date" value={trip.date} onChange={(e) => setTrip({ ...trip, date: e.target.value })} required />
-            <input className={inputCls} type="time" value={trip.time} onChange={(e) => setTrip({ ...trip, time: e.target.value })} />
+            <div className="grid grid-cols-2 gap-2">
+              <input className={inputCls} type="date" value={trip.date} onChange={(e) => setTrip({ ...trip, date: e.target.value })} />
+              <input className={inputCls} type="time" value={trip.time} onChange={(e) => setTrip({ ...trip, time: e.target.value })} />
+            </div>
             <AddressInput value={trip.pickup} onChange={(v) => setTrip({ ...trip, pickup: v })} placeholder="Pickup" />
-            <AddressInput value={trip.dropoff} onChange={(v) => setTrip({ ...trip, dropoff: v })} placeholder="Drop-off" />
-            <input className={inputCls} placeholder="Flight number" value={trip.flight} onChange={(e) => setTrip({ ...trip, flight: e.target.value })} />
+            <AddressInput value={trip.dropoff} onChange={(v) => setTrip({ ...trip, dropoff: v })} placeholder="Drop off" />
+            <input className={inputCls} placeholder="Flight (optional)" value={trip.flight} onChange={(e) => setTrip({ ...trip, flight: e.target.value })} />
             <input className={inputCls} placeholder="Passengers" value={trip.passengers} onChange={(e) => setTrip({ ...trip, passengers: e.target.value })} />
-            <textarea className={inputCls} placeholder="Notes" value={trip.notes} onChange={(e) => setTrip({ ...trip, notes: e.target.value })} />
             <select className={inputCls} value={trip.vehicle} onChange={(e) => setTrip({ ...trip, vehicle: e.target.value })}>
               <option value="sedan">Business Sedan</option>
-              <option value="suv">SUV</option>
+              <option value="suv">Business SUV</option>
               <option value="sprinter">Sprinter Van</option>
             </select>
-            <input className={inputCls} placeholder="Amount $" value={trip.amount} onChange={(e) => setTrip({ ...trip, amount: e.target.value })} />
+            <input className={inputCls} placeholder="Amount $ (optional)" value={trip.amount} onChange={(e) => setTrip({ ...trip, amount: e.target.value })} />
+            <textarea className={inputCls + " min-h-[5rem]"} placeholder="Notes" value={trip.notes} onChange={(e) => setTrip({ ...trip, notes: e.target.value })} />
             <button className="w-full rounded-2xl bg-gradient-to-b from-[#E8D3B0] to-[#C4A574] py-3 font-semibold text-[#16110a]">Add trip</button>
           </form>
         )}
         {editingJob && (
           <form onSubmit={updateTrip} className="mt-4 space-y-3 rounded-2xl border border-white/10 bg-[#141416] p-4">
-            <div className="text-sm font-medium">Edit trip {editingJob.confirmation}</div>
-            <input className={inputCls} placeholder="Customer name" value={trip.name} onChange={(e) => setTrip({ ...trip, name: e.target.value })} required />
+            <div className="text-sm text-[#E8D3B0]">Edit trip {editingJob.confirmation}</div>
+            <input className={inputCls} placeholder="Customer name" value={trip.name} onChange={(e) => setTrip({ ...trip, name: e.target.value })} />
             <input className={inputCls} placeholder="Phone" value={trip.phone} onChange={(e) => setTrip({ ...trip, phone: e.target.value })} />
-            <input className={inputCls} type="date" value={trip.date} onChange={(e) => setTrip({ ...trip, date: e.target.value })} required />
-            <input className={inputCls} type="time" value={trip.time} onChange={(e) => setTrip({ ...trip, time: e.target.value })} />
+            <div className="grid grid-cols-2 gap-2">
+              <input className={inputCls} type="date" value={trip.date} onChange={(e) => setTrip({ ...trip, date: e.target.value })} />
+              <input className={inputCls} type="time" value={trip.time} onChange={(e) => setTrip({ ...trip, time: e.target.value })} />
+            </div>
             <AddressInput value={trip.pickup} onChange={(v) => setTrip({ ...trip, pickup: v })} placeholder="Pickup" />
-            <AddressInput value={trip.dropoff} onChange={(v) => setTrip({ ...trip, dropoff: v })} placeholder="Drop-off" />
-            <input className={inputCls} placeholder="Flight number" value={trip.flight} onChange={(e) => setTrip({ ...trip, flight: e.target.value })} />
+            <AddressInput value={trip.dropoff} onChange={(v) => setTrip({ ...trip, dropoff: v })} placeholder="Drop off" />
+            <input className={inputCls} placeholder="Flight (optional)" value={trip.flight} onChange={(e) => setTrip({ ...trip, flight: e.target.value })} />
             <input className={inputCls} placeholder="Passengers" value={trip.passengers} onChange={(e) => setTrip({ ...trip, passengers: e.target.value })} />
-            <textarea className={inputCls} placeholder="Notes" value={trip.notes} onChange={(e) => setTrip({ ...trip, notes: e.target.value })} />
             <select className={inputCls} value={trip.vehicle} onChange={(e) => setTrip({ ...trip, vehicle: e.target.value })}>
               <option value="sedan">Business Sedan</option>
-              <option value="suv">SUV</option>
+              <option value="suv">Business SUV</option>
               <option value="sprinter">Sprinter Van</option>
             </select>
-            <input className={inputCls} placeholder="Amount $" value={trip.amount} onChange={(e) => setTrip({ ...trip, amount: e.target.value })} />
+            <input className={inputCls} placeholder="Amount $ (optional)" value={trip.amount} onChange={(e) => setTrip({ ...trip, amount: e.target.value })} />
+            <textarea className={inputCls + " min-h-[5rem]"} placeholder="Notes" value={trip.notes} onChange={(e) => setTrip({ ...trip, notes: e.target.value })} />
             <div className="flex gap-2">
-              <button type="button" onClick={() => setEditingJob(null)} className="flex-1 rounded-2xl border border-white/10 py-3">Cancel</button>
+              <button type="button" onClick={() => setEditingJob(null)} className="flex-1 rounded-2xl border border-white/10 py-3 text-sm">Cancel</button>
               <button className="flex-1 rounded-2xl bg-gradient-to-b from-[#E8D3B0] to-[#C4A574] py-3 font-semibold text-[#16110a]">Save</button>
             </div>
           </form>
         )}
         {rosterOpen && (
           <div className="mt-4 space-y-3 rounded-2xl border border-white/10 bg-[#141416] p-4">
-            <div className="text-sm font-medium">Drivers</div>
+            <div className="text-sm text-[#E8D3B0]">Drivers</div>
             <form onSubmit={addDriver} className="space-y-2">
               <input className={inputCls} placeholder="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
               <input className={inputCls} placeholder="Phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
@@ -525,45 +520,50 @@ export default function DispatchPage() {
                 <option value="sprinter">Sprinter</option>
               </select>
               <button className="w-full rounded-2xl bg-gradient-to-b from-[#E8D3B0] to-[#C4A574] py-3 font-semibold text-[#16110a]">{form.id ? "Update driver" : "Add driver"}</button>
-              {form.id && <button type="button" onClick={() => setForm({ id: "", name: "", phone: "", pin: "", email: "", vehicle: "sedan" })} className="w-full rounded-2xl border border-white/10 py-2 text-sm">Cancel edit</button>}
+              {form.id && <button type="button" onClick={() => setForm({ id: "", name: "", phone: "", pin: "", email: "", vehicle: "sedan" })} className="w-full text-xs text-[#9A9388]">Cancel edit</button>}
             </form>
-            {drivers.map((d) => (
-              <div key={d.id} className="flex items-center justify-between border-t border-white/10 pt-3">
-                <div>
-                  <div className="font-medium">{d.name}</div>
-                  <div className="text-xs text-[#9A9388]">{d.phone} · {d.email}</div>
+            <div className="mt-4 space-y-2">
+              {drivers.map((d) => (
+                <div key={d.id} className="flex items-center justify-between rounded-xl border border-white/10 bg-[#1C1C20] px-3 py-2 text-sm">
+                  <div>
+                    <div>{d.name}</div>
+                    <div className="text-xs text-[#9A9388]">{d.phone} · {d.vehicle} · PIN {d.pin}</div>
+                  </div>
+                  <div className="flex gap-2">
+                    <label className="cursor-pointer text-xs text-[#C4A574]">
+                      Photo
+                      <input type="file" accept="image/*" className="hidden" onChange={(e) => savePhoto(d.id, e.target.files?.[0])} />
+                    </label>
+                    <button type="button" onClick={() => editDriver(d)} className="text-xs text-[#E8D3B0]">Edit</button>
+                  </div>
                 </div>
-                <button onClick={() => editDriver(d)} className="text-xs text-[#E8D3B0]">Edit</button>
-              </div>
-            ))}
+              ))}
+            </div>
+            <form onSubmit={addOwner} className="mt-6 space-y-2 border-t border-white/10 pt-4">
+              <div className="text-sm text-[#E8D3B0]">Add owner</div>
+              <input className={inputCls} placeholder="Name" value={owner.name} onChange={(e) => setOwner({ ...owner, name: e.target.value })} />
+              <input className={inputCls} type="email" placeholder="Email" value={owner.email} onChange={(e) => setOwner({ ...owner, email: e.target.value })} required />
+              <input className={inputCls} type="password" placeholder="Password" value={owner.password} onChange={(e) => setOwner({ ...owner, password: e.target.value })} required />
+              <button className="w-full rounded-2xl border border-[#C4A574]/40 py-3 text-sm text-[#E8D3B0]">Add owner</button>
+            </form>
           </div>
         )}
-        <div className="mt-6 flex gap-2">
-          <button onClick={() => setTab("open")} className={`rounded-full px-4 py-2 text-sm ${tab === "open" ? "bg-[#E8D3B0] text-[#16110a]" : "border border-white/10 text-[#9A9388]"}`}>Open ({openJobs.length})</button>
-          <button onClick={() => setTab("done")} className={`rounded-full px-4 py-2 text-sm ${tab === "done" ? "bg-[#E8D3B0] text-[#16110a]" : "border border-white/10 text-[#9A9388]"}`}>Completed ({doneJobs.length})</button>
-          <button onClick={() => setTab("partners")} className={`rounded-full px-4 py-2 text-sm ${tab === "partners" ? "bg-[#E8D3B0] text-[#16110a]" : "border border-white/10 text-[#9A9388]"}`}>Partners ({sent.length})</button>
-        </div>
-        {msg && <p className="mt-4 text-sm text-[#7DCFB6]">{msg}</p>}
-        {err && <p className="mt-4 text-sm text-red-400">{err}</p>}
-        <div className="mt-4 space-y-3">
+        <div className="mt-5 space-y-3">
           {tab === "open" && openJobs.map((j) => jobCard(j, false))}
           {tab === "done" && doneJobs.map((j) => jobCard(j, true))}
           {tab === "partners" && (
             <>
               <div className="flex gap-2">
-                <button onClick={() => setPartnerTab("open")} className={`rounded-full px-3 py-1 text-xs ${partnerTab === "open" ? "bg-[#E8D3B0] text-[#16110a]" : "border border-white/10"}`}>Open ({sentOpen.length})</button>
-                <button onClick={() => setPartnerTab("done")} className={`rounded-full px-3 py-1 text-xs ${partnerTab === "done" ? "bg-[#E8D3B0] text-[#16110a]" : "border border-white/10"}`}>Done ({sentClosed.length})</button>
+                <button onClick={() => setPartnerTab("open")} className={`flex-1 rounded-full py-1.5 text-xs ${partnerTab === "open" ? "bg-[#E8D3B0] text-[#16110a]" : "border border-white/10"}`}>Open</button>
+                <button onClick={() => setPartnerTab("done")} className={`flex-1 rounded-full py-1.5 text-xs ${partnerTab === "done" ? "bg-[#E8D3B0] text-[#16110a]" : "border border-white/10"}`}>Done</button>
               </div>
               {(partnerTab === "open" ? sentOpen : sentClosed).map((s) => (
                 <div key={s.id} className="rounded-2xl border border-white/10 bg-[#141416] p-4">
-                  <div className="flex justify-between">
-                    <div className="text-sm text-[#C4A574]">{formatDate(s.date)} · {s.time}</div>
-                    <div className="text-[10px] tracking-widest text-[#C4A574]">{s.confirmation}</div>
-                  </div>
-                  <div className="mt-2 text-lg">{s.guest || "Partner trip"}</div>
+                  <div className="text-sm text-[#C4A574]">{formatDate(s.rideDate)} · {formatTime(s.when)}</div>
+                  <div className="mt-1 font-medium">{s.guestName || "Partner trip"}</div>
                   <div className="mt-2 text-sm">{s.pickup}</div>
-                  <div className="text-sm">{s.dropoff}</div>
-                  <div className="mt-2 text-xs text-[#E8D3B0]">To {s.partner} · {s.status}</div>
+                  <div className="text-sm text-[#9A9388]">→ {s.dropoff}</div>
+                  <div className="mt-2 text-xs text-[#E8D3B0]">{s.status}</div>
                   <button onClick={() => removePartner(s)} className="mt-3 w-full rounded-xl border border-red-500/40 py-2 text-sm text-red-300">Delete</button>
                 </div>
               ))}

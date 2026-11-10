@@ -23,10 +23,8 @@ const TIME_OPTIONS = Array.from({ length: 144 }, (_, i) => {
 
 function shortStreet(addr: string): string {
   if (!addr.trim()) return "";
-  const firstPart = addr.split(",")[0].trim();
-  // Strip leading house number
-  const withoutNumber = firstPart.replace(/^\d+\s*/, "");
-  return withoutNumber || firstPart;
+  // First part before comma (number + street name)
+  return addr.split(",")[0].trim();
 }
 
 function todayISO() {
