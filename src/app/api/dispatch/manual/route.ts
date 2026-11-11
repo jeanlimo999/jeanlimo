@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 import { readDispatchSession } from "@/lib/session";
-import { supabaseAdmin } from "@/lib/supabase";
+import { supabaseAdmin, digits } from "@/lib/supabase";
 import { formatDateTime, blacklaneDate, rideDetailsHtml, jeanLimoSubject } from "@/lib/booking";
 
 function code() {
@@ -94,17 +94,31 @@ export async function POST(req: Request) {
 
   let clientId = String(body.clientId || "").trim();
   if (!clientId) {
-    const email = String(body.email || "").trim().toLowerCase() || `manual+${Date.now()}@jeanlimo.local`;
-    const { data: existing } = await db.from("clients").select("id").eq("email", email).maybeSingle();
-    clientId = existing?.id;
-    if (!clientId) {
-      const { data: client, error: cErr } = await db
+    const phoneKey = digits(phone).slice(-10);
+    // Prefer match by phone so we don't create duplicates
+    if (phoneKey.length >= 10) {
+      const { data: byPhone } = await db
         .from("clients")
-        .insert({ email, phone, full_name: name })
-        .select("id")
-        .single();
-      if (cErr) return NextResponse.json({ error: cErr.message }, { status: 500 });
-      clientId = client.id;
+        .select("id, phone")
+        .or(`phone.ilike.%${phoneKey}%`)
+        .limit(5);
+      const match = byPhone?.find((c: any) => digits(c.phone).slice(-10) === phoneKey);
+      if (match) clientId = match.id;
+    }
+
+    if (!clientId) {
+      const email = String(body.email || "").trim().toLowerCase() || `manual+${Date.now()}@jeanlimo.local`;
+      const { data: existing } = await db.from("clients").select("id").eq("email", email).maybeSingle();
+      clientId = existing?.id;
+      if (!clientId) {
+        const { data: client, error: cErr } = await db
+          .from("clients")
+          .insert({ email, phone, full_name: name })
+          .select("id")
+          .single();
+        if (cErr) return NextResponse.json({ error: cErr.message }, { status: 500 });
+        clientId = client.id;
+      }
     }
   }
 
