@@ -34,19 +34,45 @@ export async function upsertClient(input: {
   if (!db) throw new Error("Supabase is not configured");
   const email = normEmail(input.email);
   const phone = String(input.phone || "").trim();
+  const phoneDigits = digits(phone);
+  const phoneKey = phoneDigits.slice(-10);
   if (!email || !email.includes("@")) throw new Error("Email required");
 
-  const { data: existing } = await db.from("clients").select("*").eq("email", email).maybeSingle();
+  // Prefer exact email match (skip pure temporary manual emails for matching priority)
+  let existing: any = null;
+  const isTempEmail = email.includes("@jeanlimo.local");
+  if (!isTempEmail) {
+    const { data } = await db.from("clients").select("*").eq("email", email).maybeSingle();
+    existing = data;
+  }
+
+  // If no email match, try phone match (last 10 digits)
+  if (!existing && phoneKey.length >= 10) {
+    const { data: byPhone } = await db
+      .from("clients")
+      .select("*")
+      .or(`phone.ilike.%${phoneKey}%`)
+      .limit(5);
+    if (byPhone && byPhone.length) {
+      existing = byPhone.find((c: any) => digits(c.phone).slice(-10) === phoneKey) || byPhone[0];
+    }
+  }
+
   if (existing) {
     const patch: Record<string, string> = { updated_at: new Date().toISOString() };
     if (phone) patch.phone = phone;
     if (input.full_name) patch.full_name = input.full_name;
     if (input.company) patch.company = input.company;
+    // Upgrade temporary email to real email when we have one
+    if (!isTempEmail && existing.email?.includes("@jeanlimo.local")) {
+      patch.email = email;
+    }
     const { data, error } = await db.from("clients").update(patch).eq("id", existing.id).select("*").single();
     if (error) throw error;
     return data;
   }
 
+  // Create new
   const { data, error } = await db
     .from("clients")
     .insert({
