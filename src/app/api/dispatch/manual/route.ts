@@ -92,17 +92,20 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Name, date, time, pickup, and drop-off are required" }, { status: 400 });
   }
 
-  const email = String(body.email || "").trim().toLowerCase() || `manual+${Date.now()}@jeanlimo.local`;
-  const { data: existing } = await db.from("clients").select("id").eq("email", email).maybeSingle();
-  let clientId = existing?.id;
+  let clientId = String(body.clientId || "").trim();
   if (!clientId) {
-    const { data: client, error: cErr } = await db
-      .from("clients")
-      .insert({ email, phone, full_name: name })
-      .select("id")
-      .single();
-    if (cErr) return NextResponse.json({ error: cErr.message }, { status: 500 });
-    clientId = client.id;
+    const email = String(body.email || "").trim().toLowerCase() || `manual+${Date.now()}@jeanlimo.local`;
+    const { data: existing } = await db.from("clients").select("id").eq("email", email).maybeSingle();
+    clientId = existing?.id;
+    if (!clientId) {
+      const { data: client, error: cErr } = await db
+        .from("clients")
+        .insert({ email, phone, full_name: name })
+        .select("id")
+        .single();
+      if (cErr) return NextResponse.json({ error: cErr.message }, { status: 500 });
+      clientId = client.id;
+    }
   }
 
   const amount = parseAmount(body.amount);
