@@ -76,7 +76,7 @@ export const SPRINTER_TIER_ENDS: Record<number, number> = {
 };
 export const SPRINTER_FIRST_10 = 250;
 export const SPRINTER_STEP = 5;
-export const PER_MILE_OVER_100: Record<Vehicle, number> = { sedan: 3.45, suv: 3.8, sprinter: 9.5 };
+export const PER_MILE_OVER_100: Record<Vehicle, number> = { sedan: 3.45, suv: 3.8, sprinter: 8.75 };
 export const HOURLY_RATES: Record<Vehicle, number> = { sedan: 85, suv: 110, sprinter: 175 };
 export const HOURLY_MIN_HOURS = 2;
 export const HOURLY_INCLUDED_MILES_PER_HOUR = 20;
